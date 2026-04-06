@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>单文件原型 PRD 模板 v2</title>
+  <title>单文件原型 PRD 模板 App 示例</title>
   <style>
     :root {
       --bg-canvas: #f4f1ea;
@@ -187,6 +187,21 @@
     .proto-layout.layout-web {
       flex-direction: column;
       align-items: stretch;
+    }
+
+    .app-stage-fit {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .app-stage-fit > .proto-layout.layout-app {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 980px;
+      transform-origin: top center;
+      will-change: transform;
     }
 
     .proto-canvas {
@@ -453,6 +468,10 @@
       box-shadow: var(--shadow-soft);
     }
 
+    .proto-layout.layout-app .anno-panel {
+      position: static;
+    }
+
     .proto-layout.layout-web .anno-panel {
       width: 100%;
       position: static;
@@ -716,15 +735,6 @@
     }
 
     @media (max-width: 1120px) {
-      .proto-layout.layout-app {
-        flex-direction: column;
-      }
-
-      .proto-layout.layout-app .anno-panel {
-        width: 100%;
-        position: static;
-      }
-
       .doc-meta-grid,
       .doc-grid {
         grid-template-columns: 1fr 1fr;
@@ -741,8 +751,7 @@
         border-radius: 24px;
       }
 
-      .toolbar,
-      .canvas-header {
+      .toolbar {
         flex-direction: column;
       }
 
@@ -757,13 +766,6 @@
         width: 100%;
       }
 
-      .proto-canvas,
-      .login-shell,
-      .login-card {
-        padding: 18px;
-      }
-
-      .oauth-row,
       .doc-meta-grid,
       .doc-grid {
         grid-template-columns: 1fr;
@@ -775,10 +777,10 @@
   <div class="app">
     <header class="toolbar">
       <div class="toolbar-copy">
-        <h1>单文件原型 PRD 模板 v2</h1>
+        <h1>单文件原型 PRD 模板 App 示例</h1>
         <p>
-          一个 HTML 文件内同时承载原型、页面规格、组件规格和导出逻辑。你后续复制这个模板时，只需要改页面 DOM、
-          `page-spec` 和 `component-specs` 两段 JSON，原型视图和文档视图会同步更新。
+          这个文件演示 App 设计模式下的单文件需求包。页面左侧是移动端原型，右侧是元素说明；
+          在文档嵌入场景中，原型区会按固定设计宽度等比缩放，避免窄容器触发布局重排。
         </p>
       </div>
       <div class="toolbar-actions">
@@ -790,85 +792,87 @@
       </div>
     </header>
 
-    <div class="mode-hint" id="modeHint">悬停定位组件，点击查看规格。切到 PRD 文档视图后，会自动汇总页面级说明和组件明细。</div>
+    <div class="mode-hint" id="modeHint">当前为 App 设计模式。原型区保持左右布局，并在窄容器中按固定稿等比缩放。</div>
 
     <div class="validation-banner" id="validationBanner"></div>
 
-    <section class="proto-layout layout-app" id="protoView">
-      <div class="proto-canvas">
-        <div class="canvas-header">
-          <div>
-            <h2 id="canvasTitle"></h2>
-            <p id="canvasIntro"></p>
+    <div class="app-stage-fit" id="appStage">
+      <section class="proto-layout layout-app" id="protoView">
+        <div class="proto-canvas">
+          <div class="canvas-header">
+            <div>
+              <h2 id="canvasTitle"></h2>
+              <p id="canvasIntro"></p>
+            </div>
+            <div class="canvas-meta" id="canvasMeta"></div>
           </div>
-          <div class="canvas-meta" id="canvasMeta"></div>
+
+          <div class="login-shell">
+            <div class="login-card">
+              <section class="section-space brand-lockup" data-prd-id="logo">
+                <div class="brand-mark">T</div>
+                <p class="brand-title">TeamFlow</p>
+                <p class="brand-subtitle">登录你的工作台，继续今天的协作任务</p>
+              </section>
+
+              <section class="section-space field-group" data-prd-id="phone">
+                <label>手机号</label>
+                <div class="field-box">
+                  <span class="field-prefix">+86</span>
+                  <span>请输入手机号</span>
+                </div>
+              </section>
+
+              <section class="section-space field-group" data-prd-id="password">
+                <label>密码</label>
+                <div class="field-box">
+                  <span>请输入密码</span>
+                  <span>显示</span>
+                </div>
+              </section>
+
+              <section class="section-space link-row" data-prd-id="forgot">
+                <span class="text-link">忘记密码？</span>
+              </section>
+
+              <section class="section-space" data-prd-id="login-btn">
+                <div class="primary-button">登录</div>
+              </section>
+
+              <div class="divider">或</div>
+
+              <section class="section-space oauth-row" data-prd-id="sso">
+                <div class="oauth-button">
+                  <span class="oauth-badge wx">W</span>
+                  <span>企业微信</span>
+                </div>
+                <div class="oauth-button">
+                  <span class="oauth-badge dd">D</span>
+                  <span>钉钉</span>
+                </div>
+              </section>
+
+              <section class="section-space register-row" data-prd-id="register">
+                <span>还没有账号？</span>
+                <span class="text-link">立即注册</span>
+              </section>
+
+              <section class="legal-row" data-prd-id="agreement">
+                <span>登录即表示你同意</span>
+                <span class="text-link">服务协议</span>
+                <span>和</span>
+                <span class="text-link">隐私政策</span>
+              </section>
+            </div>
+          </div>
         </div>
 
-        <div class="login-shell">
-          <div class="login-card">
-            <section class="section-space brand-lockup" data-prd-id="logo">
-              <div class="brand-mark">T</div>
-              <p class="brand-title">TeamFlow</p>
-              <p class="brand-subtitle">登录你的工作台，继续今天的协作任务</p>
-            </section>
-
-            <section class="section-space field-group" data-prd-id="phone">
-              <label>手机号</label>
-              <div class="field-box">
-                <span class="field-prefix">+86</span>
-                <span>请输入手机号</span>
-              </div>
-            </section>
-
-            <section class="section-space field-group" data-prd-id="password">
-              <label>密码</label>
-              <div class="field-box">
-                <span>请输入密码</span>
-                <span>显示</span>
-              </div>
-            </section>
-
-            <section class="section-space link-row" data-prd-id="forgot">
-              <span class="text-link">忘记密码？</span>
-            </section>
-
-            <section class="section-space" data-prd-id="login-btn">
-              <div class="primary-button">登录</div>
-            </section>
-
-            <div class="divider">或</div>
-
-            <section class="section-space oauth-row" data-prd-id="sso">
-              <div class="oauth-button">
-                <span class="oauth-badge wx">W</span>
-                <span>企业微信</span>
-              </div>
-              <div class="oauth-button">
-                <span class="oauth-badge dd">D</span>
-                <span>钉钉</span>
-              </div>
-            </section>
-
-            <section class="section-space register-row" data-prd-id="register">
-              <span>还没有账号？</span>
-              <span class="text-link">立即注册</span>
-            </section>
-
-            <section class="legal-row" data-prd-id="agreement">
-              <span>登录即表示你同意</span>
-              <span class="text-link">服务协议</span>
-              <span>和</span>
-              <span class="text-link">隐私政策</span>
-            </section>
-          </div>
-        </div>
-      </div>
-
-      <aside class="anno-panel">
-        <div id="annoIdle"></div>
-        <div id="annoContent" style="display: none;"></div>
-      </aside>
-    </section>
+        <aside class="anno-panel">
+          <div id="annoIdle"></div>
+          <div id="annoContent" style="display: none;"></div>
+        </aside>
+      </section>
+    </div>
 
     <section class="doc-view" id="docView"></section>
   </div>
@@ -878,6 +882,7 @@
       "pageId": "login",
       "product": "TeamFlow",
       "platform": "app",
+      "prototypeWidth": 980,
       "title": "用户登录页面",
       "status": "草稿",
       "version": "v2.0",
@@ -903,9 +908,9 @@
         "文档视图能完整展示页面信息和组件规格"
       ],
       "notes": [
-        "这个文件是单需求需求包模板，后续复制时建议保留文件结构不变，只替换页面内容和 JSON。",
+        "这个文件是 App 示例版，适合复制后直接产出移动端需求页面。",
         "如果页面组件很多，可以继续沿用 data-prd-id，但不要把整段规格直接写进 DOM 属性。",
-        "APP 设计时把 platform 设为 app，模板会使用左右布局；Web 设计时设为 web，模板会自动切换成上下布局。"
+        "文档嵌入场景下，页面原型会基于 prototypeWidth 做等比缩放，避免窄容器触发布局重排。"
       ]
     }
   </script>
@@ -1093,6 +1098,11 @@
       return getPlatformType() === "web" ? "上下布局" : "左右布局";
     }
 
+    function getPrototypeWidth() {
+      const width = Number(pageSpec.prototypeWidth);
+      return Number.isFinite(width) && width >= 720 ? width : 980;
+    }
+
     function getComponentOrder() {
       return Array.from(document.querySelectorAll("[data-prd-id]")).map((element) => element.dataset.prdId);
     }
@@ -1170,7 +1180,56 @@
         warnings.push("page-spec.platform 仅支持 app 或 web，当前值为: " + pageSpec.platform);
       }
 
+      if (getPlatformType() === "app" && !Number.isFinite(Number(pageSpec.prototypeWidth))) {
+        warnings.push("建议在 page-spec 中声明 prototypeWidth，用于文档嵌入场景下的等比缩放");
+      }
+
       return warnings;
+    }
+
+    function updatePrototypeScale() {
+      const stage = document.getElementById("appStage");
+      const inner = document.getElementById("protoView");
+
+      if (!stage || !inner || getPlatformType() !== "app") {
+        return;
+      }
+
+      const designWidth = getPrototypeWidth();
+      inner.style.width = designWidth + "px";
+
+      requestAnimationFrame(() => {
+        const availableWidth = stage.clientWidth;
+        if (!availableWidth) {
+          return;
+        }
+
+        const scale = Math.min(1, availableWidth / designWidth);
+        inner.style.transform = `translateX(-50%) scale(${scale})`;
+        stage.style.height = `${inner.offsetHeight * scale}px`;
+      });
+    }
+
+    function bindPrototypeScale() {
+      const stage = document.getElementById("appStage");
+      const container = stage?.parentElement;
+
+      if (!stage || !container || getPlatformType() !== "app") {
+        return;
+      }
+
+      updatePrototypeScale();
+
+      if (typeof ResizeObserver !== "undefined") {
+        const observer = new ResizeObserver(() => updatePrototypeScale());
+        observer.observe(container);
+      }
+
+      window.addEventListener("resize", updatePrototypeScale);
+
+      if (document.fonts?.ready) {
+        document.fonts.ready.then(() => updatePrototypeScale());
+      }
     }
 
     function applyPrototypeLayout() {
@@ -1185,7 +1244,7 @@
       if (getPlatformType() === "web") {
         modeHint.textContent = "当前为 Web 设计模式。原型区采用上下布局，上方展示页面，下方展示页面摘要和元素说明。";
       } else {
-        modeHint.textContent = "当前为 App 设计模式。原型区采用左右布局，左侧聚焦页面，右侧持续展示页面摘要和元素说明。";
+        modeHint.textContent = "当前为 App 设计模式。原型区采用左右布局，并在窄容器中按固定设计宽度等比缩放。";
       }
     }
 
@@ -1210,6 +1269,7 @@
       const meta = [
         "平台: " + getPlatformLabel(),
         "布局: " + getLayoutLabel(),
+        "设计宽度: " + getPrototypeWidth() + "px",
         "产品: " + (pageSpec.product || "-"),
         "页面: " + (pageSpec.title || "-"),
         "状态: " + (pageSpec.status || "-"),
@@ -1230,7 +1290,7 @@
       if (getPlatformType() === "web") {
         canvasIntro.textContent = "当前页面按 Web 设计模式展示。模板会将原型区域放在上方，元素说明区放在下方，便于承载宽页面和长页面的查阅。";
       } else {
-        canvasIntro.textContent = "当前页面按 App 设计模式展示。模板会将页面放在左侧，元素说明固定在右侧，更接近移动端原型评审时的查阅习惯。";
+        canvasIntro.textContent = "当前页面按 App 设计模式展示。模板会保持左侧原型、右侧说明的结构，并在文档嵌入场景中按固定稿等比缩放。";
       }
     }
 
@@ -1371,7 +1431,7 @@
         <div class="doc-grid">
           <section class="doc-section">
             <h3>页面信息</h3>
-            <p><strong>平台:</strong> ${getPlatformLabel()} · ${getLayoutLabel()}</p>
+            <p><strong>平台:</strong> ${getPlatformLabel()} · ${getLayoutLabel()} · ${getPrototypeWidth()}px</p>
             <p><strong>角色:</strong> ${(pageSpec.roles || []).join(" / ") || "-"}</p>
             <p><strong>入口:</strong> ${(pageSpec.entryPoints || []).join(" / ") || "-"}</p>
             <p><strong>前置条件:</strong> ${(pageSpec.preconditions || []).join(" / ") || "-"}</p>
@@ -1480,6 +1540,7 @@
 
     function setMode(nextMode) {
       mode = nextMode;
+      const protoStage = document.getElementById("appStage");
       const protoView = document.getElementById("protoView");
       const docView = document.getElementById("docView");
       const btnProto = document.getElementById("btnProto");
@@ -1487,13 +1548,16 @@
       const modeHint = document.getElementById("modeHint");
 
       if (mode === "proto") {
+        protoStage.style.display = "block";
         protoView.style.display = "flex";
         docView.style.display = "none";
         modeHint.style.display = "block";
         btnProto.classList.add("active");
         btnDoc.classList.remove("active");
         resetPanel();
+        updatePrototypeScale();
       } else {
+        protoStage.style.display = "none";
         protoView.style.display = "none";
         docView.style.display = "block";
         modeHint.style.display = "none";
@@ -1506,7 +1570,7 @@
     function exportMarkdown() {
       const components = getComponentsInViewOrder();
       let markdown = `# ${pageSpec.title || "未命名页面"}\n\n`;
-      markdown += `> 平台: ${getPlatformLabel()} · 布局: ${getLayoutLabel()} · 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
+      markdown += `> 平台: ${getPlatformLabel()} · 布局: ${getLayoutLabel()} · 设计宽度: ${getPrototypeWidth()}px · 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
       markdown += `## 页面目标\n\n${pageSpec.goal || "-"}\n\n`;
 
       const pageSections = [
@@ -1615,6 +1679,7 @@
       renderCanvasMeta();
       renderIdlePanel();
       renderValidationBanner();
+      bindPrototypeScale();
       bindEvents();
       setMode("proto");
     }
