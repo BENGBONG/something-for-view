@@ -1,0 +1,244 @@
+<style>
+[data-prd]{transition:outline 0.1s}
+[data-prd]:not(.sel):hover{outline:2px dashed #378ADD;outline-offset:4px;cursor:pointer;border-radius:4px}
+[data-prd].sel{outline:2px solid #185FA5;outline-offset:4px;border-radius:4px;cursor:pointer}
+</style>
+
+<div style="font-family:var(--font-sans);padding:0.5rem 0">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)">
+  <div style="display:flex;align-items:center;gap:16px">
+    <div style="display:flex;gap:0;background:var(--color-background-secondary);padding:3px;border-radius:8px;border:0.5px solid var(--color-border-tertiary)">
+      <button id="btnP" onclick="setMode('proto')" style="padding:5px 14px;font-size:13px;cursor:pointer;border-radius:6px;border:none;background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500">原型模式</button>
+      <button id="btnD" onclick="setMode('doc')" style="padding:5px 14px;font-size:13px;cursor:pointer;border-radius:6px;border:none;background:transparent;color:var(--color-text-secondary);font-weight:400">PRD 文档</button>
+    </div>
+    <span style="font-size:13px;color:var(--color-text-tertiary)">TeamFlow · 用户登录页面</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="modeHint" style="font-size:12px;color:var(--color-text-tertiary)">悬停高亮 · 点击查看标注</span>
+    <button onclick="exportMD()" style="font-size:12px;padding:5px 12px">↓ 导出 Markdown</button>
+  </div>
+</div>
+
+<div id="protoView" style="display:flex;gap:1.5rem;align-items:flex-start">
+  <div style="flex:1;min-width:0;display:flex;justify-content:center">
+    <div style="width:360px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:2rem 2.5rem;border:0.5px solid var(--color-border-tertiary)">
+
+      <div data-prd='{"id":"logo","title":"产品标识区","type":"section","desc":"展示 Logo 与产品名，建立品牌认知。登录页顶部固定展示，不可点击。","rules":["Logo 尺寸不低于 144x144px，格式 SVG 或 PNG@3x","产品名称 20px，颜色跟随深浅色模式自动切换","副标题色使用次要文字色"],"states":["default"],"exceptions":[]}' style="text-align:center;margin-bottom:1.75rem">
+        <div style="width:44px;height:44px;background:#185FA5;border-radius:10px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center">
+          <span style="color:#fff;font-weight:700;font-size:18px">T</span>
+        </div>
+        <p style="font-size:20px;font-weight:500;margin:0;color:var(--color-text-primary)">TeamFlow</p>
+        <p style="font-size:13px;color:var(--color-text-secondary);margin:4px 0 0">登录你的工作台</p>
+      </div>
+
+      <div data-prd='{"id":"phone","title":"手机号输入框","type":"field","desc":"用户输入已注册手机号，作为账号唯一标识。","rules":["仅接受数字输入，自动过滤非数字字符","限制 11 位，超出无法继续输入","失焦后校验格式，不通过则实时标红报错","空提交时展示必填错误提示"],"fields":[{"name":"phone","type":"string","required":true,"placeholder":"请输入手机号","maxLength":11,"validation":"11位手机号，1 开头"}],"states":["normal","focused","error","disabled"],"exceptions":["格式错误：显示「请输入正确的手机号」","未注册：提示「该手机号未注册，立即注册」"]}' style="margin-bottom:1rem">
+        <label style="font-size:13px;color:var(--color-text-secondary);display:block;margin-bottom:6px">手机号</label>
+        <div style="display:flex;align-items:center;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:0 12px;height:40px;gap:8px">
+          <span style="font-size:13px;color:var(--color-text-tertiary);border-right:0.5px solid var(--color-border-tertiary);padding-right:8px;white-space:nowrap">+86</span>
+          <span style="font-size:14px;color:var(--color-text-tertiary)">请输入手机号</span>
+        </div>
+      </div>
+
+      <div data-prd='{"id":"password","title":"密码输入框","type":"field","desc":"用户输入账号密码完成身份验证。","rules":["长度限制 8-20 位","支持切换明文/密文显示","连续错误 5 次触发账号锁定 30 分钟","密码不写入本地存储"],"fields":[{"name":"password","type":"password","required":true,"minLength":8,"maxLength":20,"validation":"8-20 位字符"}],"states":["normal","focused","error","locked"],"exceptions":["密码错误：提示剩余可尝试次数","账号锁定：显示解锁剩余时间","密码过期：引导重置密码"]}' style="margin-bottom:0.75rem">
+        <label style="font-size:13px;color:var(--color-text-secondary);display:block;margin-bottom:6px">密码</label>
+        <div style="display:flex;align-items:center;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:0 12px;height:40px;justify-content:space-between">
+          <span style="font-size:14px;color:var(--color-text-tertiary)">请输入密码</span>
+          <span style="font-size:12px;color:var(--color-text-tertiary);cursor:pointer">显示</span>
+        </div>
+      </div>
+
+      <div data-prd='{"id":"forgot","title":"忘记密码","type":"action","desc":"引导用户进入密码重置流程。","rules":["文字链接样式，蓝色","点击跳转 /reset-password","若用户已输入手机号则携带至重置页"],"states":["default","hover"],"exceptions":[]}' style="text-align:right;margin-bottom:1.25rem">
+        <span style="font-size:13px;color:#185FA5;cursor:pointer">忘记密码？</span>
+      </div>
+
+      <div data-prd='{"id":"login-btn","title":"登录按钮","type":"action","desc":"提交表单进行身份验证，页面核心操作。","rules":["点击后立即进入 loading，防止重复提交","loading 时按钮文字改为「登录中…」并显示 spinner","成功后跳转 /dashboard","失败后恢复可点击并在按钮上方展示错误信息"],"states":["default","loading","success","error","disabled"],"exceptions":["网络超时 10s：提示「网络异常，请重试」","服务端异常 5xx：提示「服务繁忙，请稍后重试」"]}' style="margin-bottom:1.25rem">
+        <div style="background:#185FA5;color:#fff;border-radius:var(--border-radius-md);height:42px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;cursor:pointer">登录</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem">
+        <div style="flex:1;height:0.5px;background:var(--color-border-tertiary)"></div>
+        <span style="font-size:12px;color:var(--color-text-tertiary)">或</span>
+        <div style="flex:1;height:0.5px;background:var(--color-border-tertiary)"></div>
+      </div>
+
+      <div data-prd='{"id":"sso","title":"第三方登录","type":"section","desc":"提供企业微信、钉钉 OAuth 快捷登录入口。","rules":["点击跳转对应 OAuth 授权页","回调地址统一为 /auth/callback/:provider","首次授权若未注册则自动建立账号","展示顺序：企业微信排在钉钉前"],"states":["default","hover"],"exceptions":["OAuth 授权失败：跳回登录页并提示错误原因","第三方服务不可用时：隐藏对应按钮（不降级为灰色禁用）"]}' style="display:flex;gap:10px;margin-bottom:1.5rem">
+        <div style="flex:1;height:38px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:var(--color-background-primary)">
+          <span style="font-size:11px;background:#07C160;color:#fff;border-radius:3px;padding:1px 5px;font-weight:700">W</span>
+          <span style="font-size:13px;color:var(--color-text-secondary)">企业微信</span>
+        </div>
+        <div style="flex:1;height:38px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:var(--color-background-primary)">
+          <span style="font-size:11px;background:#1677FF;color:#fff;border-radius:3px;padding:1px 5px;font-weight:700">D</span>
+          <span style="font-size:13px;color:var(--color-text-secondary)">钉钉</span>
+        </div>
+      </div>
+
+      <div data-prd='{"id":"register","title":"注册引导","type":"action","desc":"引导无账号用户跳转注册页面，置于表单底部。","rules":["点击跳转 /register","新标签页打开还是当前页跳转，由产品策略决定"],"states":["default"],"exceptions":[]}' style="text-align:center">
+        <span style="font-size:13px;color:var(--color-text-secondary)">还没有账号？</span>
+        <span style="font-size:13px;color:#185FA5;cursor:pointer;font-weight:500">立即注册</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="annoPanel" style="width:256px;flex-shrink:0;background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:1.25rem">
+    <div id="annoIdle" style="padding:2rem 0;text-align:center">
+      <div style="width:36px;height:36px;border-radius:50%;background:#E6F1FB;margin:0 auto 10px;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:16px;color:#185FA5">◎</span>
+      </div>
+      <p style="font-size:13px;color:var(--color-text-tertiary);line-height:1.7;margin:0">悬停预览 · 点击查看<br>组件需求标注</p>
+    </div>
+    <div id="annoContent" style="display:none"></div>
+  </div>
+</div>
+
+<div id="docView" style="display:none"></div>
+
+</div>
+
+<script>
+let mode = 'proto';
+const typeLabel = {page:'页面',section:'区块',field:'字段',action:'操作',component:'组件'};
+
+function getPRDData() {
+  return Array.from(document.querySelectorAll('#protoView [data-prd]')).map(el => {
+    try { return JSON.parse(el.getAttribute('data-prd')); } catch(e) { return null; }
+  }).filter(Boolean);
+}
+
+function annoHTML(d) {
+  let h = `<div style="padding-bottom:12px;margin-bottom:12px;border-bottom:0.5px solid var(--color-border-tertiary)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+      <span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${d.title}</span>
+      <span style="font-size:11px;padding:2px 8px;background:#E6F1FB;color:#0C447C;border-radius:20px">${typeLabel[d.type]||d.type}</span>
+    </div>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0;line-height:1.6">${d.desc}</p>
+  </div>`;
+  if (d.rules?.length) {
+    h += `<p style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 6px;letter-spacing:0.5px">业务规则</p>`;
+    d.rules.forEach(r => { h += `<div style="display:flex;gap:6px;margin:4px 0;font-size:13px"><span style="color:#185FA5;flex-shrink:0">•</span><span style="line-height:1.5;color:var(--color-text-primary)">${r}</span></div>`; });
+    h += `<div style="margin-bottom:12px"></div>`;
+  }
+  if (d.fields?.length) {
+    h += `<p style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 6px;letter-spacing:0.5px">字段规格</p>`;
+    d.fields.forEach(f => {
+      h += `<div style="background:var(--color-background-secondary);border-radius:6px;padding:8px 10px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+          <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${f.name}</span>
+          <span style="font-size:12px;color:var(--color-text-tertiary)">${f.type}${f.required?' · 必填':''}</span>
+        </div>
+        ${f.validation?`<p style="font-size:12px;color:var(--color-text-secondary);margin:0">${f.validation}</p>`:''}
+      </div>`;
+    });
+    h += `<div style="margin-bottom:4px"></div>`;
+  }
+  if (d.states?.length) {
+    h += `<p style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);margin:8px 0 6px;letter-spacing:0.5px">组件状态</p>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">`;
+    d.states.forEach(s => { h += `<span style="font-size:12px;padding:3px 10px;background:var(--color-background-secondary);border-radius:20px;color:var(--color-text-secondary)">${s}</span>`; });
+    h += `</div>`;
+  }
+  if (d.exceptions?.length) {
+    h += `<p style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 6px;letter-spacing:0.5px">异常处理</p>`;
+    d.exceptions.forEach(e => { h += `<div style="display:flex;gap:6px;padding:7px 10px;background:#FAECE7;border-radius:6px;margin-bottom:5px;font-size:13px;line-height:1.5;color:#4A1B0C"><span style="flex-shrink:0">⚠</span><span>${e}</span></div>`; });
+  }
+  return h;
+}
+
+function renderDoc() {
+  const data = getPRDData();
+  let h = `<div style="max-width:680px">
+    <div style="margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <h1 style="font-size:22px;font-weight:500;margin:0 0 6px;color:var(--color-text-primary)">PRD · 用户登录页面</h1>
+      <p style="font-size:13px;color:var(--color-text-tertiary);margin:0">从原型标注自动生成 · ${new Date().toLocaleDateString('zh-CN')} · ${data.length} 个组件</p>
+    </div>`;
+  data.forEach((d, i) => {
+    h += `<div style="margin-bottom:2.5rem;padding-bottom:2.5rem;${i<data.length-1?'border-bottom:0.5px solid var(--color-border-tertiary)':''}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--color-text-tertiary);min-width:20px">${String(i+1).padStart(2,'0')}</span>
+        <h2 style="font-size:17px;font-weight:500;margin:0;color:var(--color-text-primary)">${d.title}</h2>
+        <span style="font-size:11px;padding:2px 8px;background:#E6F1FB;color:#0C447C;border-radius:20px">${typeLabel[d.type]||d.type}</span>
+      </div>
+      <p style="font-size:14px;color:var(--color-text-secondary);margin:0 0 1.25rem;line-height:1.7">${d.desc}</p>`;
+    if (d.rules?.length) {
+      h += `<p style="font-size:12px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 8px;letter-spacing:0.5px">业务规则</p>`;
+      d.rules.forEach((r,ri) => { h += `<div style="display:flex;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px"><span style="font-size:11px;font-weight:500;color:#185FA5;flex-shrink:0;margin-top:2px;min-width:20px">R${ri+1}</span><span style="line-height:1.6;color:var(--color-text-primary)">${r}</span></div>`; });
+      h += `<div style="margin-bottom:1.25rem"></div>`;
+    }
+    if (d.fields?.length) {
+      h += `<p style="font-size:12px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 8px;letter-spacing:0.5px">字段规格</p>
+        <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:1.25rem">
+          <thead><tr>
+            <th style="text-align:left;padding:6px 0;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">字段名</th>
+            <th style="text-align:left;padding:6px 8px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">类型</th>
+            <th style="text-align:left;padding:6px 8px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">必填</th>
+            <th style="text-align:left;padding:6px 0 6px 8px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">校验规则</th>
+          </tr></thead><tbody>`;
+      d.fields.forEach(f => { h += `<tr><td style="padding:8px 0;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)">${f.name}</td><td style="padding:8px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">${f.type}</td><td style="padding:8px;color:${f.required?'#185FA5':'var(--color-text-tertiary)'};border-bottom:0.5px solid var(--color-border-tertiary)">${f.required?'是':'否'}</td><td style="padding:8px 0 8px 8px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)">${f.validation||'-'}</td></tr>`; });
+      h += `</tbody></table>`;
+    }
+    if (d.states?.length) {
+      h += `<p style="font-size:12px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 8px;letter-spacing:0.5px">组件状态</p><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem">`;
+      d.states.forEach(s => { h += `<span style="font-size:13px;padding:4px 12px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:20px;color:var(--color-text-secondary)">${s}</span>`; });
+      h += `</div>`;
+    }
+    if (d.exceptions?.length) {
+      h += `<p style="font-size:12px;font-weight:500;color:var(--color-text-tertiary);margin:0 0 8px;letter-spacing:0.5px">异常处理</p>`;
+      d.exceptions.forEach(e => { h += `<div style="display:flex;gap:8px;padding:8px 12px;background:#FAECE7;border-radius:6px;margin-bottom:6px;font-size:13px;color:#4A1B0C;line-height:1.5"><span>⚠</span><span>${e}</span></div>`; });
+    }
+    h += `</div>`;
+  });
+  h += `</div>`;
+  document.getElementById('docView').innerHTML = h;
+}
+
+function setMode(m) {
+  mode = m;
+  const pv = document.getElementById('protoView');
+  const dv = document.getElementById('docView');
+  const hint = document.getElementById('modeHint');
+  const btnP = document.getElementById('btnP');
+  const btnD = document.getElementById('btnD');
+  if (m === 'proto') {
+    pv.style.display = 'flex'; dv.style.display = 'none'; hint.style.display = '';
+    btnP.style.background = 'var(--color-background-primary)'; btnP.style.color = 'var(--color-text-primary)'; btnP.style.fontWeight = '500';
+    btnD.style.background = 'transparent'; btnD.style.color = 'var(--color-text-secondary)'; btnD.style.fontWeight = '400';
+    document.querySelectorAll('[data-prd].sel').forEach(x => x.classList.remove('sel'));
+    document.getElementById('annoIdle').style.display = ''; document.getElementById('annoContent').style.display = 'none';
+  } else {
+    pv.style.display = 'none'; dv.style.display = 'block'; hint.style.display = 'none';
+    btnP.style.background = 'transparent'; btnP.style.color = 'var(--color-text-secondary)'; btnP.style.fontWeight = '400';
+    btnD.style.background = 'var(--color-background-primary)'; btnD.style.color = 'var(--color-text-primary)'; btnD.style.fontWeight = '500';
+    renderDoc();
+  }
+}
+
+function exportMD() {
+  const data = getPRDData();
+  let md = `# PRD · 用户登录页面\n\n> 从原型标注自动生成 · ${new Date().toLocaleDateString('zh-CN')}\n\n---\n\n`;
+  data.forEach((d, i) => {
+    md += `## ${i+1}. ${d.title} \`${typeLabel[d.type]||d.type}\`\n\n${d.desc}\n\n`;
+    if (d.rules?.length) { md += `### 业务规则\n\n`; d.rules.forEach((r,ri) => md += `- **R${ri+1}** ${r}\n`); md += '\n'; }
+    if (d.fields?.length) { md += `### 字段规格\n\n| 字段 | 类型 | 必填 | 校验 |\n|------|------|------|------|\n`; d.fields.forEach(f => md += `| ${f.name} | ${f.type} | ${f.required?'是':'否'} | ${f.validation||'-'} |\n`); md += '\n'; }
+    if (d.states?.length) { md += `### 组件状态\n\n${d.states.map(s=>'`'+s+'`').join(' / ')}\n\n`; }
+    if (d.exceptions?.length) { md += `### 异常处理\n\n`; d.exceptions.forEach(e => md += `> ⚠ ${e}\n\n`); }
+    md += '---\n\n';
+  });
+  const a = Object.assign(document.createElement('a'), {href: URL.createObjectURL(new Blob([md],{type:'text/plain;charset=utf-8'})), download:'prd-login.md'});
+  a.click();
+}
+
+document.addEventListener('click', e => {
+  if (mode !== 'proto') return;
+  const el = e.target.closest('[data-prd]');
+  if (!el) return;
+  document.querySelectorAll('[data-prd].sel').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel');
+  try {
+    const d = JSON.parse(el.getAttribute('data-prd'));
+    document.getElementById('annoIdle').style.display = 'none';
+    document.getElementById('annoContent').style.display = 'block';
+    document.getElementById('annoContent').innerHTML = annoHTML(d);
+  } catch(e) {}
+});
+</script>
