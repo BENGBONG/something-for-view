@@ -177,7 +177,16 @@
     .proto-layout {
       display: flex;
       gap: 22px;
+    }
+
+    .proto-layout.layout-app {
+      flex-direction: row;
       align-items: flex-start;
+    }
+
+    .proto-layout.layout-web {
+      flex-direction: column;
+      align-items: stretch;
     }
 
     .proto-canvas {
@@ -189,6 +198,10 @@
         linear-gradient(145deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.28)),
         rgba(255, 255, 255, 0.35);
       border: 1px solid rgba(255, 255, 255, 0.52);
+    }
+
+    .proto-layout.layout-web .proto-canvas {
+      width: 100%;
     }
 
     .canvas-header {
@@ -438,6 +451,11 @@
       border: 1px solid rgba(255, 255, 255, 0.62);
       backdrop-filter: blur(14px);
       box-shadow: var(--shadow-soft);
+    }
+
+    .proto-layout.layout-web .anno-panel {
+      width: 100%;
+      position: static;
     }
 
     .panel-section + .panel-section {
@@ -698,11 +716,11 @@
     }
 
     @media (max-width: 1120px) {
-      .proto-layout {
+      .proto-layout.layout-app {
         flex-direction: column;
       }
 
-      .anno-panel {
+      .proto-layout.layout-app .anno-panel {
         width: 100%;
         position: static;
       }
@@ -776,12 +794,12 @@
 
     <div class="validation-banner" id="validationBanner"></div>
 
-    <section class="proto-layout" id="protoView">
+    <section class="proto-layout layout-app" id="protoView">
       <div class="proto-canvas">
         <div class="canvas-header">
           <div>
-            <h2>示例页面: TeamFlow 登录</h2>
-            <p>这个示例保留登录页的展示形态，但把规格数据从 DOM 属性挪到了页面底部的 JSON 区块。DOM 里只保留 `data-prd-id` 用于关联。</p>
+            <h2 id="canvasTitle"></h2>
+            <p id="canvasIntro"></p>
           </div>
           <div class="canvas-meta" id="canvasMeta"></div>
         </div>
@@ -859,6 +877,7 @@
     {
       "pageId": "login",
       "product": "TeamFlow",
+      "platform": "app",
       "title": "用户登录页面",
       "status": "草稿",
       "version": "v2.0",
@@ -885,7 +904,8 @@
       ],
       "notes": [
         "这个文件是单需求需求包模板，后续复制时建议保留文件结构不变，只替换页面内容和 JSON。",
-        "如果页面组件很多，可以继续沿用 data-prd-id，但不要把整段规格直接写进 DOM 属性。"
+        "如果页面组件很多，可以继续沿用 data-prd-id，但不要把整段规格直接写进 DOM 属性。",
+        "APP 设计时把 platform 设为 app，模板会使用左右布局；Web 设计时设为 web，模板会自动切换成上下布局。"
       ]
     }
   </script>
@@ -1060,6 +1080,19 @@
     const pageSpec = parseJSONScript("page-spec") || {};
     const componentSpecs = parseJSONScript("component-specs") || {};
 
+    function getPlatformType() {
+      const platform = String(pageSpec.platform || "").trim().toLowerCase();
+      return platform === "web" ? "web" : "app";
+    }
+
+    function getPlatformLabel() {
+      return getPlatformType() === "web" ? "Web" : "App";
+    }
+
+    function getLayoutLabel() {
+      return getPlatformType() === "web" ? "上下布局" : "左右布局";
+    }
+
     function getComponentOrder() {
       return Array.from(document.querySelectorAll("[data-prd-id]")).map((element) => element.dataset.prdId);
     }
@@ -1130,7 +1163,30 @@
         }
       });
 
+      const rawPlatform = String(pageSpec.platform || "").trim().toLowerCase();
+      if (!rawPlatform) {
+        warnings.push("建议在 page-spec 中声明 platform: app 或 web");
+      } else if (!["app", "web"].includes(rawPlatform)) {
+        warnings.push("page-spec.platform 仅支持 app 或 web，当前值为: " + pageSpec.platform);
+      }
+
       return warnings;
+    }
+
+    function applyPrototypeLayout() {
+      const protoView = document.getElementById("protoView");
+      protoView.classList.remove("layout-app", "layout-web");
+      protoView.classList.add("layout-" + getPlatformType());
+    }
+
+    function renderModeHint() {
+      const modeHint = document.getElementById("modeHint");
+
+      if (getPlatformType() === "web") {
+        modeHint.textContent = "当前为 Web 设计模式。原型区采用上下布局，上方展示页面，下方展示页面摘要和元素说明。";
+      } else {
+        modeHint.textContent = "当前为 App 设计模式。原型区采用左右布局，左侧聚焦页面，右侧持续展示页面摘要和元素说明。";
+      }
     }
 
     function renderValidationBanner() {
@@ -1152,6 +1208,8 @@
 
     function renderCanvasMeta() {
       const meta = [
+        "平台: " + getPlatformLabel(),
+        "布局: " + getLayoutLabel(),
         "产品: " + (pageSpec.product || "-"),
         "页面: " + (pageSpec.title || "-"),
         "状态: " + (pageSpec.status || "-"),
@@ -1161,6 +1219,19 @@
       document.getElementById("canvasMeta").innerHTML = meta
         .map((item) => `<span class="meta-chip">${item}</span>`)
         .join("");
+    }
+
+    function renderCanvasHeader() {
+      const canvasTitle = document.getElementById("canvasTitle");
+      const canvasIntro = document.getElementById("canvasIntro");
+
+      canvasTitle.textContent = "示例页面: " + (pageSpec.title || "未命名页面");
+
+      if (getPlatformType() === "web") {
+        canvasIntro.textContent = "当前页面按 Web 设计模式展示。模板会将原型区域放在上方，元素说明区放在下方，便于承载宽页面和长页面的查阅。";
+      } else {
+        canvasIntro.textContent = "当前页面按 App 设计模式展示。模板会将页面放在左侧，元素说明固定在右侧，更接近移动端原型评审时的查阅习惯。";
+      }
     }
 
     function renderIdlePanel() {
@@ -1173,7 +1244,11 @@
           <p class="panel-kicker">Page Overview</p>
           <h2 class="panel-title">${pageSpec.title || "未命名页面"}</h2>
           <p class="panel-copy">${pageSpec.goal || "请在 page-spec 中补充页面目标。"}</p>
-          <div class="tag-row">${roles || '<span class="tag">待补充角色</span>'}</div>
+          <div class="tag-row">
+            <span class="tag">平台: ${getPlatformLabel()}</span>
+            <span class="tag">布局: ${getLayoutLabel()}</span>
+            ${roles || '<span class="tag">待补充角色</span>'}
+          </div>
         </div>
         <div class="panel-section">
           <p class="panel-kicker">Main Flow</p>
@@ -1296,6 +1371,7 @@
         <div class="doc-grid">
           <section class="doc-section">
             <h3>页面信息</h3>
+            <p><strong>平台:</strong> ${getPlatformLabel()} · ${getLayoutLabel()}</p>
             <p><strong>角色:</strong> ${(pageSpec.roles || []).join(" / ") || "-"}</p>
             <p><strong>入口:</strong> ${(pageSpec.entryPoints || []).join(" / ") || "-"}</p>
             <p><strong>前置条件:</strong> ${(pageSpec.preconditions || []).join(" / ") || "-"}</p>
@@ -1430,7 +1506,7 @@
     function exportMarkdown() {
       const components = getComponentsInViewOrder();
       let markdown = `# ${pageSpec.title || "未命名页面"}\n\n`;
-      markdown += `> 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
+      markdown += `> 平台: ${getPlatformLabel()} · 布局: ${getLayoutLabel()} · 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
       markdown += `## 页面目标\n\n${pageSpec.goal || "-"}\n\n`;
 
       const pageSections = [
@@ -1533,6 +1609,9 @@
     }
 
     function init() {
+      applyPrototypeLayout();
+      renderModeHint();
+      renderCanvasHeader();
       renderCanvasMeta();
       renderIdlePanel();
       renderValidationBanner();
