@@ -227,6 +227,25 @@
       color: var(--text-main);
     }
 
+    .web-stage {
+      width: 100%;
+    }
+
+    .web-stage-fit {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .web-stage-inner {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1720px;
+      transform-origin: top center;
+      will-change: transform;
+    }
+
     .web-shell {
       border-radius: 26px;
       overflow: hidden;
@@ -848,10 +867,6 @@
     }
 
     @media (max-width: 1120px) {
-      .metric-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
       .doc-meta-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -867,11 +882,7 @@
       }
 
       .toolbar,
-      .canvas-header,
-      .page-header,
-      .filter-bar,
-      .table-toolbar,
-      .pagination {
+      .canvas-header {
         flex-direction: column;
         align-items: stretch;
       }
@@ -887,19 +898,9 @@
         width: 100%;
       }
 
-      .metric-grid,
       .doc-meta-grid,
       .doc-grid {
         grid-template-columns: 1fr;
-      }
-
-      .nav-menu,
-      .nav-actions,
-      .header-actions,
-      .filter-group,
-      .filter-actions,
-      .pagination-controls {
-        width: 100%;
       }
     }
   </style>
@@ -937,147 +938,153 @@
           <div class="canvas-meta" id="canvasMeta"></div>
         </div>
 
-        <div class="web-shell">
-          <div class="browser-bar">
-            <div class="dot-row">
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
+        <div class="web-stage">
+          <div class="web-stage-fit" id="webStage">
+            <div class="web-stage-inner" id="webStageInner">
+              <div class="web-shell">
+                <div class="browser-bar">
+                  <div class="dot-row">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="browser-url">https://console.saleshub.com/customer/overview</div>
+                </div>
+
+                <div class="web-page">
+                  <section class="top-nav" data-prd-id="top-nav">
+                    <div class="brand-area">
+                      <div class="brand-badge">S</div>
+                      <div>
+                        <strong>SalesHub Console</strong>
+                        <span>客户运营后台</span>
+                      </div>
+                    </div>
+                    <div class="nav-menu">
+                      <span class="nav-item">首页</span>
+                      <span class="nav-item active">客户中心</span>
+                      <span class="nav-item">订单中心</span>
+                      <span class="nav-item">营销活动</span>
+                    </div>
+                    <div class="nav-actions">
+                      <span class="action-chip">消息 12</span>
+                      <span class="action-chip">Lin 产品组</span>
+                    </div>
+                  </section>
+
+                  <section class="page-header" data-prd-id="page-header">
+                    <div>
+                      <h3>客户总览页面</h3>
+                      <p>帮助运营团队快速查看客户分层、近期跟进状态和风险客户，集中完成筛选、导出和批量分配操作。</p>
+                    </div>
+                    <div class="header-actions">
+                      <span class="header-button">新建客户标签</span>
+                      <span class="header-button">批量导出</span>
+                      <span class="header-button">创建分组</span>
+                    </div>
+                  </section>
+
+                  <section class="metric-grid" data-prd-id="metric-cards">
+                    <div class="metric-card">
+                      <span>总客户数</span>
+                      <strong>12,480</strong>
+                      <small>较上周 +8.4%</small>
+                    </div>
+                    <div class="metric-card">
+                      <span>本周新增</span>
+                      <strong>436</strong>
+                      <small>渠道投放贡献 61%</small>
+                    </div>
+                    <div class="metric-card">
+                      <span>待跟进客户</span>
+                      <strong>128</strong>
+                      <small>需在 24h 内处理</small>
+                    </div>
+                    <div class="metric-card">
+                      <span>高风险流失</span>
+                      <strong>37</strong>
+                      <small>建议立即提醒销售</small>
+                    </div>
+                  </section>
+
+                  <section class="filter-bar" data-prd-id="filter-bar">
+                    <div class="filter-group">
+                      <span class="filter-pill">搜索客户姓名/手机号</span>
+                      <span class="filter-pill">客户分层: 全部</span>
+                      <span class="filter-pill">最近跟进: 7 天内</span>
+                      <span class="filter-pill">负责人: 全部</span>
+                    </div>
+                    <div class="filter-actions">
+                      <span class="filter-pill">重置条件</span>
+                      <span class="filter-pill">保存筛选器</span>
+                    </div>
+                  </section>
+
+                  <section class="table-card" data-prd-id="customer-table">
+                    <div class="table-toolbar">
+                      <div>
+                        <h4>客户列表</h4>
+                        <p>展示符合筛选条件的客户，并支持勾选后批量操作。</p>
+                      </div>
+                      <div class="toolbar-badges">
+                        <span class="toolbar-badge">已勾选 16 项</span>
+                        <span class="toolbar-badge">批量分配</span>
+                        <span class="toolbar-badge">批量打标签</span>
+                      </div>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>客户</th>
+                          <th>分层</th>
+                          <th>负责人</th>
+                          <th>最近跟进</th>
+                          <th>状态</th>
+                          <th>成交概率</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><span class="table-name">陈晓雯</span><br />138****2026</td>
+                          <td>A 类高意向</td>
+                          <td>王嘉怡</td>
+                          <td>今天 09:20</td>
+                          <td><span class="status-pill">跟进中</span></td>
+                          <td>82%</td>
+                        </tr>
+                        <tr>
+                          <td><span class="table-name">李晨宇</span><br />137****8821</td>
+                          <td>B 类观察</td>
+                          <td>赵志豪</td>
+                          <td>昨天 16:42</td>
+                          <td><span class="status-pill risk">需召回</span></td>
+                          <td>36%</td>
+                        </tr>
+                        <tr>
+                          <td><span class="table-name">苏青</span><br />156****1109</td>
+                          <td>A 类高意向</td>
+                          <td>王嘉怡</td>
+                          <td>2 天前</td>
+                          <td><span class="status-pill">预约演示</span></td>
+                          <td>67%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </section>
+
+                  <section class="pagination" data-prd-id="pagination">
+                    <p>共 1,248 条结果，当前第 1 页，每页 20 条</p>
+                    <div class="pagination-controls">
+                      <span class="page-chip">上一页</span>
+                      <span class="page-chip active">1</span>
+                      <span class="page-chip">2</span>
+                      <span class="page-chip">3</span>
+                      <span class="page-chip">下一页</span>
+                    </div>
+                  </section>
+                </div>
+              </div>
             </div>
-            <div class="browser-url">https://console.saleshub.com/customer/overview</div>
-          </div>
-
-          <div class="web-page">
-            <section class="top-nav" data-prd-id="top-nav">
-              <div class="brand-area">
-                <div class="brand-badge">S</div>
-                <div>
-                  <strong>SalesHub Console</strong>
-                  <span>客户运营后台</span>
-                </div>
-              </div>
-              <div class="nav-menu">
-                <span class="nav-item">首页</span>
-                <span class="nav-item active">客户中心</span>
-                <span class="nav-item">订单中心</span>
-                <span class="nav-item">营销活动</span>
-              </div>
-              <div class="nav-actions">
-                <span class="action-chip">消息 12</span>
-                <span class="action-chip">Lin 产品组</span>
-              </div>
-            </section>
-
-            <section class="page-header" data-prd-id="page-header">
-              <div>
-                <h3>客户总览页面</h3>
-                <p>帮助运营团队快速查看客户分层、近期跟进状态和风险客户，集中完成筛选、导出和批量分配操作。</p>
-              </div>
-              <div class="header-actions">
-                <span class="header-button">新建客户标签</span>
-                <span class="header-button">批量导出</span>
-                <span class="header-button">创建分组</span>
-              </div>
-            </section>
-
-            <section class="metric-grid" data-prd-id="metric-cards">
-              <div class="metric-card">
-                <span>总客户数</span>
-                <strong>12,480</strong>
-                <small>较上周 +8.4%</small>
-              </div>
-              <div class="metric-card">
-                <span>本周新增</span>
-                <strong>436</strong>
-                <small>渠道投放贡献 61%</small>
-              </div>
-              <div class="metric-card">
-                <span>待跟进客户</span>
-                <strong>128</strong>
-                <small>需在 24h 内处理</small>
-              </div>
-              <div class="metric-card">
-                <span>高风险流失</span>
-                <strong>37</strong>
-                <small>建议立即提醒销售</small>
-              </div>
-            </section>
-
-            <section class="filter-bar" data-prd-id="filter-bar">
-              <div class="filter-group">
-                <span class="filter-pill">搜索客户姓名/手机号</span>
-                <span class="filter-pill">客户分层: 全部</span>
-                <span class="filter-pill">最近跟进: 7 天内</span>
-                <span class="filter-pill">负责人: 全部</span>
-              </div>
-              <div class="filter-actions">
-                <span class="filter-pill">重置条件</span>
-                <span class="filter-pill">保存筛选器</span>
-              </div>
-            </section>
-
-            <section class="table-card" data-prd-id="customer-table">
-              <div class="table-toolbar">
-                <div>
-                  <h4>客户列表</h4>
-                  <p>展示符合筛选条件的客户，并支持勾选后批量操作。</p>
-                </div>
-                <div class="toolbar-badges">
-                  <span class="toolbar-badge">已勾选 16 项</span>
-                  <span class="toolbar-badge">批量分配</span>
-                  <span class="toolbar-badge">批量打标签</span>
-                </div>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>客户</th>
-                    <th>分层</th>
-                    <th>负责人</th>
-                    <th>最近跟进</th>
-                    <th>状态</th>
-                    <th>成交概率</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><span class="table-name">陈晓雯</span><br />138****2026</td>
-                    <td>A 类高意向</td>
-                    <td>王嘉怡</td>
-                    <td>今天 09:20</td>
-                    <td><span class="status-pill">跟进中</span></td>
-                    <td>82%</td>
-                  </tr>
-                  <tr>
-                    <td><span class="table-name">李晨宇</span><br />137****8821</td>
-                    <td>B 类观察</td>
-                    <td>赵志豪</td>
-                    <td>昨天 16:42</td>
-                    <td><span class="status-pill risk">需召回</span></td>
-                    <td>36%</td>
-                  </tr>
-                  <tr>
-                    <td><span class="table-name">苏青</span><br />156****1109</td>
-                    <td>A 类高意向</td>
-                    <td>王嘉怡</td>
-                    <td>2 天前</td>
-                    <td><span class="status-pill">预约演示</span></td>
-                    <td>67%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </section>
-
-            <section class="pagination" data-prd-id="pagination">
-              <p>共 1,248 条结果，当前第 1 页，每页 20 条</p>
-              <div class="pagination-controls">
-                <span class="page-chip">上一页</span>
-                <span class="page-chip active">1</span>
-                <span class="page-chip">2</span>
-                <span class="page-chip">3</span>
-                <span class="page-chip">下一页</span>
-              </div>
-            </section>
           </div>
         </div>
       </div>
@@ -1096,6 +1103,7 @@
       "pageId": "customer-overview",
       "product": "SalesHub Console",
       "platform": "web",
+      "prototypeWidth": 1720,
       "title": "客户总览页面",
       "status": "草稿",
       "version": "v2.0",
@@ -1122,7 +1130,8 @@
       ],
       "notes": [
         "这个文件用于演示 Web 模式下的阅读方式，适合后台、运营台和宽页面。",
-        "复制此模板时，只需要替换页面 DOM、page-spec 和 component-specs。"
+        "复制此模板时，只需要替换页面 DOM、page-spec 和 component-specs。",
+        "文档嵌入场景下，页面原型会基于 prototypeWidth 做等比缩放，避免窄容器触发布局重排。"
       ]
     }
   </script>
@@ -1283,6 +1292,11 @@
       return getPlatformType() === "app" ? "左右布局" : "上下布局";
     }
 
+    function getPrototypeWidth() {
+      const width = Number(pageSpec.prototypeWidth);
+      return Number.isFinite(width) && width >= 960 ? width : 1720;
+    }
+
     function getComponentOrder() {
       return Array.from(document.querySelectorAll("[data-prd-id]")).map((node) => node.dataset.prdId);
     }
@@ -1359,6 +1373,51 @@
       return warnings;
     }
 
+    function updatePrototypeScale() {
+      const stage = document.getElementById("webStage");
+      const inner = document.getElementById("webStageInner");
+
+      if (!stage || !inner) {
+        return;
+      }
+
+      const designWidth = getPrototypeWidth();
+      inner.style.width = designWidth + "px";
+
+      requestAnimationFrame(() => {
+        const availableWidth = stage.clientWidth;
+        if (!availableWidth) {
+          return;
+        }
+
+        const scale = Math.min(1, availableWidth / designWidth);
+        inner.style.transform = `translateX(-50%) scale(${scale})`;
+        stage.style.height = `${inner.offsetHeight * scale}px`;
+      });
+    }
+
+    function bindPrototypeScale() {
+      const stage = document.getElementById("webStage");
+      const container = stage?.parentElement;
+
+      if (!stage || !container) {
+        return;
+      }
+
+      updatePrototypeScale();
+
+      if (typeof ResizeObserver !== "undefined") {
+        const observer = new ResizeObserver(() => updatePrototypeScale());
+        observer.observe(container);
+      }
+
+      window.addEventListener("resize", updatePrototypeScale);
+
+      if (document.fonts?.ready) {
+        document.fonts.ready.then(() => updatePrototypeScale());
+      }
+    }
+
     function renderValidationBanner() {
       const warnings = validateSpecs();
       const banner = document.getElementById("validationBanner");
@@ -1385,6 +1444,7 @@
       const meta = [
         "平台: " + getPlatformLabel(),
         "布局: " + getLayoutLabel(),
+        "设计宽度: " + getPrototypeWidth() + "px",
         "产品: " + (pageSpec.product || "-"),
         "页面: " + (pageSpec.title || "-"),
         "状态: " + (pageSpec.status || "-"),
@@ -1590,7 +1650,7 @@
         </section>
 
         <div class="doc-meta-grid">
-          <div class="doc-meta-card"><span class="label">平台</span><span class="value">${getPlatformLabel()} · ${getLayoutLabel()}</span></div>
+          <div class="doc-meta-card"><span class="label">平台</span><span class="value">${getPlatformLabel()} · ${getLayoutLabel()} · ${getPrototypeWidth()}px</span></div>
           <div class="doc-meta-card"><span class="label">产品</span><span class="value">${pageSpec.product || "-"}</span></div>
           <div class="doc-meta-card"><span class="label">版本</span><span class="value">${pageSpec.version || "-"}</span></div>
           <div class="doc-meta-card"><span class="label">更新日期</span><span class="value">${pageSpec.updatedAt || "-"}</span></div>
@@ -1643,6 +1703,7 @@
         btnProto.classList.add("active");
         btnDoc.classList.remove("active");
         resetPanel();
+        updatePrototypeScale();
       } else {
         protoView.style.display = "none";
         docView.style.display = "block";
@@ -1656,7 +1717,7 @@
     function exportMarkdown() {
       const components = getComponentsInViewOrder();
       let markdown = `# ${pageSpec.title || "未命名页面"}\n\n`;
-      markdown += `> 平台: ${getPlatformLabel()} · 布局: ${getLayoutLabel()} · 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
+      markdown += `> 平台: ${getPlatformLabel()} · 布局: ${getLayoutLabel()} · 设计宽度: ${getPrototypeWidth()}px · 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
       markdown += `## 页面目标\n\n${pageSpec.goal || "-"}\n\n`;
 
       const pageSections = [
@@ -1762,6 +1823,7 @@
       renderCanvasMeta();
       renderIdlePanel();
       renderValidationBanner();
+      bindPrototypeScale();
       bindEvents();
       setMode("proto");
     }
