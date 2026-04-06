@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>单文件原型 PRD 模板 Web 示例</title>
+  <style>
+    :root {
+      --bg-page: #eef3f7;
+      --bg-app: rgba(255, 255, 255, 0.68);
+      --bg-card: #ffffff;
+      --bg-soft: #f5f8fb;
+      --bg-line: rgba(17, 24, 39, 0.08);
+      --bg-brand: #0f4c81;
+      --bg-brand-2: #2a7bc7;
+      --text-strong: #18202a;
+      --text-main: #475467;
+      --text-muted: #7c8896;
+      --text-white: #f8fbff;
+      --danger-bg: #fdeae7;
+      --danger-text: #8f301f;
+      --warning-bg: #fff3df;
+      --warning-text: #8b5a15;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-soft: 0 22px 50px rgba(24, 32, 42, 0.08);
+      --font-sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: var(--font-sans);
+      color: var(--text-strong);
+      background:
+        radial-gradient(circle at top left, rgba(42, 123, 199, 0.12), transparent 24%),
+        radial-gradient(circle at right bottom, rgba(15, 76, 129, 0.1), transparent 28%),
+        var(--bg-page);
+    }
+
+    body {
+      padding: 24px;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 28px;
+      border-radius: 32px;
+      background: var(--bg-app);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+
+    .toolbar-copy h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+    }
+
+    .toolbar-copy p {
+      margin: 0;
+      max-width: 760px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-main);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--bg-line);
+    }
+
+    .mode-toggle button,
+    .ghost-button {
+      border: none;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .mode-toggle button {
+      min-width: 112px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      color: var(--text-main);
+      background: transparent;
+    }
+
+    .mode-toggle button.active {
+      color: var(--text-white);
+      background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-2));
+      box-shadow: 0 8px 18px rgba(15, 76, 129, 0.22);
+    }
+
+    .ghost-button {
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--bg-line);
+      color: var(--text-strong);
+    }
+
+    .ghost-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .mode-hint {
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .validation-banner {
+      display: none;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid rgba(139, 90, 21, 0.12);
+    }
+
+    .validation-banner.show {
+      display: block;
+    }
+
+    .validation-banner strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .validation-banner ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .proto-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .proto-canvas {
+      width: 100%;
+      padding: 28px;
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.38)),
+        rgba(255, 255, 255, 0.44);
+      border: 1px solid rgba(255, 255, 255, 0.56);
+    }
+
+    .canvas-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--bg-line);
+    }
+
+    .canvas-header h2,
+    .canvas-header p {
+      margin: 0;
+    }
+
+    .canvas-header h2 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .canvas-header p {
+      max-width: 760px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-main);
+    }
+
+    .canvas-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      align-content: flex-start;
+    }
+
+    .meta-chip {
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--bg-line);
+      font-size: 12px;
+      color: var(--text-main);
+    }
+
+    .web-shell {
+      border-radius: 26px;
+      overflow: hidden;
+      background: #dde7f1;
+      border: 1px solid rgba(15, 76, 129, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      background: linear-gradient(180deg, #eef4fb, #e6edf5);
+      border-bottom: 1px solid rgba(15, 76, 129, 0.08);
+    }
+
+    .dot-row {
+      display: flex;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d0dae4;
+    }
+
+    .browser-url {
+      flex: 1;
+      min-width: 0;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid rgba(15, 76, 129, 0.06);
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .web-page {
+      background: #f4f7fb;
+      padding: 18px;
+    }
+
+    [data-prd-id] {
+      transition: outline 0.14s ease, transform 0.14s ease;
+    }
+
+    [data-prd-id]:not(.selected):hover {
+      outline: 2px dashed rgba(42, 123, 199, 0.9);
+      outline-offset: 5px;
+      border-radius: 16px;
+      cursor: pointer;
+      transform: translateY(-1px);
+    }
+
+    [data-prd-id].selected {
+      outline: 2px solid rgba(15, 76, 129, 0.92);
+      outline-offset: 5px;
+      border-radius: 16px;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(24, 32, 42, 0.05);
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--text-white);
+      background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-2));
+      font-weight: 700;
+    }
+
+    .brand-area strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .brand-area span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-item {
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text-main);
+      background: var(--bg-soft);
+    }
+
+    .nav-item.active {
+      color: var(--text-white);
+      background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-2));
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .action-chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--text-main);
+      font-size: 13px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 24px;
+      margin-bottom: 16px;
+      border-radius: 22px;
+      color: var(--text-white);
+      background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-2));
+      box-shadow: 0 18px 34px rgba(15, 76, 129, 0.18);
+    }
+
+    .page-header h3,
+    .page-header p {
+      margin: 0;
+    }
+
+    .page-header h3 {
+      margin-bottom: 10px;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-header p {
+      max-width: 680px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: rgba(248, 251, 255, 0.88);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .header-button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 13px;
+      color: var(--text-white);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .metric-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(24, 32, 42, 0.05);
+    }
+
+    .metric-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-size: 26px;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .metric-card small {
+      font-size: 12px;
+      color: #0b8c61;
+    }
+
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(24, 32, 42, 0.05);
+    }
+
+    .filter-group,
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      min-width: 118px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--bg-soft);
+      border: 1px solid var(--bg-line);
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .table-card {
+      border-radius: 22px;
+      background: #ffffff;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(24, 32, 42, 0.05);
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--bg-line);
+    }
+
+    .table-toolbar h4,
+    .table-toolbar p {
+      margin: 0;
+    }
+
+    .table-toolbar h4 {
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+
+    .table-toolbar p {
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .toolbar-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-badge {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--text-main);
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--bg-line);
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      background: #fbfcfe;
+    }
+
+    td {
+      color: var(--text-main);
+    }
+
+    .table-name {
+      font-weight: 600;
+      color: var(--text-strong);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #e7f5ee;
+      color: #0f8c62;
+    }
+
+    .status-pill.risk {
+      background: #fff3df;
+      color: #8b5a15;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: #fbfcfe;
+    }
+
+    .pagination p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .page-chip {
+      min-width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--bg-line);
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .page-chip.active {
+      color: var(--text-white);
+      background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-2));
+      border-color: transparent;
+    }
+
+    .insight-panel {
+      width: 100%;
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .panel-section + .panel-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--bg-line);
+    }
+
+    .panel-kicker {
+      margin: 0 0 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .panel-title {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .panel-copy {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-main);
+    }
+
+    .tag-row,
+    .state-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag,
+    .state-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .tag {
+      background: var(--bg-soft);
+      color: var(--text-main);
+      border: 1px solid rgba(17, 24, 39, 0.06);
+    }
+
+    .state-chip {
+      background: #dcedfb;
+      color: #0f4c81;
+      font-weight: 600;
+    }
+
+    .panel-list,
+    .doc-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-main);
+    }
+
+    .warning-card {
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      border-radius: var(--radius-sm);
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .doc-view {
+      display: none;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-top: 10px;
+    }
+
+    .doc-hero {
+      padding: 28px;
+      margin-bottom: 18px;
+      border-radius: 28px;
+      color: var(--text-white);
+      background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-2));
+      box-shadow: 0 20px 42px rgba(15, 76, 129, 0.18);
+    }
+
+    .doc-hero h2,
+    .doc-hero p {
+      margin: 0;
+    }
+
+    .doc-hero h2 {
+      margin-bottom: 10px;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+    }
+
+    .doc-hero p {
+      max-width: 760px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: rgba(248, 251, 255, 0.88);
+    }
+
+    .doc-meta-grid,
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .doc-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .doc-meta-card,
+    .doc-section,
+    .component-card {
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .doc-meta-card {
+      padding: 18px;
+    }
+
+    .doc-meta-card .label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .doc-meta-card .value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .doc-section {
+      padding: 22px;
+    }
+
+    .doc-section h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .doc-section p {
+      margin: 0 0 8px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-main);
+    }
+
+    .component-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .component-card {
+      padding: 22px;
+    }
+
+    .component-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .component-name {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .component-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #dcedfb;
+      color: #0f4c81;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .component-card p {
+      margin: 0 0 14px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-main);
+    }
+
+    .spec-block + .spec-block {
+      margin-top: 14px;
+    }
+
+    .spec-block h4 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--bg-soft);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .field-table th,
+    .field-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    }
+
+    .field-table th {
+      color: var(--text-main);
+    }
+
+    .field-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    @media (max-width: 1120px) {
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .doc-meta-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      body {
+        padding: 14px;
+      }
+
+      .app {
+        padding: 18px;
+      }
+
+      .toolbar,
+      .canvas-header,
+      .page-header,
+      .filter-bar,
+      .table-toolbar,
+      .pagination {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .toolbar-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .mode-toggle,
+      .mode-toggle button,
+      .ghost-button {
+        width: 100%;
+      }
+
+      .metric-grid,
+      .doc-meta-grid,
+      .doc-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-menu,
+      .nav-actions,
+      .header-actions,
+      .filter-group,
+      .filter-actions,
+      .pagination-controls {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="toolbar">
+      <div class="toolbar-copy">
+        <h1>单文件原型 PRD 模板 Web 示例</h1>
+        <p>
+          这个示例专门演示 Web 设计模式。原型区采用上下布局，上方展示完整网页骨架，下方展示页面摘要和元素说明，
+          更适合后台页面、运营台和长页面的评审方式。
+        </p>
+      </div>
+      <div class="toolbar-actions">
+        <div class="mode-toggle" aria-label="视图模式切换">
+          <button id="btnProto" class="active" type="button">原型模式</button>
+          <button id="btnDoc" type="button">PRD 文档</button>
+        </div>
+        <button class="ghost-button" id="exportButton" type="button">导出 Markdown</button>
+      </div>
+    </header>
+
+    <div class="mode-hint" id="modeHint">当前为 Web 设计模式。上方是页面原型，下方是页面摘要和点击后的元素说明。</div>
+
+    <div class="validation-banner" id="validationBanner"></div>
+
+    <section class="proto-layout" id="protoView">
+      <div class="proto-canvas">
+        <div class="canvas-header">
+          <div>
+            <h2 id="canvasTitle"></h2>
+            <p id="canvasIntro"></p>
+          </div>
+          <div class="canvas-meta" id="canvasMeta"></div>
+        </div>
+
+        <div class="web-shell">
+          <div class="browser-bar">
+            <div class="dot-row">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="browser-url">https://console.saleshub.com/customer/overview</div>
+          </div>
+
+          <div class="web-page">
+            <section class="top-nav" data-prd-id="top-nav">
+              <div class="brand-area">
+                <div class="brand-badge">S</div>
+                <div>
+                  <strong>SalesHub Console</strong>
+                  <span>客户运营后台</span>
+                </div>
+              </div>
+              <div class="nav-menu">
+                <span class="nav-item">首页</span>
+                <span class="nav-item active">客户中心</span>
+                <span class="nav-item">订单中心</span>
+                <span class="nav-item">营销活动</span>
+              </div>
+              <div class="nav-actions">
+                <span class="action-chip">消息 12</span>
+                <span class="action-chip">Lin 产品组</span>
+              </div>
+            </section>
+
+            <section class="page-header" data-prd-id="page-header">
+              <div>
+                <h3>客户总览页面</h3>
+                <p>帮助运营团队快速查看客户分层、近期跟进状态和风险客户，集中完成筛选、导出和批量分配操作。</p>
+              </div>
+              <div class="header-actions">
+                <span class="header-button">新建客户标签</span>
+                <span class="header-button">批量导出</span>
+                <span class="header-button">创建分组</span>
+              </div>
+            </section>
+
+            <section class="metric-grid" data-prd-id="metric-cards">
+              <div class="metric-card">
+                <span>总客户数</span>
+                <strong>12,480</strong>
+                <small>较上周 +8.4%</small>
+              </div>
+              <div class="metric-card">
+                <span>本周新增</span>
+                <strong>436</strong>
+                <small>渠道投放贡献 61%</small>
+              </div>
+              <div class="metric-card">
+                <span>待跟进客户</span>
+                <strong>128</strong>
+                <small>需在 24h 内处理</small>
+              </div>
+              <div class="metric-card">
+                <span>高风险流失</span>
+                <strong>37</strong>
+                <small>建议立即提醒销售</small>
+              </div>
+            </section>
+
+            <section class="filter-bar" data-prd-id="filter-bar">
+              <div class="filter-group">
+                <span class="filter-pill">搜索客户姓名/手机号</span>
+                <span class="filter-pill">客户分层: 全部</span>
+                <span class="filter-pill">最近跟进: 7 天内</span>
+                <span class="filter-pill">负责人: 全部</span>
+              </div>
+              <div class="filter-actions">
+                <span class="filter-pill">重置条件</span>
+                <span class="filter-pill">保存筛选器</span>
+              </div>
+            </section>
+
+            <section class="table-card" data-prd-id="customer-table">
+              <div class="table-toolbar">
+                <div>
+                  <h4>客户列表</h4>
+                  <p>展示符合筛选条件的客户，并支持勾选后批量操作。</p>
+                </div>
+                <div class="toolbar-badges">
+                  <span class="toolbar-badge">已勾选 16 项</span>
+                  <span class="toolbar-badge">批量分配</span>
+                  <span class="toolbar-badge">批量打标签</span>
+                </div>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>客户</th>
+                    <th>分层</th>
+                    <th>负责人</th>
+                    <th>最近跟进</th>
+                    <th>状态</th>
+                    <th>成交概率</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="table-name">陈晓雯</span><br />138****2026</td>
+                    <td>A 类高意向</td>
+                    <td>王嘉怡</td>
+                    <td>今天 09:20</td>
+                    <td><span class="status-pill">跟进中</span></td>
+                    <td>82%</td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-name">李晨宇</span><br />137****8821</td>
+                    <td>B 类观察</td>
+                    <td>赵志豪</td>
+                    <td>昨天 16:42</td>
+                    <td><span class="status-pill risk">需召回</span></td>
+                    <td>36%</td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-name">苏青</span><br />156****1109</td>
+                    <td>A 类高意向</td>
+                    <td>王嘉怡</td>
+                    <td>2 天前</td>
+                    <td><span class="status-pill">预约演示</span></td>
+                    <td>67%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="pagination" data-prd-id="pagination">
+              <p>共 1,248 条结果，当前第 1 页，每页 20 条</p>
+              <div class="pagination-controls">
+                <span class="page-chip">上一页</span>
+                <span class="page-chip active">1</span>
+                <span class="page-chip">2</span>
+                <span class="page-chip">3</span>
+                <span class="page-chip">下一页</span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <aside class="insight-panel">
+        <div id="annoIdle"></div>
+        <div id="annoContent" style="display: none;"></div>
+      </aside>
+    </section>
+
+    <section class="doc-view" id="docView"></section>
+  </div>
+
+  <script id="page-spec" type="application/json">
+    {
+      "pageId": "customer-overview",
+      "product": "SalesHub Console",
+      "platform": "web",
+      "title": "客户总览页面",
+      "status": "草稿",
+      "version": "v2.0",
+      "owner": "增长运营产品",
+      "updatedAt": "2026-04-06",
+      "goal": "帮助运营团队在一个页面内完成客户筛选、风险识别和批量操作，减少跨页面跳转带来的决策阻力。",
+      "roles": ["运营专员", "销售主管", "增长经理"],
+      "entryPoints": ["运营后台导航", "首页快捷入口", "消息中心待办跳转"],
+      "preconditions": ["用户已登录后台", "具备客户中心查看权限", "客户数据同步正常"],
+      "mainFlow": [
+        "进入客户总览页面",
+        "查看指标卡片判断整体状态",
+        "使用筛选栏缩小客户范围",
+        "在表格中查看客户详情并勾选目标对象",
+        "执行批量分配、打标签或导出操作"
+      ],
+      "successMetrics": ["筛选后有效操作率", "风险客户处理时效", "批量操作完成率"],
+      "dependencies": ["客户中心接口", "用户权限服务", "导出任务服务"],
+      "acceptanceCriteria": [
+        "页面首屏能展示核心指标、筛选器和客户表格",
+        "筛选条件变化后列表与分页联动刷新",
+        "批量操作只对勾选数据生效，并给出明确反馈",
+        "Web 模式原型采用上下布局，上方原型、下方说明"
+      ],
+      "notes": [
+        "这个文件用于演示 Web 模式下的阅读方式，适合后台、运营台和宽页面。",
+        "复制此模板时，只需要替换页面 DOM、page-spec 和 component-specs。"
+      ]
+    }
+  </script>
+
+  <script id="component-specs" type="application/json">
+    {
+      "top-nav": {
+        "title": "顶部导航",
+        "type": "section",
+        "desc": "承载品牌、一级导航和账号操作，是后台页面的全局导航区。",
+        "rules": [
+          "当前一级菜单需要高亮",
+          "导航项数量较多时允许横向折叠或收纳",
+          "消息入口和账号入口固定放在右侧"
+        ],
+        "states": ["default", "active", "collapsed"],
+        "exceptions": [],
+        "testCases": ["当前菜单高亮", "无权限菜单隐藏", "超长菜单收纳"]
+      },
+      "page-header": {
+        "title": "页面头部摘要",
+        "type": "section",
+        "desc": "说明页面目标、主要操作和本页定位，帮助用户快速进入任务上下文。",
+        "rules": [
+          "标题应准确表达页面用途",
+          "主操作数量建议不超过 3 个",
+          "头部摘要要在首屏内完整呈现"
+        ],
+        "states": ["default"],
+        "exceptions": []
+      },
+      "metric-cards": {
+        "title": "指标卡片区",
+        "type": "section",
+        "desc": "展示客户总量、新增趋势、待跟进量和风险客户等关键概览数据。",
+        "rules": [
+          "卡片指标需要与当前筛选条件保持一致",
+          "指标变化应展示对比口径，如周同比或日同比",
+          "最多展示 4 到 6 张卡片，避免首屏信息过载"
+        ],
+        "states": ["default", "loading", "empty"],
+        "exceptions": [
+          "接口异常时展示兜底占位，不影响其他区域操作",
+          "无数据时显示空态说明"
+        ],
+        "api": ["GET /api/customer/overview-metrics"]
+      },
+      "filter-bar": {
+        "title": "筛选栏",
+        "type": "field",
+        "desc": "提供搜索、分层、时间和负责人等筛选条件，是后台页面最核心的控制区。",
+        "rules": [
+          "支持多条件组合筛选",
+          "筛选项较多时，优先保留高频条件在首行",
+          "点击重置后应恢复到默认条件",
+          "允许保存常用筛选器"
+        ],
+        "fields": [
+          {
+            "name": "keyword",
+            "type": "string",
+            "required": false,
+            "placeholder": "搜索客户姓名/手机号",
+            "validation": "支持模糊搜索"
+          },
+          {
+            "name": "tier",
+            "type": "select",
+            "required": false,
+            "validation": "可选全部 / A 类 / B 类 / C 类"
+          },
+          {
+            "name": "owner",
+            "type": "select",
+            "required": false,
+            "validation": "按负责人筛选"
+          }
+        ],
+        "states": ["default", "focused", "dirty", "loading"],
+        "exceptions": [
+          "筛选接口超时时，保留当前条件并提示重试",
+          "无结果时需要展示空列表，而不是错误态"
+        ],
+        "testCases": ["多条件组合", "重置条件", "保存筛选器", "无结果查询"]
+      },
+      "customer-table": {
+        "title": "客户表格",
+        "type": "section",
+        "desc": "展示客户明细及勾选状态，并承载批量操作入口。",
+        "rules": [
+          "表头固定展示核心字段，字段顺序需经过业务确认",
+          "勾选状态与批量操作数量联动",
+          "状态字段需具备明显的视觉区分",
+          "表格区域应支持空态、加载态和权限受限提示"
+        ],
+        "states": ["default", "loading", "empty", "error"],
+        "exceptions": [
+          "列表加载失败时，提供刷新入口",
+          "批量操作失败时，展示失败原因和影响数量"
+        ],
+        "api": ["GET /api/customer/list", "POST /api/customer/batch-action"],
+        "testCases": ["勾选单行", "全选当前页", "批量分配", "空态展示", "接口失败"]
+      },
+      "pagination": {
+        "title": "分页区",
+        "type": "component",
+        "desc": "负责列表翻页和页码定位，适用于结果数量较大的后台场景。",
+        "rules": [
+          "分页信息需展示总数、当前页和每页条数",
+          "切页后保留当前筛选条件",
+          "页码较多时使用省略策略"
+        ],
+        "states": ["default", "disabled"],
+        "exceptions": [],
+        "testCases": ["上一页/下一页", "切换页码", "边界页禁用状态"]
+      }
+    }
+  </script>
+
+  <script>
+    const typeLabel = {
+      page: "页面",
+      section: "区块",
+      field: "字段",
+      action: "操作",
+      component: "组件"
+    };
+
+    let mode = "proto";
+
+    function parseJSONScript(id) {
+      const node = document.getElementById(id);
+      if (!node) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(node.textContent);
+      } catch (error) {
+        console.error("JSON 解析失败:", id, error);
+        return null;
+      }
+    }
+
+    const pageSpec = parseJSONScript("page-spec") || {};
+    const componentSpecs = parseJSONScript("component-specs") || {};
+
+    function getPlatformType() {
+      const platform = String(pageSpec.platform || "").trim().toLowerCase();
+      return platform === "app" ? "app" : "web";
+    }
+
+    function getPlatformLabel() {
+      return getPlatformType() === "app" ? "App" : "Web";
+    }
+
+    function getLayoutLabel() {
+      return getPlatformType() === "app" ? "左右布局" : "上下布局";
+    }
+
+    function getComponentOrder() {
+      return Array.from(document.querySelectorAll("[data-prd-id]")).map((node) => node.dataset.prdId);
+    }
+
+    function getComponentsInViewOrder() {
+      const orderedIds = getComponentOrder();
+      const used = new Set();
+      const ordered = [];
+
+      orderedIds.forEach((id) => {
+        if (componentSpecs[id]) {
+          ordered.push({ id, ...componentSpecs[id] });
+          used.add(id);
+        }
+      });
+
+      Object.entries(componentSpecs).forEach(([id, spec]) => {
+        if (!used.has(id)) {
+          ordered.push({ id, ...spec });
+        }
+      });
+
+      return ordered;
+    }
+
+    function validateSpecs() {
+      const warnings = [];
+      const domIds = getComponentOrder();
+      const domIdSet = new Set();
+
+      domIds.forEach((id) => {
+        if (domIdSet.has(id)) {
+          warnings.push("页面中存在重复的 data-prd-id: " + id);
+        }
+        domIdSet.add(id);
+
+        if (!componentSpecs[id]) {
+          warnings.push("DOM 中的组件未找到规格定义: " + id);
+        }
+      });
+
+      Object.keys(componentSpecs).forEach((id) => {
+        if (!domIdSet.has(id)) {
+          warnings.push("规格中存在未绑定到页面的组件: " + id);
+        }
+
+        const spec = componentSpecs[id];
+        ["title", "type", "desc"].forEach((key) => {
+          if (!spec[key]) {
+            warnings.push("组件缺少必填字段 " + key + ": " + id);
+          }
+        });
+
+        if (spec.type === "field" && !spec.fields?.length) {
+          warnings.push("字段组件缺少 fields 定义: " + id);
+        }
+      });
+
+      ["title", "goal", "mainFlow", "acceptanceCriteria"].forEach((key) => {
+        const value = pageSpec[key];
+        const missing = Array.isArray(value) ? value.length === 0 : !value;
+        if (missing) {
+          warnings.push("页面级规格缺少字段: " + key);
+        }
+      });
+
+      const platform = String(pageSpec.platform || "").trim().toLowerCase();
+      if (!platform) {
+        warnings.push("建议在 page-spec 中声明 platform: web");
+      } else if (!["app", "web"].includes(platform)) {
+        warnings.push("page-spec.platform 仅支持 app 或 web，当前值为: " + pageSpec.platform);
+      }
+
+      return warnings;
+    }
+
+    function renderValidationBanner() {
+      const warnings = validateSpecs();
+      const banner = document.getElementById("validationBanner");
+
+      if (!warnings.length) {
+        banner.classList.remove("show");
+        banner.innerHTML = "";
+        return;
+      }
+
+      banner.classList.add("show");
+      banner.innerHTML = `
+        <strong>规格校验发现 ${warnings.length} 个提示</strong>
+        <ul>${warnings.map((item) => `<li>${item}</li>`).join("")}</ul>
+      `;
+    }
+
+    function renderCanvasHeader() {
+      document.getElementById("canvasTitle").textContent = "示例页面: " + (pageSpec.title || "未命名页面");
+      document.getElementById("canvasIntro").textContent = "当前页面以 Web 设计模式展示。原型区放在上方，适合承载宽页面结构；说明区放在下方，点击页面模块后就近查看规格。";
+    }
+
+    function renderCanvasMeta() {
+      const meta = [
+        "平台: " + getPlatformLabel(),
+        "布局: " + getLayoutLabel(),
+        "产品: " + (pageSpec.product || "-"),
+        "页面: " + (pageSpec.title || "-"),
+        "状态: " + (pageSpec.status || "-"),
+        "版本: " + (pageSpec.version || "-")
+      ];
+
+      document.getElementById("canvasMeta").innerHTML = meta.map((item) => `<span class="meta-chip">${item}</span>`).join("");
+    }
+
+    function renderIdlePanel() {
+      const roles = (pageSpec.roles || []).map((item) => `<span class="tag">${item}</span>`).join("");
+      const entryPoints = (pageSpec.entryPoints || []).map((item) => `<span class="tag">${item}</span>`).join("");
+      const dependencies = (pageSpec.dependencies || []).map((item) => `<li>${item}</li>`).join("");
+
+      document.getElementById("annoIdle").innerHTML = `
+        <div class="panel-section">
+          <p class="panel-kicker">Page Overview</p>
+          <h2 class="panel-title">${pageSpec.title || "未命名页面"}</h2>
+          <p class="panel-copy">${pageSpec.goal || "请在 page-spec 中补充页面目标。"}</p>
+          <div class="tag-row">
+            <span class="tag">平台: ${getPlatformLabel()}</span>
+            <span class="tag">布局: ${getLayoutLabel()}</span>
+            ${roles || '<span class="tag">待补充角色</span>'}
+          </div>
+        </div>
+        <div class="panel-section">
+          <p class="panel-kicker">Main Flow</p>
+          <ol class="panel-list">${(pageSpec.mainFlow || []).map((item) => `<li>${item}</li>`).join("")}</ol>
+        </div>
+        <div class="panel-section">
+          <p class="panel-kicker">Entry Points</p>
+          <div class="tag-row">${entryPoints || '<span class="tag">待补充入口</span>'}</div>
+        </div>
+        <div class="panel-section">
+          <p class="panel-kicker">Dependencies</p>
+          <ul class="panel-list">${dependencies || "<li>待补充依赖</li>"}</ul>
+        </div>
+      `;
+    }
+
+    function renderFields(fields) {
+      if (!fields?.length) {
+        return "";
+      }
+
+      return `
+        <div class="panel-section">
+          <p class="panel-kicker">Fields</p>
+          ${fields.map((field) => `
+            <div class="warning-card" style="background: var(--bg-soft); color: var(--text-main);">
+              <div>
+                <strong>${field.name}</strong><br />
+                ${field.type}${field.required ? " · 必填" : ""}${field.validation ? " · " + field.validation : ""}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderSelectedPanel(id) {
+      const spec = componentSpecs[id];
+      if (!spec) {
+        return `
+          <div class="panel-section">
+            <p class="panel-kicker">Spec Missing</p>
+            <h2 class="panel-title">${id}</h2>
+            <p class="panel-copy">当前组件没有找到规格定义，请检查 component-specs 中是否存在同名键。</p>
+          </div>
+        `;
+      }
+
+      const rules = spec.rules?.length
+        ? `<div class="panel-section"><p class="panel-kicker">Rules</p><ul class="panel-list">${spec.rules.map((item) => `<li>${item}</li>`).join("")}</ul></div>`
+        : "";
+      const states = spec.states?.length
+        ? `<div class="panel-section"><p class="panel-kicker">States</p><div class="state-row">${spec.states.map((item) => `<span class="state-chip">${item}</span>`).join("")}</div></div>`
+        : "";
+      const exceptions = spec.exceptions?.length
+        ? `<div class="panel-section"><p class="panel-kicker">Exceptions</p>${spec.exceptions.map((item) => `<div class="warning-card"><span>!</span><span>${item}</span></div>`).join("")}</div>`
+        : "";
+      const testCases = spec.testCases?.length
+        ? `<div class="panel-section"><p class="panel-kicker">Test Cases</p><ul class="panel-list">${spec.testCases.map((item) => `<li>${item}</li>`).join("")}</ul></div>`
+        : "";
+
+      return `
+        <div class="panel-section">
+          <p class="panel-kicker">${typeLabel[spec.type] || spec.type}</p>
+          <h2 class="panel-title">${spec.title}</h2>
+          <p class="panel-copy">${spec.desc || ""}</p>
+          <div class="tag-row">
+            <span class="tag">ID: ${id}</span>
+            <span class="tag">类型: ${typeLabel[spec.type] || spec.type}</span>
+          </div>
+        </div>
+        ${rules}
+        ${renderFields(spec.fields)}
+        ${states}
+        ${exceptions}
+        ${testCases}
+      `;
+    }
+
+    function selectComponent(id) {
+      document.querySelectorAll("[data-prd-id].selected").forEach((node) => node.classList.remove("selected"));
+      const target = document.querySelector(`[data-prd-id="${id}"]`);
+      if (target) {
+        target.classList.add("selected");
+      }
+
+      document.getElementById("annoIdle").style.display = "none";
+      document.getElementById("annoContent").style.display = "block";
+      document.getElementById("annoContent").innerHTML = renderSelectedPanel(id);
+    }
+
+    function resetPanel() {
+      document.querySelectorAll("[data-prd-id].selected").forEach((node) => node.classList.remove("selected"));
+      document.getElementById("annoIdle").style.display = "block";
+      document.getElementById("annoContent").style.display = "none";
+      document.getElementById("annoContent").innerHTML = "";
+    }
+
+    function renderComponentCard(component) {
+      return `
+        <article class="component-card">
+          <div class="component-top">
+            <h3 class="component-name">${component.title || component.id}</h3>
+            <span class="component-badge">${typeLabel[component.type] || component.type}</span>
+          </div>
+          <p>${component.desc || ""}</p>
+
+          ${component.rules?.length ? `
+            <section class="spec-block">
+              <h4>业务规则</h4>
+              <ul class="doc-list">${component.rules.map((item) => `<li>${item}</li>`).join("")}</ul>
+            </section>
+          ` : ""}
+
+          ${component.fields?.length ? `
+            <section class="spec-block">
+              <h4>字段规格</h4>
+              <table class="field-table">
+                <thead>
+                  <tr>
+                    <th>字段名</th>
+                    <th>类型</th>
+                    <th>必填</th>
+                    <th>校验规则</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${component.fields.map((field) => `
+                    <tr>
+                      <td>${field.name || "-"}</td>
+                      <td>${field.type || "-"}</td>
+                      <td>${field.required ? "是" : "否"}</td>
+                      <td>${field.validation || "-"}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </section>
+          ` : ""}
+
+          ${component.states?.length ? `
+            <section class="spec-block">
+              <h4>状态</h4>
+              <div class="state-row">${component.states.map((item) => `<span class="state-chip">${item}</span>`).join("")}</div>
+            </section>
+          ` : ""}
+
+          ${component.exceptions?.length ? `
+            <section class="spec-block">
+              <h4>异常处理</h4>
+              ${component.exceptions.map((item) => `<div class="warning-card"><span>!</span><span>${item}</span></div>`).join("")}
+            </section>
+          ` : ""}
+
+          ${component.api?.length ? `
+            <section class="spec-block">
+              <h4>接口依赖</h4>
+              <ul class="doc-list">${component.api.map((item) => `<li>${item}</li>`).join("")}</ul>
+            </section>
+          ` : ""}
+
+          ${component.testCases?.length ? `
+            <section class="spec-block">
+              <h4>测试点</h4>
+              <ul class="doc-list">${component.testCases.map((item) => `<li>${item}</li>`).join("")}</ul>
+            </section>
+          ` : ""}
+        </article>
+      `;
+    }
+
+    function renderDocView() {
+      const components = getComponentsInViewOrder();
+
+      document.getElementById("docView").innerHTML = `
+        <section class="doc-hero">
+          <h2>${pageSpec.title || "未命名页面"}</h2>
+          <p>${pageSpec.goal || "请在 page-spec 中补充页面目标。"}</p>
+        </section>
+
+        <div class="doc-meta-grid">
+          <div class="doc-meta-card"><span class="label">平台</span><span class="value">${getPlatformLabel()} · ${getLayoutLabel()}</span></div>
+          <div class="doc-meta-card"><span class="label">产品</span><span class="value">${pageSpec.product || "-"}</span></div>
+          <div class="doc-meta-card"><span class="label">版本</span><span class="value">${pageSpec.version || "-"}</span></div>
+          <div class="doc-meta-card"><span class="label">更新日期</span><span class="value">${pageSpec.updatedAt || "-"}</span></div>
+        </div>
+
+        <div class="doc-grid">
+          <section class="doc-section">
+            <h3>页面信息</h3>
+            <p><strong>角色:</strong> ${(pageSpec.roles || []).join(" / ") || "-"}</p>
+            <p><strong>入口:</strong> ${(pageSpec.entryPoints || []).join(" / ") || "-"}</p>
+            <p><strong>前置条件:</strong> ${(pageSpec.preconditions || []).join(" / ") || "-"}</p>
+          </section>
+          <section class="doc-section">
+            <h3>成功指标与依赖</h3>
+            <ul class="doc-list">${(pageSpec.successMetrics || []).map((item) => `<li>${item}</li>`).join("")}</ul>
+            <div style="height: 12px;"></div>
+            <ul class="doc-list">${(pageSpec.dependencies || []).map((item) => `<li>${item}</li>`).join("")}</ul>
+          </section>
+        </div>
+
+        <div class="doc-grid">
+          <section class="doc-section">
+            <h3>主流程</h3>
+            <ol class="doc-list">${(pageSpec.mainFlow || []).map((item) => `<li>${item}</li>`).join("")}</ol>
+          </section>
+          <section class="doc-section">
+            <h3>验收标准</h3>
+            <ul class="doc-list">${(pageSpec.acceptanceCriteria || []).map((item) => `<li>${item}</li>`).join("")}</ul>
+          </section>
+        </div>
+
+        <section class="component-list">
+          ${components.map((component) => renderComponentCard(component)).join("")}
+        </section>
+      `;
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const protoView = document.getElementById("protoView");
+      const docView = document.getElementById("docView");
+      const btnProto = document.getElementById("btnProto");
+      const btnDoc = document.getElementById("btnDoc");
+      const modeHint = document.getElementById("modeHint");
+
+      if (mode === "proto") {
+        protoView.style.display = "flex";
+        docView.style.display = "none";
+        modeHint.style.display = "block";
+        btnProto.classList.add("active");
+        btnDoc.classList.remove("active");
+        resetPanel();
+      } else {
+        protoView.style.display = "none";
+        docView.style.display = "block";
+        modeHint.style.display = "none";
+        btnProto.classList.remove("active");
+        btnDoc.classList.add("active");
+        renderDocView();
+      }
+    }
+
+    function exportMarkdown() {
+      const components = getComponentsInViewOrder();
+      let markdown = `# ${pageSpec.title || "未命名页面"}\n\n`;
+      markdown += `> 平台: ${getPlatformLabel()} · 布局: ${getLayoutLabel()} · 产品: ${pageSpec.product || "-"} · 状态: ${pageSpec.status || "-"} · 版本: ${pageSpec.version || "-"} · 更新日期: ${pageSpec.updatedAt || "-"}\n\n`;
+      markdown += `## 页面目标\n\n${pageSpec.goal || "-"}\n\n`;
+
+      const pageSections = [
+        ["角色", pageSpec.roles],
+        ["入口", pageSpec.entryPoints],
+        ["前置条件", pageSpec.preconditions],
+        ["主流程", pageSpec.mainFlow],
+        ["成功指标", pageSpec.successMetrics],
+        ["依赖项", pageSpec.dependencies],
+        ["验收标准", pageSpec.acceptanceCriteria],
+        ["备注", pageSpec.notes]
+      ];
+
+      pageSections.forEach(([title, value]) => {
+        if (!value || !value.length) {
+          return;
+        }
+        markdown += `## ${title}\n\n`;
+        value.forEach((item) => {
+          markdown += `- ${item}\n`;
+        });
+        markdown += `\n`;
+      });
+
+      components.forEach((component, index) => {
+        markdown += `## ${index + 1}. ${component.title || component.id} \`${typeLabel[component.type] || component.type}\`\n\n`;
+        markdown += `${component.desc || "-"}\n\n`;
+
+        if (component.rules?.length) {
+          markdown += `### 业务规则\n\n`;
+          component.rules.forEach((item, ruleIndex) => {
+            markdown += `- R${ruleIndex + 1}. ${item}\n`;
+          });
+          markdown += `\n`;
+        }
+
+        if (component.fields?.length) {
+          markdown += `### 字段规格\n\n| 字段 | 类型 | 必填 | 校验 |\n| --- | --- | --- | --- |\n`;
+          component.fields.forEach((field) => {
+            markdown += `| ${field.name || "-"} | ${field.type || "-"} | ${field.required ? "是" : "否"} | ${field.validation || "-"} |\n`;
+          });
+          markdown += `\n`;
+        }
+
+        if (component.states?.length) {
+          markdown += `### 状态\n\n${component.states.map((item) => `\`${item}\``).join(" / ")}\n\n`;
+        }
+
+        if (component.exceptions?.length) {
+          markdown += `### 异常处理\n\n`;
+          component.exceptions.forEach((item) => {
+            markdown += `> ${item}\n\n`;
+          });
+        }
+
+        if (component.api?.length) {
+          markdown += `### 接口依赖\n\n`;
+          component.api.forEach((item) => {
+            markdown += `- ${item}\n`;
+          });
+          markdown += `\n`;
+        }
+
+        if (component.testCases?.length) {
+          markdown += `### 测试点\n\n`;
+          component.testCases.forEach((item) => {
+            markdown += `- ${item}\n`;
+          });
+          markdown += `\n`;
+        }
+      });
+
+      const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${pageSpec.pageId || "web"}-spec.md`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function bindEvents() {
+      document.getElementById("btnProto").addEventListener("click", () => setMode("proto"));
+      document.getElementById("btnDoc").addEventListener("click", () => setMode("doc"));
+      document.getElementById("exportButton").addEventListener("click", exportMarkdown);
+
+      document.addEventListener("click", (event) => {
+        if (mode !== "proto") {
+          return;
+        }
+
+        const target = event.target.closest("[data-prd-id]");
+        if (!target) {
+          return;
+        }
+
+        selectComponent(target.dataset.prdId);
+      });
+    }
+
+    function init() {
+      renderCanvasHeader();
+      renderCanvasMeta();
+      renderIdlePanel();
+      renderValidationBanner();
+      bindEvents();
+      setMode("proto");
+    }
+
+    init();
+  </script>
+</body>
+</html>
