@@ -100,6 +100,29 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    body.fit-preview {
+      background: #f7f8fb;
+    }
+
+    body.fit-preview .fit-stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    body.fit-preview .fit-canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: var(--fit-design-width, 1440px);
+      height: var(--fit-design-height, 900px);
+      transform: translate(-50%, -50%) scale(var(--fit-scale, 1));
+      transform-origin: center center;
+    }
+
     button,
     input,
     textarea {
@@ -161,6 +184,12 @@
       transition: grid-template-columns 180ms ease;
     }
 
+    body.fit-preview .app {
+      width: var(--fit-design-width, 1440px);
+      height: var(--fit-design-height, 900px);
+      min-height: 0;
+    }
+
     .app.nav-collapsed {
       --nav: 72px;
     }
@@ -178,6 +207,11 @@
       border-right: 1px solid var(--line);
       z-index: 5;
       overflow: hidden;
+    }
+
+    body.fit-preview .rail,
+    body.fit-preview .shell {
+      height: var(--fit-design-height, 900px);
     }
 
     .app-logo {
@@ -8588,6 +8622,51 @@
       layoutResizer: document.getElementById("layoutResizer")
     };
 
+    const fitPreviewConfig = {
+      enabled: new URLSearchParams(window.location.search).get("fit") === "1",
+      width: 1440,
+      height: 900
+    };
+
+    function setupFitPreview() {
+      if (!fitPreviewConfig.enabled || !els.appShell) return;
+
+      document.body.classList.add("fit-preview");
+      if (els.appShell.parentElement && els.appShell.parentElement.classList.contains("fit-canvas")) return;
+
+      const stage = document.createElement("div");
+      stage.className = "fit-stage";
+      const canvas = document.createElement("div");
+      canvas.className = "fit-canvas";
+      canvas.style.setProperty("--fit-design-width", `${fitPreviewConfig.width}px`);
+      canvas.style.setProperty("--fit-design-height", `${fitPreviewConfig.height}px`);
+
+      els.appShell.parentNode.insertBefore(stage, els.appShell);
+      stage.appendChild(canvas);
+      canvas.appendChild(els.appShell);
+
+      const updateScale = () => {
+        const viewport = window.visualViewport || window;
+        const viewportWidth = Math.max(1, viewport.width || window.innerWidth);
+        const viewportHeight = Math.max(1, viewport.height || window.innerHeight);
+        const scale = Math.min(
+          viewportWidth / fitPreviewConfig.width,
+          viewportHeight / fitPreviewConfig.height,
+          1
+        );
+        canvas.style.setProperty("--fit-scale", scale.toFixed(4));
+      };
+
+      updateScale();
+      window.addEventListener("resize", updateScale, { passive: true });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", updateScale, { passive: true });
+      }
+      if (window.ResizeObserver) {
+        new ResizeObserver(updateScale).observe(stage);
+      }
+    }
+
     const workspaceConfigs = {
       files: {
         rootId: "personal",
@@ -12616,6 +12695,7 @@
       }
     }
 
+    setupFitPreview();
     setNavCollapsed(localStorage.getItem("knowledgeBaseNavCollapsed") === "1", false);
     state.assistantExpandedWidth = Math.max(320, Number(localStorage.getItem("knowledgeBaseAssistantWidth")) || 360);
     setAssistantWidth(state.assistantExpandedWidth, false);
