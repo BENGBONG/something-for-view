@@ -8732,7 +8732,6 @@
         searchPlaceholder: "搜索当前目录文件...",
         sourceFilters: ["全部", "自行上传", "任务报告", "PPT 文件"],
         ingest: [
-          { label: "AI PPT", icon: "i-task-ppt", action: "ppt" },
           { label: "上传文档", icon: "i-upload-cloud", toast: "已打开上传入口，可选择 Word、Excel、PPT、PDF、TXT、Markdown、图片等资料。" },
           { label: "添加网址", icon: "i-link", toast: "网址采集已进入待解析队列，会自动提取标题、摘要与正文。" },
           { label: "随笔记录", icon: "i-clipboard-paste", toast: "随笔记录已保存为临时知识片段，来源会自动分配。" }
@@ -8747,8 +8746,7 @@
         searchPlaceholder: "搜索当前月份录音...",
         sourceFilters: ["全部", "录音文件"],
         ingest: [
-          { label: "开始录音", icon: "i-mic", className: "ingest-record", toast: "已开始录音，再次点击停止并转写为语音笔记。" },
-          { label: "AI PPT", icon: "i-task-ppt", action: "ppt" }
+          { label: "开始录音", icon: "i-mic", className: "ingest-record", toast: "已开始录音，再次点击停止并转写为语音笔记。" }
         ]
       }
     };
