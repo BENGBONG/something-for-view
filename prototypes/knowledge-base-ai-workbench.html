@@ -9142,18 +9142,6 @@
       showToast(`已新建同级目录：${name}`);
     }
 
-    function editPersonalFolder(folderId) {
-      const folder = folders.find(item => item.id === folderId);
-      if (!folder || folder.id === "personal" || !isPersonalManagedFolder(folder)) return;
-      const value = window.prompt("编辑目录说明", folder.note || "");
-      if (value === null) return;
-      const note = String(value || "").trim().slice(0, 80);
-      folder.note = note;
-      state.folderMenuOpen = null;
-      renderFolders();
-      showToast(note ? "目录说明已更新" : "已清空目录说明");
-    }
-
     function renamePersonalFolder(folderId) {
       const folder = folders.find(item => item.id === folderId);
       if (!folder || folder.id === "personal" || !isPersonalManagedFolder(folder)) return;
@@ -9277,7 +9265,6 @@
                     <button data-folder-add-child="${folder.id}" type="button" role="menuitem">新建下级目录</button>
                     ${canEdit ? `
                       <button data-folder-add-sibling="${folder.id}" type="button" role="menuitem">新建同级目录</button>
-                      <button data-folder-edit="${folder.id}" type="button" role="menuitem">编辑</button>
                       <button data-folder-rename="${folder.id}" type="button" role="menuitem">重命名</button>
                       <button class="danger" data-folder-delete="${folder.id}" type="button" role="menuitem">删除</button>
                     ` : ""}
@@ -9304,7 +9291,7 @@
 
       els.folderTree.querySelectorAll("[data-folder]").forEach(button => {
         button.addEventListener("click", event => {
-          if (event.target.closest("[data-expand-folder], [data-folder-menu], [data-folder-add-child], [data-folder-add-sibling], [data-folder-edit], [data-folder-rename], [data-folder-delete], .tree-menu")) return;
+          if (event.target.closest("[data-expand-folder], [data-folder-menu], [data-folder-add-child], [data-folder-add-sibling], [data-folder-rename], [data-folder-delete], .tree-menu")) return;
           state.folderMenuOpen = null;
           state.selectedFolder = button.dataset.folder;
           render();
@@ -9333,14 +9320,6 @@
           event.preventDefault();
           event.stopPropagation();
           addPersonalSiblingFolder(button.dataset.folderAddSibling);
-        });
-      });
-
-      els.folderTree.querySelectorAll("[data-folder-edit]").forEach(button => {
-        button.addEventListener("click", event => {
-          event.preventDefault();
-          event.stopPropagation();
-          editPersonalFolder(button.dataset.folderEdit);
         });
       });
 
