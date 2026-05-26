@@ -12528,15 +12528,28 @@
       return Math.max(min, Math.min(max, value));
     }
 
+    function getAssistantWidth() {
+      return parseFloat(getComputedStyle(els.appShell).getPropertyValue("--assistant")) ||
+        parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--assistant")) ||
+        440;
+    }
+
+    function getFitPreviewScale() {
+      if (!fitPreviewConfig.enabled || !els.appShell) return 1;
+      const scale = els.appShell.getBoundingClientRect().width / fitPreviewConfig.width;
+      return Number.isFinite(scale) && scale > 0 ? scale : 1;
+    }
+
     function setAssistantWidth(width, persist = true) {
       const hasRail = state.tasks.length > 0;
       const minWidth = state.assistantCollapsed ? 46 : (hasRail ? 420 : 320);
       const nextWidth = clamp(Math.round(width), minWidth, 760);
       document.documentElement.style.setProperty("--assistant", `${nextWidth}px`);
+      els.appShell.style.setProperty("--assistant", `${nextWidth}px`);
       els.layoutResizer.setAttribute("aria-valuenow", String(nextWidth));
       els.layoutResizer.setAttribute("aria-valuemin", String(minWidth));
       els.layoutResizer.setAttribute("aria-valuemax", "760");
-      if (persist && !state.assistantCollapsed) {
+      if (persist && !state.assistantCollapsed && !fitPreviewConfig.enabled) {
         localStorage.setItem("knowledgeBaseAssistantWidth", String(nextWidth));
       }
     }
@@ -12547,8 +12560,9 @@
       els.appShell.classList.toggle("assistant-collapsed", collapsed);
       els.layoutResizer.style.display = collapsed ? "none" : "";
       if (collapsed) {
-        state.assistantExpandedWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--assistant")) || state.assistantExpandedWidth || 440;
+        state.assistantExpandedWidth = getAssistantWidth() || state.assistantExpandedWidth || 440;
         document.documentElement.style.setProperty("--assistant", "0px");
+        els.appShell.style.setProperty("--assistant", "0px");
         state.historyOpen = false;
         renderHistoryDrawer();
         showToast("小智已收起，点击右上角入口可展开");
@@ -12568,15 +12582,17 @@
         if (!els.appShell.classList.contains("is-resizing")) return;
         els.appShell.classList.remove("is-resizing");
         els.layoutResizer.releasePointerCapture?.(event.pointerId);
-        state.assistantExpandedWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--assistant")) || state.assistantExpandedWidth;
-        localStorage.setItem("knowledgeBaseAssistantWidth", getComputedStyle(document.documentElement).getPropertyValue("--assistant").trim().replace("px", ""));
+        state.assistantExpandedWidth = getAssistantWidth() || state.assistantExpandedWidth;
+        if (!fitPreviewConfig.enabled) {
+          localStorage.setItem("knowledgeBaseAssistantWidth", String(Math.round(state.assistantExpandedWidth)));
+        }
       };
 
       els.layoutResizer.addEventListener("pointerdown", event => {
         if (state.assistantCollapsed) return;
         event.preventDefault();
         startX = event.clientX;
-        startWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--assistant")) || 440;
+        startWidth = getAssistantWidth();
         els.appShell.classList.add("is-resizing");
         els.layoutResizer.setPointerCapture?.(event.pointerId);
       });
@@ -12584,13 +12600,14 @@
       els.layoutResizer.addEventListener("pointermove", event => {
         if (!els.appShell.classList.contains("is-resizing")) return;
         event.preventDefault();
-        setAssistantWidth(startWidth - (event.clientX - startX), false);
+        const deltaX = (event.clientX - startX) / getFitPreviewScale();
+        setAssistantWidth(startWidth - deltaX, false);
       });
 
       els.layoutResizer.addEventListener("pointerup", stopResize);
       els.layoutResizer.addEventListener("pointercancel", stopResize);
       els.layoutResizer.addEventListener("keydown", event => {
-        const current = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--assistant")) || 440;
+        const current = getAssistantWidth();
         if (event.key === "ArrowLeft") {
           event.preventDefault();
           setAssistantWidth(current + 20);
