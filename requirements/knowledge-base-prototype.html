@@ -185,6 +185,9 @@
     }
 
     body.fit-preview .app {
+      --nav: 280px;
+      --sidebar: 250px;
+      --assistant: 440px;
       width: var(--fit-design-width, 1440px);
       height: var(--fit-design-height, 900px);
       min-height: 0;
@@ -5953,6 +5956,54 @@
         padding-left: 16px;
         padding-right: 16px;
       }
+    }
+
+    body.fit-preview .rail {
+      padding: 0 12px;
+      align-items: stretch;
+    }
+
+    body.fit-preview .app-logo {
+      width: auto;
+      justify-content: space-between;
+      padding: 0 4px 0 8px;
+    }
+
+    body.fit-preview .brand-lockup {
+      gap: 10px;
+      font-size: 20px;
+    }
+
+    body.fit-preview .brand-lockup span,
+    body.fit-preview .new-button span:not(:first-child),
+    body.fit-preview .rail-button span,
+    body.fit-preview .user-row span {
+      display: inline;
+    }
+
+    body.fit-preview .task-tabs {
+      display: flex;
+    }
+
+    body.fit-preview .empty-task {
+      display: grid;
+    }
+
+    body.fit-preview .collapse-button {
+      display: grid;
+    }
+
+    body.fit-preview .new-button,
+    body.fit-preview .rail-button,
+    body.fit-preview .user-row {
+      width: 100%;
+    }
+
+    body.fit-preview .rail-button {
+      grid-template-columns: 22px 1fr auto;
+      align-items: center;
+      place-items: normal;
+      padding: 0 16px;
     }
 
     /* ============================================================
@@ -12464,7 +12515,7 @@
       els.collapseNav.setAttribute("aria-pressed", String(collapsed));
       els.collapseNav.setAttribute("aria-label", collapsed ? "展开侧栏" : "收起侧栏");
       els.collapseNav.setAttribute("title", collapsed ? "展开侧栏" : "收起侧栏");
-      if (persist) {
+      if (persist && !fitPreviewConfig.enabled) {
         localStorage.setItem("knowledgeBaseNavCollapsed", collapsed ? "1" : "0");
       }
     }
@@ -12696,7 +12747,7 @@
     }
 
     setupFitPreview();
-    setNavCollapsed(localStorage.getItem("knowledgeBaseNavCollapsed") === "1", false);
+    setNavCollapsed(fitPreviewConfig.enabled ? false : localStorage.getItem("knowledgeBaseNavCollapsed") === "1", false);
     state.assistantExpandedWidth = Math.max(320, Number(localStorage.getItem("knowledgeBaseAssistantWidth")) || 360);
     setAssistantWidth(state.assistantExpandedWidth, false);
     renderChatInitial();
