@@ -8377,7 +8377,7 @@
           <div class="toolbar">
             <div class="selected-summary">
               <span class="select-all"><svg class="icon icon-sm"><use href="#i-check"/></svg></span>
-              <span id="selectionText">已选 2 个文件，可用于知识生产</span>
+              <span id="selectionText">已选文件可移动到其他目录</span>
             </div>
             <div class="toolbar-actions">
               <button class="small-button" id="moveButton" type="button">
@@ -8417,7 +8417,7 @@
           <div class="composer">
             <div class="context-box" id="contextBox">
               <div class="context-head">
-                <span id="contextTitle">引用 2 个文件</span>
+                <span id="contextTitle">引用文件</span>
                 <button class="small-button" id="manageFiles">展开</button>
               </div>
               <div class="context-files" id="contextFiles"></div>
@@ -8588,7 +8588,8 @@
     const state = {
       selectedFolder: "personal",
       activeWorkspace: "files",
-      selectedFiles: new Set(["f1", "f2"]),
+      selectedFiles: new Set(),
+      referencedFiles: new Set(),
       customBackgroundUploaded: false,
       customBackgroundName: "",
       customLogoUploaded: false,
@@ -8975,7 +8976,7 @@
 
     function taskInstanceTitle(type) {
       const meta = taskMeta(type);
-      const firstFile = selectedFiles()[0]?.name?.replace(/\.[^.]+$/, "") || "所选知识";
+      const firstFile = taskReferenceFiles(null)[0]?.name?.replace(/\.[^.]+$/, "") || "所选知识";
       const shortName = firstFile.length > 12 ? `${firstFile.slice(0, 12)}...` : firstFile;
       return `${meta.name} · ${shortName}`;
     }
@@ -9022,7 +9023,7 @@
     }
 
     function selectedReferenceIds() {
-      return [...state.selectedFiles].filter(id => !state.deletedFiles.has(id));
+      return [...state.referencedFiles].filter(id => !state.deletedFiles.has(id));
     }
 
     function updatePromptPlaceholder() {
@@ -9033,38 +9034,37 @@
     }
 
     function selectedReferenceText() {
-      return `引用 ${state.selectedFiles.size} 个文件`;
+      return `引用 ${selectedReferenceIds().length} 个文件`;
     }
 
     function removeReference(fileId, taskId = state.assistantView === "task" ? state.activeTaskId : null) {
       if (!fileId) return;
-      state.selectedFiles.delete(fileId);
+      state.referencedFiles.delete(fileId);
       const task = taskId ? state.tasks.find(item => item.id === taskId) : null;
       if (task && Array.isArray(task.references)) {
         task.references = task.references.filter(id => id !== fileId);
       }
-      renderSelection();
-      renderList();
       renderAssistantContext();
       if (state.assistantView === "task") renderTaskView();
       showToast("已取消引用");
     }
 
     function taskReferenceFiles(task = currentTaskRecord()) {
-      if (!task) return selectedFiles();
+      if (!task) return files.filter(file => state.referencedFiles.has(file.id) && !state.deletedFiles.has(file.id));
       return files.filter(file => task.references.includes(file.id) && !state.deletedFiles.has(file.id));
     }
 
     function renderTaskReferences() {
       const selected = taskReferenceFiles();
+      if (selected.length === 0) return "";
       const visible = state.referenceExpanded ? selected : selected.slice(0, 2);
-      const firstName = selected[0]?.name || "未选择引用文件";
+      const firstName = selected[0]?.name || "";
       return `
         <div class="task-reference-box ${state.referenceExpanded && selected.length > 0 ? "expanded" : ""}">
           <div class="task-reference-head">
             <div class="task-reference-title">
-              <span class="task-reference-count">${selected.length > 0 ? `引用 ${selected.length}` : "未选择引用"}</span>
-              <span class="task-reference-name">${selected.length > 0 ? firstName : "请在中间文件列表选择文件"}</span>
+              <span class="task-reference-count">引用 ${selected.length}</span>
+              <span class="task-reference-name">${firstName}</span>
             </div>
             <button class="task-reference-toggle" id="taskReferenceToggle" type="button">${state.referenceExpanded ? "收起" : "展开"}</button>
           </div>
@@ -9309,6 +9309,9 @@
       }
       [...state.selectedFiles].forEach(id => {
         if (removedFileIds.has(id)) state.selectedFiles.delete(id);
+      });
+      [...state.referencedFiles].forEach(id => {
+        if (removedFileIds.has(id)) state.referencedFiles.delete(id);
       });
       if (folderIds.includes(state.selectedFolder)) {
         state.selectedFolder = "personal";
@@ -9558,10 +9561,8 @@
     function addKnowledgePickerReferences() {
       const ids = [...new Set([...state.knowledgePickerSelected].map(id => id.split(":")[0]))]
         .filter(id => !state.deletedFiles.has(id));
-      ids.forEach(id => state.selectedFiles.add(id));
+      ids.forEach(id => state.referencedFiles.add(id));
       closeKnowledgePicker();
-      renderSelection();
-      renderList();
       renderAssistantContext();
       showToast(ids.length > 0 ? `已引用 ${ids.length} 个知识库文件` : "未选择新的引用文件");
     }
@@ -10123,7 +10124,7 @@
       const summary = els.selectionText.closest(".selected-summary");
       if (summary) summary.style.display = count > 0 ? "" : "none";
       els.selectionText.textContent = count > 0
-        ? `已选 ${count} 个文件，可用于知识生产`
+        ? `已选 ${count} 个文件，可移动到其他目录`
         : "";
       if (els.moveButton) {
         els.moveButton.disabled = count === 0 || state.activeWorkspace !== "files";
@@ -10227,8 +10228,8 @@
     }
 
     function createTask(taskId, source = "menu") {
-      if (state.selectedFiles.size === 0) {
-        showToast("请先选择至少一个引用文件");
+      if (selectedReferenceIds().length === 0) {
+        showToast("请先通过引用知识库添加文件");
         return null;
       }
       const existing = unfinishedTaskOfType(taskId);
@@ -10617,26 +10618,28 @@
     }
 
     function renderAssistantContext() {
-      const selected = selectedFiles();
-      els.contextTitle.textContent = selected.length > 0 ? `引用 ${selected.length} · ${selected[0].name}` : "未选择引用文件";
-      els.contextBox.classList.toggle("has-selection", selected.length > 0);
-      els.contextBox.classList.toggle("expanded", state.referenceExpanded && selected.length > 0);
+      const selected = taskReferenceFiles(null);
+      const hasReferences = selected.length > 0;
+      els.contextBox.style.display = hasReferences ? "" : "none";
+      els.contextTitle.textContent = hasReferences ? `引用 ${selected.length} · ${selected[0].name}` : "";
+      els.contextBox.classList.toggle("has-selection", hasReferences);
+      els.contextBox.classList.toggle("expanded", state.referenceExpanded && hasReferences);
       document.getElementById("manageFiles").textContent = state.referenceExpanded ? "收起" : "展开";
-      if (selected.length === 0) {
-        els.contextFiles.innerHTML = `<div class="context-empty">选择中间列表里的文件后，小智会仅基于这些知识回答。</div>`;
-      } else {
-        const visible = state.referenceExpanded ? selected : selected.slice(0, 2);
-        const hiddenCount = selected.length - visible.length;
-        els.contextFiles.innerHTML = visible.map(file => `
-          <div class="context-file">
-            <span class="file-icon">${fileIcon(file)}</span>
-            <span>${file.name}</span>
-            <button class="context-remove" data-reference-remove="${file.id}" type="button" aria-label="取消引用 ${escapeHtml(file.name)}">
-              <svg class="icon icon-xs"><use href="#i-x"/></svg>
-            </button>
-          </div>
-        `).join("") + (hiddenCount > 0 ? `<div class="context-more">还有 ${hiddenCount} 个引用文件，点击展开查看</div>` : "");
+      if (!hasReferences) {
+        els.contextFiles.innerHTML = "";
+        return;
       }
+      const visible = state.referenceExpanded ? selected : selected.slice(0, 2);
+      const hiddenCount = selected.length - visible.length;
+      els.contextFiles.innerHTML = visible.map(file => `
+        <div class="context-file">
+          <span class="file-icon">${fileIcon(file)}</span>
+          <span>${file.name}</span>
+          <button class="context-remove" data-reference-remove="${file.id}" type="button" aria-label="取消引用 ${escapeHtml(file.name)}">
+            <svg class="icon icon-xs"><use href="#i-x"/></svg>
+          </button>
+        </div>
+      `).join("") + (hiddenCount > 0 ? `<div class="context-more">还有 ${hiddenCount} 个引用文件，点击展开查看</div>` : "");
       els.contextFiles.querySelectorAll("[data-reference-remove]").forEach(button => {
         button.addEventListener("click", event => {
           event.preventDefault();
@@ -11636,7 +11639,7 @@
       document.getElementById("startSimpleTask")?.addEventListener("click", () => {
         const activeRecord = currentTaskRecord();
         if (!activeRecord || activeRecord.references.length === 0) {
-          showToast("请先选择至少一个引用文件");
+          showToast("请先通过引用知识库添加文件");
           return;
         }
         if (!activeRecord.config.prompt?.trim()) {
@@ -11806,7 +11809,7 @@
       bindTaskQueueButtons();
       document.getElementById("taskReferenceToggle")?.addEventListener("click", () => {
         if (taskReferenceFiles().length === 0) {
-          showToast("请先在中间列表选择引用文件");
+          showToast("请先通过引用知识库添加文件");
           return;
         }
         state.referenceExpanded = !state.referenceExpanded;
@@ -11876,8 +11879,9 @@
     }
 
     function startChatProductionTask(type) {
-      if (state.selectedFiles.size === 0) {
-        showToast("请先选择至少一个引用文件");
+      const referenceCount = selectedReferenceIds().length;
+      if (referenceCount === 0) {
+        showToast("请先通过引用知识库添加文件");
         return;
       }
       const task = enqueueTaskFromChat(type, "基于刚才的聊天分析生成多模态文件");
@@ -11891,8 +11895,9 @@
         showToast("请输入问题");
         return;
       }
-      if (state.selectedFiles.size === 0) {
-        showToast("请先选择至少一个引用文件");
+      const referenceCount = selectedReferenceIds().length;
+      if (referenceCount === 0) {
+        showToast("请先通过引用知识库添加文件");
         return;
       }
       if (state.assistantView === "task") {
@@ -11934,7 +11939,7 @@
         </div>
         <div class="message" id="loadingMessage">
           <div class="bot-mark">智</div>
-          <div class="bubble"><span class="loading"><span class="thinking-dots"><span></span><span></span><span></span></span>小智正在基于 ${state.selectedFiles.size} 个文件回答...</span></div>
+          <div class="bubble"><span class="loading"><span class="thinking-dots"><span></span><span></span><span></span></span>小智正在基于 ${referenceCount} 个文件回答...</span></div>
         </div>
       `);
       els.promptInput.value = "";
@@ -11948,7 +11953,7 @@
           <div class="message">
             <div class="bot-mark">智</div>
             <div class="bubble">
-              小智已基于 ${state.selectedFiles.size} 个文件完成分析。建议先把内容组织为「背景 - 关键发现 - 风险与机会 - 下一步行动」四段，这样既适合汇报，也方便继续追问。
+              小智已基于 ${referenceCount} 个文件完成分析。建议先把内容组织为「背景 - 关键发现 - 风险与机会 - 下一步行动」四段，这样既适合汇报，也方便继续追问。
               <div class="result-card">
                 <h4>生成结果草案</h4>
                 <div class="outline-list">
@@ -12596,6 +12601,7 @@
       lastDeletedIndex = idx;
       state.deletedFiles.add(file.id);
       state.selectedFiles.delete(file.id);
+      state.referencedFiles.delete(file.id);
       renderFolders();
       renderSelection();
       renderList();
@@ -12841,8 +12847,8 @@
       });
       document.getElementById("moveButton")?.addEventListener("click", openMoveFolderModal);
       document.getElementById("manageFiles").addEventListener("click", () => {
-        if (state.selectedFiles.size === 0) {
-          showToast("请先在中间列表选择引用文件");
+        if (selectedReferenceIds().length === 0) {
+          showToast("请先通过引用知识库添加文件");
           return;
         }
         state.referenceExpanded = !state.referenceExpanded;
