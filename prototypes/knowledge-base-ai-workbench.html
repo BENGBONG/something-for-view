@@ -8313,7 +8313,7 @@
     <main class="shell">
       <header class="topbar">
         <div class="title">
-          <h1 id="pageTitle">个人知识库</h1>
+          <h1 id="pageTitle">知识库</h1>
           <p id="pageSubtitle">管理个人文件、任务报告和 PPT，基于所选知识一键生成内容。</p>
         </div>
         <label class="search-box">
@@ -8468,7 +8468,7 @@
 
   <script>
     const folders = [
-      { id: "personal", name: "个人文件", depth: 0, expanded: true, kind: "personal" },
+      { id: "personal", name: "我的文件", depth: 0, expanded: true, kind: "personal" },
       { id: "personal-meeting", name: "会议资料", depth: 1, parent: "personal", kind: "custom" },
       { id: "personal-customer", name: "客户案例", depth: 1, parent: "personal", expanded: true, kind: "custom" },
       { id: "personal-case-a", name: "客户A - 制造业", depth: 2, parent: "personal-customer", kind: "custom" },
@@ -8779,7 +8779,7 @@
     const workspaceConfigs = {
       files: {
         rootId: "personal",
-        navTitle: "个人知识库",
+        navTitle: "知识库",
         navSubtitle: "管理个人文件、任务报告和 PPT，基于所选知识一键生成内容。",
         mainTitle: "我的文件",
         mainSubtitle: "上传文档、添加网址或记录随笔，沉淀为可检索的个人知识。",
@@ -9131,12 +9131,12 @@
         return false;
       }
       if (state.activeWorkspace !== "files") {
-        if (showMessage) showToast("只有文件夹-个人文件下的文件支持移动");
+        if (showMessage) showToast("只有文件夹-我的文件下的文件支持移动");
         return false;
       }
       const blocked = selected.filter(file => !isMovablePersonalFile(file));
       if (blocked.length > 0) {
-        if (showMessage) showToast(`只有文件夹-个人文件下的文件支持移动，已选 ${blocked.length} 个不可移动文件`);
+        if (showMessage) showToast(`只有文件夹-我的文件下的文件支持移动，已选 ${blocked.length} 个不可移动文件`);
         return false;
       }
       return true;
@@ -9785,14 +9785,14 @@
           <div class="knowledge-picker-head">
             <div>
               <strong>选择移动位置</strong>
-              <span>仅支持移动到“文件夹 - 个人文件”下的目录</span>
+              <span>仅支持移动到“文件夹 - 我的文件”下的目录</span>
             </div>
             <button class="icon-button" data-move-close type="button" aria-label="关闭移动文件弹窗">
               <svg class="icon icon-sm"><use href="#i-x"/></svg>
             </button>
           </div>
           <div class="move-folder-summary">
-            已选 ${selected.length} 个文件，当前目标：${escapeHtml(target?.name || "个人文件")}
+            已选 ${selected.length} 个文件，当前目标：${escapeHtml(target?.name || "我的文件")}
           </div>
           <div class="move-folder-options" aria-label="可移动目录范围">
             ${moveFolders.map(folder => `
@@ -10604,7 +10604,7 @@
       renderFolders();
       renderSelection();
       renderList();
-      showToast(`已保存到 ${folders.find(folder => folder.id === folderId)?.name || "个人文件"}`);
+      showToast(`已保存到 ${folders.find(folder => folder.id === folderId)?.name || "我的文件"}`);
       window.setTimeout(() => {
         state.tasks = state.tasks.filter(t => t.id !== task.id);
         state.assistantView = "chat";
