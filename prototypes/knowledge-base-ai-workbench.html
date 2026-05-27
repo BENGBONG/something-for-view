@@ -7225,9 +7225,47 @@
       padding: 10px 12px 12px;
     }
 
+    .move-folder-item {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      align-items: center;
+      gap: 4px;
+      margin: 2px 0;
+      padding-left: calc(var(--picker-depth, 0) * 18px);
+    }
+
+    .move-folder-toggle {
+      width: 24px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 8px;
+      color: var(--faint);
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+    }
+
+    .move-folder-toggle.expanded {
+      transform: rotate(90deg);
+    }
+
+    .move-folder-toggle:hover {
+      color: var(--blue);
+      background: #f1f5ff;
+    }
+
+    .move-folder-toggle-placeholder {
+      width: 24px;
+      height: 32px;
+    }
+
     .move-folder-shell .knowledge-picker-folder {
       height: 40px;
       margin: 2px 0;
+      padding: 0 10px;
     }
 
     .move-folder-shell .knowledge-picker-foot {
@@ -8607,6 +8645,7 @@
       knowledgePickerSelected: new Set(),
       moveFolderOpen: false,
       moveTargetFolder: "personal",
+      moveFolderExpanded: new Set(["personal", "personal-customer"]),
       assistantView: "chat",
       activeTaskType: null,
       activeTaskId: null,
@@ -9147,8 +9186,28 @@
       if (!root) return [];
       const collect = (parentId, depth) => folders
         .filter(folder => folder.parent === parentId && isPersonalManagedFolder(folder))
-        .flatMap(folder => [{ ...folder, pickerDepth: depth }, ...collect(folder.id, depth + 1)]);
+        .flatMap(folder => [
+          { ...folder, pickerDepth: depth },
+          ...(state.moveFolderExpanded.has(folder.id) ? collect(folder.id, depth + 1) : [])
+        ]);
       return [{ ...root, pickerDepth: 0 }, ...collect("personal", 1)];
+    }
+
+    function moveFolderChildren(folderId) {
+      return folders.filter(folder => folder.parent === folderId && isPersonalManagedFolder(folder));
+    }
+
+    function hasMoveFolderChildren(folderId) {
+      return moveFolderChildren(folderId).length > 0;
+    }
+
+    function expandMoveFolderAncestors(folderId) {
+      state.moveFolderExpanded.add("personal");
+      let current = folders.find(folder => folder.id === folderId);
+      while (current?.parent) {
+        state.moveFolderExpanded.add(current.parent);
+        current = folders.find(folder => folder.id === current.parent);
+      }
     }
 
     function expandFolderAncestors(folderId) {
@@ -9720,6 +9779,7 @@
         ? selected[0].folder
         : state.selectedFolder;
       state.moveTargetFolder = isPersonalFolderId(commonFolder) ? commonFolder : "personal";
+      expandMoveFolderAncestors(state.moveTargetFolder);
       state.moveFolderOpen = true;
       renderMoveFolderModal();
     }
@@ -9797,11 +9857,16 @@
           </div>
           <div class="move-folder-options" aria-label="可移动目录范围">
             ${moveFolders.map(folder => `
-              <button class="knowledge-picker-folder ${state.moveTargetFolder === folder.id ? "active" : ""}" data-move-folder="${folder.id}" style="--picker-depth:${folder.pickerDepth || 0}" type="button">
-                ${folderIcon(folder)}
-                <span>${escapeHtml(folder.name)}</span>
-                <em>${folderCount(folder.id)}</em>
-              </button>
+              <div class="move-folder-item" style="--picker-depth:${folder.pickerDepth || 0}">
+                ${hasMoveFolderChildren(folder.id) ? `
+                  <button class="move-folder-toggle ${state.moveFolderExpanded.has(folder.id) ? "expanded" : ""}" data-move-folder-toggle="${folder.id}" type="button" aria-label="${state.moveFolderExpanded.has(folder.id) ? "收起" : "展开"} ${escapeHtml(folder.name)}">▸</button>
+                ` : `<span class="move-folder-toggle-placeholder" aria-hidden="true"></span>`}
+                <button class="knowledge-picker-folder ${state.moveTargetFolder === folder.id ? "active" : ""}" data-move-folder="${folder.id}" type="button">
+                  ${folderIcon(folder)}
+                  <span>${escapeHtml(folder.name)}</span>
+                  <em>${folderCount(folder.id)}</em>
+                </button>
+              </div>
             `).join("")}
           </div>
           <div class="knowledge-picker-foot">
@@ -9817,6 +9882,19 @@
       els.moveFolderModal.onclick = event => {
         if (event.target === els.moveFolderModal) closeMoveFolderModal();
       };
+      els.moveFolderModal.querySelectorAll("[data-move-folder-toggle]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const folderId = button.dataset.moveFolderToggle;
+          if (state.moveFolderExpanded.has(folderId)) {
+            state.moveFolderExpanded.delete(folderId);
+          } else {
+            state.moveFolderExpanded.add(folderId);
+          }
+          renderMoveFolderModal();
+        });
+      });
       els.moveFolderModal.querySelectorAll("[data-move-folder]").forEach(button => {
         button.addEventListener("click", () => {
           state.moveTargetFolder = button.dataset.moveFolder;
