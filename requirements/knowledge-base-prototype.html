@@ -7187,6 +7187,53 @@
       box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
     }
 
+    .move-folder-shell {
+      width: min(420px, calc(100vw - 32px));
+      max-height: min(560px, calc(100vh - 36px));
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+    }
+
+    .move-folder-shell .knowledge-picker-head {
+      padding: 18px 20px 14px;
+    }
+
+    .move-folder-shell .knowledge-picker-head strong {
+      display: block;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .move-folder-shell .knowledge-picker-head span,
+    .move-folder-summary {
+      color: var(--faint);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .move-folder-summary {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcff;
+    }
+
+    .move-folder-options {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px 12px 12px;
+    }
+
+    .move-folder-shell .knowledge-picker-folder {
+      height: 40px;
+      margin: 2px 0;
+    }
+
+    .move-folder-shell .knowledge-picker-foot {
+      padding: 14px 20px 18px;
+    }
+
     .knowledge-picker-head {
       display: flex;
       align-items: flex-start;
@@ -9734,51 +9781,27 @@
 
       els.moveFolderModal.hidden = false;
       els.moveFolderModal.innerHTML = `
-        <div class="knowledge-picker-shell" data-move-shell>
+        <div class="knowledge-picker-shell move-folder-shell" data-move-shell>
           <div class="knowledge-picker-head">
             <div>
-              <strong>移动文件</strong>
-              <span>仅支持移动“文件夹 - 个人文件”下的文件</span>
+              <strong>选择移动位置</strong>
+              <span>仅支持移动到“文件夹 - 个人文件”下的目录</span>
             </div>
             <button class="icon-button" data-move-close type="button" aria-label="关闭移动文件弹窗">
               <svg class="icon icon-sm"><use href="#i-x"/></svg>
             </button>
           </div>
-          <div class="knowledge-picker-tools">
-            <div class="selected-summary" style="display:flex">
-              <span class="select-all"><svg class="icon icon-sm"><use href="#i-check"/></svg></span>
-              <span>已选 ${selected.length} 个文件</span>
-            </div>
-            <span class="plain-cell">目标目录：${escapeHtml(target?.name || "个人文件")}</span>
+          <div class="move-folder-summary">
+            已选 ${selected.length} 个文件，当前目标：${escapeHtml(target?.name || "个人文件")}
           </div>
-          <div class="knowledge-picker-body">
-            <aside class="knowledge-picker-tree" aria-label="可移动目录范围">
-              ${moveFolders.map(folder => `
-                <button class="knowledge-picker-folder ${state.moveTargetFolder === folder.id ? "active" : ""}" data-move-folder="${folder.id}" style="--picker-depth:${folder.pickerDepth || 0}" type="button">
-                  ${folderIcon(folder)}
-                  <span>${escapeHtml(folder.name)}</span>
-                  <em>${folderCount(folder.id)}</em>
-                </button>
-              `).join("")}
-            </aside>
-            <section class="knowledge-picker-list">
-              <div class="knowledge-picker-list-head">
-                <strong>可移动目录范围</strong>
-                <span>文件夹 / 个人文件</span>
-              </div>
-              <div class="knowledge-picker-files">
-                ${selected.map(file => `
-                  <article class="knowledge-picker-file selected">
-                    ${fileIcon(file)}
-                    <div class="knowledge-picker-file-main">
-                      <strong>${escapeHtml(file.name)}</strong>
-                      <span>当前位置：${escapeHtml(folders.find(folder => folder.id === file.folder)?.name || "个人文件")}</span>
-                    </div>
-                    <div class="knowledge-picker-tags">${renderSystemTags(file, 1)}</div>
-                  </article>
-                `).join("")}
-              </div>
-            </section>
+          <div class="move-folder-options" aria-label="可移动目录范围">
+            ${moveFolders.map(folder => `
+              <button class="knowledge-picker-folder ${state.moveTargetFolder === folder.id ? "active" : ""}" data-move-folder="${folder.id}" style="--picker-depth:${folder.pickerDepth || 0}" type="button">
+                ${folderIcon(folder)}
+                <span>${escapeHtml(folder.name)}</span>
+                <em>${folderCount(folder.id)}</em>
+              </button>
+            `).join("")}
           </div>
           <div class="knowledge-picker-foot">
             <button class="small-button" data-move-close type="button">取消</button>
