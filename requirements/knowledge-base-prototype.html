@@ -6065,6 +6065,8 @@
     }
     .small-button:hover { color: var(--text); background: var(--chip); border-color: rgba(0,0,0,0.14); transform: translateY(-1px); }
     .small-button:active { transform: scale(0.97); }
+    .small-button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .small-button:disabled:hover { color: var(--muted); background: #fff; border-color: var(--line); transform: none; }
     .small-button.primary { color: #fff; background: var(--gradient-brand); border-color: transparent; box-shadow: 0 4px 12px rgba(22,93,255,0.22); }
     .small-button.primary:hover { background: var(--gradient-brand-hover); }
     .small-button svg { width: var(--icon-sm); height: var(--icon-sm); }
@@ -8331,7 +8333,7 @@
               <span id="selectionText">已选 2 个文件，可用于知识生产</span>
             </div>
             <div class="toolbar-actions">
-              <button class="small-button" id="moveButton">
+              <button class="small-button" id="moveButton" type="button">
                 <svg class="icon icon-sm"><use href="#i-folder-input"/></svg>
                 移动
               </button>
@@ -8415,6 +8417,7 @@
   <div class="flashcard-preview-modal" id="flashcardPreviewModal" hidden role="dialog" aria-modal="true" aria-label="闪卡预览"></div>
   <div class="flashcard-preview-modal table-preview-modal" id="tablePreviewModal" hidden role="dialog" aria-modal="true" aria-label="表格预览"></div>
   <div class="knowledge-picker-modal" id="knowledgePickerModal" hidden role="dialog" aria-modal="true" aria-label="选择知识库文件"></div>
+  <div class="knowledge-picker-modal" id="moveFolderModal" hidden role="dialog" aria-modal="true" aria-label="移动文件到目录"></div>
 
   <script>
     const folders = [
@@ -8554,6 +8557,8 @@
       knowledgePickerSource: "全部",
       knowledgePickerDate: "",
       knowledgePickerSelected: new Set(),
+      moveFolderOpen: false,
+      moveTargetFolder: "personal",
       assistantView: "chat",
       activeTaskType: null,
       activeTaskId: null,
@@ -8672,6 +8677,8 @@
       listViewButton: document.getElementById("listViewButton"),
       gridViewButton: document.getElementById("gridViewButton"),
       knowledgePickerModal: document.getElementById("knowledgePickerModal"),
+      moveFolderModal: document.getElementById("moveFolderModal"),
+      moveButton: document.getElementById("moveButton"),
       appShell: document.getElementById("appShell"),
       collapseNav: document.getElementById("collapseNav"),
       layoutResizer: document.getElementById("layoutResizer")
@@ -9060,6 +9067,51 @@
 
     function selectedFiles() {
       return files.filter(file => state.selectedFiles.has(file.id) && !state.deletedFiles.has(file.id));
+    }
+
+    function isPersonalFolderId(folderId) {
+      return folderId === "personal" || parentFolderMatch(folderId, "personal");
+    }
+
+    function isMovablePersonalFile(file) {
+      return !!file && isPersonalFolderId(file.folder);
+    }
+
+    function validateMoveSelection(showMessage = true) {
+      const selected = selectedFiles();
+      if (selected.length === 0) {
+        if (showMessage) showToast("请先勾选需要移动的文件");
+        return false;
+      }
+      if (state.activeWorkspace !== "files") {
+        if (showMessage) showToast("只有文件夹-个人文件下的文件支持移动");
+        return false;
+      }
+      const blocked = selected.filter(file => !isMovablePersonalFile(file));
+      if (blocked.length > 0) {
+        if (showMessage) showToast(`只有文件夹-个人文件下的文件支持移动，已选 ${blocked.length} 个不可移动文件`);
+        return false;
+      }
+      return true;
+    }
+
+    function personalMoveFolders() {
+      const root = folders.find(folder => folder.id === "personal");
+      if (!root) return [];
+      const collect = (parentId, depth) => folders
+        .filter(folder => folder.parent === parentId && isPersonalManagedFolder(folder))
+        .flatMap(folder => [{ ...folder, pickerDepth: depth }, ...collect(folder.id, depth + 1)]);
+      return [{ ...root, pickerDepth: 0 }, ...collect("personal", 1)];
+    }
+
+    function expandFolderAncestors(folderId) {
+      let current = folders.find(folder => folder.id === folderId);
+      while (current?.parent) {
+        const parent = folders.find(folder => folder.id === current.parent);
+        if (!parent) break;
+        parent.expanded = true;
+        current = parent;
+      }
     }
 
     function isFolderVisible(folder) {
@@ -9613,6 +9665,143 @@
       els.knowledgePickerModal.querySelector("[data-picker-add]").addEventListener("click", addKnowledgePickerReferences);
     }
 
+    function openMoveFolderModal() {
+      if (!validateMoveSelection(true)) return;
+      const selected = selectedFiles();
+      const commonFolder = selected.length > 0 && selected.every(file => file.folder === selected[0].folder)
+        ? selected[0].folder
+        : state.selectedFolder;
+      state.moveTargetFolder = isPersonalFolderId(commonFolder) ? commonFolder : "personal";
+      state.moveFolderOpen = true;
+      renderMoveFolderModal();
+    }
+
+    function closeMoveFolderModal() {
+      state.moveFolderOpen = false;
+      renderMoveFolderModal();
+    }
+
+    function applyMoveSelectedFiles() {
+      if (!validateMoveSelection(true)) {
+        closeMoveFolderModal();
+        return;
+      }
+      const target = folders.find(folder => folder.id === state.moveTargetFolder && isPersonalManagedFolder(folder));
+      if (!target) {
+        showToast("请选择可移动的个人文件目录");
+        return;
+      }
+      const selected = selectedFiles();
+      if (selected.every(file => file.folder === target.id)) {
+        showToast("所选文件已在该目录");
+        closeMoveFolderModal();
+        return;
+      }
+      selected.forEach(file => {
+        file.folder = target.id;
+      });
+      expandFolderAncestors(target.id);
+      state.selectedFolder = target.id;
+      state.moveFolderOpen = false;
+      renderFolders();
+      renderSelection();
+      renderList();
+      renderAssistantContext();
+      if (state.assistantView === "task") renderTaskView();
+      renderMoveFolderModal();
+      showToast(`已移动 ${selected.length} 个文件到 ${target.name}`);
+    }
+
+    function renderMoveFolderModal() {
+      if (!els.moveFolderModal) return;
+      if (!state.moveFolderOpen) {
+        els.moveFolderModal.hidden = true;
+        els.moveFolderModal.innerHTML = "";
+        return;
+      }
+
+      if (!validateMoveSelection(false)) {
+        closeMoveFolderModal();
+        return;
+      }
+
+      const selected = selectedFiles();
+      const moveFolders = personalMoveFolders();
+      if (!moveFolders.some(folder => folder.id === state.moveTargetFolder)) {
+        state.moveTargetFolder = "personal";
+      }
+      const target = moveFolders.find(folder => folder.id === state.moveTargetFolder);
+
+      els.moveFolderModal.hidden = false;
+      els.moveFolderModal.innerHTML = `
+        <div class="knowledge-picker-shell" data-move-shell>
+          <div class="knowledge-picker-head">
+            <div>
+              <strong>移动文件</strong>
+              <span>仅支持移动“文件夹 - 个人文件”下的文件</span>
+            </div>
+            <button class="icon-button" data-move-close type="button" aria-label="关闭移动文件弹窗">
+              <svg class="icon icon-sm"><use href="#i-x"/></svg>
+            </button>
+          </div>
+          <div class="knowledge-picker-tools">
+            <div class="selected-summary" style="display:flex">
+              <span class="select-all"><svg class="icon icon-sm"><use href="#i-check"/></svg></span>
+              <span>已选 ${selected.length} 个文件</span>
+            </div>
+            <span class="plain-cell">目标目录：${escapeHtml(target?.name || "个人文件")}</span>
+          </div>
+          <div class="knowledge-picker-body">
+            <aside class="knowledge-picker-tree" aria-label="可移动目录范围">
+              ${moveFolders.map(folder => `
+                <button class="knowledge-picker-folder ${state.moveTargetFolder === folder.id ? "active" : ""}" data-move-folder="${folder.id}" style="--picker-depth:${folder.pickerDepth || 0}" type="button">
+                  ${folderIcon(folder)}
+                  <span>${escapeHtml(folder.name)}</span>
+                  <em>${folderCount(folder.id)}</em>
+                </button>
+              `).join("")}
+            </aside>
+            <section class="knowledge-picker-list">
+              <div class="knowledge-picker-list-head">
+                <strong>可移动目录范围</strong>
+                <span>文件夹 / 个人文件</span>
+              </div>
+              <div class="knowledge-picker-files">
+                ${selected.map(file => `
+                  <article class="knowledge-picker-file selected">
+                    ${fileIcon(file)}
+                    <div class="knowledge-picker-file-main">
+                      <strong>${escapeHtml(file.name)}</strong>
+                      <span>当前位置：${escapeHtml(folders.find(folder => folder.id === file.folder)?.name || "个人文件")}</span>
+                    </div>
+                    <div class="knowledge-picker-tags">${renderSystemTags(file, 1)}</div>
+                  </article>
+                `).join("")}
+              </div>
+            </section>
+          </div>
+          <div class="knowledge-picker-foot">
+            <button class="small-button" data-move-close type="button">取消</button>
+            <button class="small-button primary" data-move-apply type="button">移动到此目录</button>
+          </div>
+        </div>
+      `;
+
+      els.moveFolderModal.querySelectorAll("[data-move-close]").forEach(button => {
+        button.addEventListener("click", closeMoveFolderModal);
+      });
+      els.moveFolderModal.onclick = event => {
+        if (event.target === els.moveFolderModal) closeMoveFolderModal();
+      };
+      els.moveFolderModal.querySelectorAll("[data-move-folder]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.moveTargetFolder = button.dataset.moveFolder;
+          renderMoveFolderModal();
+        });
+      });
+      els.moveFolderModal.querySelector("[data-move-apply]").addEventListener("click", applyMoveSelectedFiles);
+    }
+
     function renderWorkspaceShell() {
       const config = workspaceConfig();
       els.pageTitle.textContent = config.navTitle;
@@ -9661,6 +9850,7 @@
       state.view = "list";
       state.selectedFiles.clear();
       state.folderMenuOpen = null;
+      state.moveFolderOpen = false;
       render();
     }
 
@@ -9912,6 +10102,10 @@
       els.selectionText.textContent = count > 0
         ? `已选 ${count} 个文件，可用于知识生产`
         : "";
+      if (els.moveButton) {
+        els.moveButton.disabled = count === 0 || state.activeWorkspace !== "files";
+        els.moveButton.setAttribute("aria-disabled", String(els.moveButton.disabled));
+      }
     }
 
     function renderTaskMenu() {
@@ -12622,7 +12816,7 @@
         event.stopPropagation();
         startChatProductionTask(button.dataset.chatProduce);
       });
-      document.getElementById("moveButton")?.addEventListener("click", () => showToast("移动到文件夹面板已打开"));
+      document.getElementById("moveButton")?.addEventListener("click", openMoveFolderModal);
       document.getElementById("manageFiles").addEventListener("click", () => {
         if (state.selectedFiles.size === 0) {
           showToast("请先在中间列表选择引用文件");
@@ -12735,6 +12929,7 @@
       renderAssistantContext();
       renderTaskMenu();
       renderKnowledgePicker();
+      renderMoveFolderModal();
       if (state.assistantView === "task") {
         renderTaskView();
       } else if (state.assistantView === "queue") {
