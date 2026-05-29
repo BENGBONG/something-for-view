@@ -11023,9 +11023,9 @@
       const isOpen = !state.assistantCollapsed && (!previewFile || state.previewAssistantOpen);
       els.assistantWake.classList.toggle("is-open", isOpen);
       els.assistantWake.setAttribute("aria-pressed", String(isOpen));
-      els.assistantWake.setAttribute("aria-label", isOpen ? "小智已打开，点击收起" : "问问小智");
+      els.assistantWake.setAttribute("aria-label", "问问小智");
       if (els.assistantWakeText) {
-        els.assistantWakeText.textContent = isOpen ? "小智已打开" : "问问小智";
+        els.assistantWakeText.textContent = "问问小智";
       }
     }
 
