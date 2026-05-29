@@ -620,6 +620,15 @@
       grid-template-columns: var(--sidebar) minmax(0, 1fr);
     }
 
+    .app.file-preview-reading .workspace {
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    }
+
+    .app.file-preview-reading .layout-resizer,
+    .app.file-preview-reading .assistant {
+      display: none;
+    }
+
     .layout-resizer {
       width: 14px;
       min-width: 14px;
@@ -1489,6 +1498,11 @@
       overscroll-behavior: contain;
     }
 
+    .content-list.preview-mode {
+      padding: 0;
+      background: #ffffff;
+    }
+
     table {
       width: 100%;
       min-width: 0;
@@ -2024,33 +2038,36 @@
 
     .file-preview {
       display: grid;
-      gap: 16px;
-      padding: 16px 0 24px;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 100%;
+      background: #ffffff;
     }
 
     .file-preview-head {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 16px;
-      padding: 18px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
       background: #ffffff;
     }
 
     .file-preview-title {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
+      align-items: center;
+      gap: 11px;
       min-width: 0;
     }
 
     .file-preview-title h3 {
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       color: var(--text);
-      font-size: 18px;
-      line-height: 1.35;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .file-preview-title p {
@@ -2058,6 +2075,12 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.5;
+    }
+
+    .file-preview-title-meta {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .file-preview-actions {
@@ -2122,6 +2145,112 @@
       background: #f7faff;
       font-size: 12px;
       line-height: 1.7;
+    }
+
+    .document-preview-shell {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      min-height: 0;
+      height: 100%;
+    }
+
+    .document-outline {
+      overflow: auto;
+      padding: 16px 12px;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      background: #fbfcff;
+    }
+
+    .document-outline-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .document-outline-head button {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 7px;
+      color: var(--faint);
+      background: transparent;
+    }
+
+    .document-outline-list {
+      display: grid;
+      gap: 4px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .document-outline-list span {
+      overflow: hidden;
+      padding: 7px 8px;
+      border-radius: 7px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .document-outline-list span.active {
+      color: var(--text);
+      background: #eef4ff;
+      font-weight: 700;
+    }
+
+    .document-outline-list span.indent {
+      padding-left: 20px;
+    }
+
+    .document-body {
+      overflow: auto;
+      padding: 24px 28px 56px;
+      color: #1f2530;
+      background: #ffffff;
+      line-height: 1.85;
+    }
+
+    .document-body h1 {
+      margin: 0 0 14px;
+      color: #0f172a;
+      font-size: 26px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .document-body h2 {
+      margin: 24px 0 12px;
+      color: #0f172a;
+      font-size: 21px;
+      line-height: 1.4;
+      letter-spacing: 0;
+    }
+
+    .document-body h3 {
+      margin: 18px 0 8px;
+      color: #111827;
+      font-size: 17px;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    .document-body p {
+      margin: 0 0 12px;
+      color: #273044;
+      font-size: 14px;
+    }
+
+    .document-markdown-line {
+      margin: 10px 0;
+      color: #273044;
+      font-size: 14px;
+      word-break: break-word;
     }
 
     .assistant {
@@ -8550,7 +8679,7 @@
         </aside>
 
         <section class="panel main">
-          <div class="section">
+          <div class="section" id="mainIntroSection">
             <div class="main-header">
               <div>
                 <h2 id="mainTitle">我的文件</h2>
@@ -8673,11 +8802,12 @@
   <script>
     const folders = [
       { id: "personal", name: "我的文件", depth: 0, expanded: true, kind: "personal" },
-      { id: "personal-meeting", name: "会议资料", depth: 1, parent: "personal", kind: "custom" },
+      { id: "personal-meeting", name: "会议资料", depth: 1, parent: "personal", expanded: true, kind: "custom" },
       { id: "personal-customer", name: "客户案例", depth: 1, parent: "personal", expanded: true, kind: "custom" },
       { id: "personal-case-a", name: "客户A - 制造业", depth: 2, parent: "personal-customer", kind: "custom" },
       { id: "personal-case-b", name: "客户B - 零售业", depth: 2, parent: "personal-customer", kind: "custom" },
-      { id: "personal-project", name: "项目资料", depth: 1, parent: "personal", kind: "custom" },
+      { id: "personal-project", name: "项目资料", depth: 1, parent: "personal", expanded: true, kind: "custom" },
+      { id: "personal-project-research", name: "调研素材", depth: 2, parent: "personal-project", kind: "custom" },
       { id: "personal-archive", name: "知识沉淀", depth: 1, parent: "personal", kind: "custom" },
       { id: "voice-root", name: "我的笔记", depth: 0, expanded: true, kind: "recording-root" },
       { id: "voice-meeting", name: "会议笔记", depth: 1, parent: "voice-root", kind: "recording-root" },
@@ -8698,6 +8828,9 @@
       { id: "f7", name: "AI 产品经理转型路线图.md", size: "18.40 KB", type: "Markdown", ragStatus: "入库中", systemTags: ["任务报告"], folder: "personal-archive", updated: "2026-05-12 21:08", summary: "客户洞察 Agent 提炼的能力模型与成长路径资料。" },
       { id: "f8", name: "客户案例复盘 - 智能售后.txt", size: "24.11 KB", type: "TXT", ragStatus: "已入库", systemTags: ["自行上传"], folder: "personal-case-a", updated: "2026-05-12 18:26", summary: "复盘智能售后项目的需求、阻力、价值与可复制经验。" },
       { id: "f9", name: "Q2 管理层汇报框架.pptx", size: "3.42 MB", type: "PPT", ragStatus: "解析中", systemTags: ["任务报告"], folder: "personal-meeting", updated: "2026-05-11 09:30", summary: "会议纪要 Agent 输出的管理层汇报框架，归档到会议资料。" },
+      { id: "f15", name: "客户案例索引.md", size: "3.08 KB", type: "Markdown", ragStatus: "已入库", systemTags: ["自行上传"], folder: "personal-customer", updated: "2026-05-11 18:20", summary: "汇总客户案例目录、行业标签和可复用销售话术，作为客户案例根目录下的索引文件。" },
+      { id: "f16", name: "个人知识库使用说明.md", size: "6.21 KB", type: "Markdown", ragStatus: "已入库", systemTags: ["自行上传"], folder: "personal", updated: "2026-05-11 16:42", summary: "记录个人文件夹的归档规则、命名规范和小智引用知识库的使用边界。" },
+      { id: "f17", name: "AI 研究素材清单.xlsx", size: "86.40 KB", type: "Excel", ragStatus: "入库中", systemTags: ["自行上传"], folder: "personal-project-research", updated: "2026-05-10 14:06", summary: "整理 AI 产品调研素材、来源链接、关键结论和后续验证状态。" },
       { id: "f10", name: "灵感-202605.md", size: "2.16 KB", type: "Markdown", ragStatus: "已入库", systemTags: ["手机同步"], folder: "voice-flash-idea", updated: "2026-05-10 20:18", summary: "按月沉淀的灵感类闪念，包括知识库迁移规则与产品判断。" },
       { id: "f11", name: "待办-202605.md", size: "1.42 KB", type: "Markdown", ragStatus: "已入库", systemTags: ["手机同步"], folder: "voice-flash-todo", updated: "2026-05-09 18:22", summary: "按月沉淀的待办类闪念，记录临时任务和跟进事项。" },
       { id: "f12", name: "记账-202605.md", size: "986.00 B", type: "Markdown", ragStatus: "已入库", systemTags: ["手机同步"], folder: "voice-flash-ledger", updated: "2026-05-08 11:06", summary: "按月沉淀的记账类闪念，记录支出、收入与待核对事项。" },
@@ -8907,6 +9040,7 @@
       folderRootName: document.getElementById("folderRootName"),
       rootFileCount: document.getElementById("rootFileCount"),
       ingestCards: document.getElementById("ingestCards"),
+      mainIntroSection: document.getElementById("mainIntroSection"),
       pageTitle: document.getElementById("pageTitle"),
       pageSubtitle: document.getElementById("pageSubtitle"),
       mainTitle: document.getElementById("mainTitle"),
@@ -10204,6 +10338,7 @@
       const selectedFolder = folders.find(folder => folder.id === state.selectedFolder);
       const childFolderCount = state.activeWorkspace === "files" && !previewFile ? directChildFolders(state.selectedFolder || workspaceRootId()).length : 0;
       const directFiles = state.activeWorkspace === "files" && !previewFile ? directFileCount(state.selectedFolder || workspaceRootId()) : 0;
+      const isPreview = !!previewFile;
       els.pageTitle.textContent = config.navTitle;
       els.pageSubtitle.textContent = config.navSubtitle;
       if (previewFile) {
@@ -10217,7 +10352,12 @@
         els.mainSubtitle.textContent = config.mainSubtitle;
       }
       els.fileSearch.placeholder = config.searchPlaceholder;
-      if (els.toolbar) els.toolbar.style.display = state.activeWorkspace === "voice" || !!previewFile ? "none" : "";
+      if (els.mainIntroSection) els.mainIntroSection.style.display = isPreview ? "none" : "";
+      if (els.filterBox) els.filterBox.style.display = isPreview ? "none" : "";
+      if (els.ingestCards) els.ingestCards.style.display = isPreview ? "none" : "";
+      if (els.toolbar) els.toolbar.style.display = state.activeWorkspace === "voice" || isPreview ? "none" : "";
+      if (els.contentList) els.contentList.classList.toggle("preview-mode", isPreview);
+      if (els.appShell) els.appShell.classList.toggle("file-preview-reading", isPreview);
       els.ingestCards.innerHTML = config.ingest.map(item => `
         <button class="ingest-card ${item.className || ""}" ${item.action ? `data-ingest-action="${escapeHtml(item.action)}"` : `data-toast="${escapeHtml(item.toast)}"`} type="button">
           <span class="ingest-icon"><svg class="icon icon-sm"><use href="#${item.icon}"/></svg></span>
@@ -10301,37 +10441,78 @@
       `;
     }
 
+    function previewDocumentTitle(file) {
+      return (file.name || "未命名文件").replace(/\.[^.]+$/, "");
+    }
+
+    function renderPreviewOutline(file) {
+      const title = previewDocumentTitle(file);
+      return [
+        title,
+        "一、内容摘要",
+        "1.1 文件信息",
+        "1.2 关键内容",
+        "二、知识库解析状态",
+        "2.1 入库与引用",
+        "三、后续使用建议"
+      ].map((item, index) => `<span class="${index === 0 ? "active" : index > 1 && /^[0-9]/.test(item) ? "indent" : ""}">${escapeHtml(item)}</span>`).join("");
+    }
+
+    function renderPreviewBody(file) {
+      const title = previewDocumentTitle(file);
+      const folderPath = folderPathLabel(file.folder);
+      return `
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(file.summary || "该文件已进入知识库，可在后续问答、检索和内容生产中使用。")}</p>
+        <h2>一、内容摘要</h2>
+        <h3>1.1 文件信息</h3>
+        <div class="document-markdown-line">| 文件名 | ${escapeHtml(file.name)} |</div>
+        <div class="document-markdown-line">| 所在目录 | ${escapeHtml(folderPath)} |</div>
+        <div class="document-markdown-line">| 文件类型 | ${escapeHtml(file.type)} |</div>
+        <div class="document-markdown-line">| 文件大小 | ${escapeHtml(file.size)} |</div>
+        <h3>1.2 关键内容</h3>
+        <p>${escapeHtml(file.summary || "暂无正文片段。")}</p>
+        <p>此处展示解析后的 Markdown 预览效果。用户从左侧目录树或右侧文件列表进入文件后，页面直接切换到阅读态，不再展示上传入口、筛选条件或目录列表。</p>
+        <h2>二、知识库解析状态</h2>
+        <p>当前文件状态为：${escapeHtml(file.ragStatus)}。文件可作为小智引用知识库的候选资料，但不会因为在目录中被选中而自动关联到小智。</p>
+        <h3>2.1 入库与引用</h3>
+        <p>如需让小智使用该文件，需要在小智对话框中通过“引用知识库”主动选择。文件列表中的勾选仍仅用于移动文件。</p>
+        <h2>三、后续使用建议</h2>
+        <p>建议在预览确认内容后，根据文件主题移动到合适目录，保持个人文件夹结构和知识库引用范围一致。</p>
+      `;
+    }
+
     function renderFilePreview(file) {
       return `
-        <section class="file-preview">
+        <section class="file-preview document-preview">
           <div class="file-preview-head">
             <div class="file-preview-title">
               <span class="file-icon">${fileIcon(file)}</span>
-              <div>
+              <div class="file-preview-title-meta">
                 <h3>${escapeHtml(file.name)}</h3>
-                <p>${escapeHtml(file.summary || "暂无摘要")}</p>
-                <div class="file-card-tags">${renderSystemTags(file, 3)}</div>
+                <p>${escapeHtml(file.size)} · ${escapeHtml(file.type)} · ${escapeHtml(file.updated)} · ${escapeHtml(file.summary || "暂无摘要")}</p>
               </div>
             </div>
             <div class="file-preview-actions">
-              <button class="small-button" data-preview-back type="button">返回目录</button>
-              ${renderFileActions(file)}
+              <button class="small-button" type="button">
+                <svg class="icon icon-sm"><use href="#i-list"/></svg>
+                大纲
+              </button>
+              <button class="icon-button" data-preview-back type="button" title="关闭预览" aria-label="关闭预览">
+                <svg class="icon icon-sm"><use href="#i-x"/></svg>
+              </button>
             </div>
           </div>
-          <div class="file-preview-meta">
-            <span>所在目录<strong>${escapeHtml(folderPathLabel(file.folder))}</strong></span>
-            <span>文件类型<strong>${escapeHtml(file.type)}</strong></span>
-            <span>文件大小<strong>${escapeHtml(file.size)}</strong></span>
-            <span>入库状态<strong>${escapeHtml(file.ragStatus)}</strong></span>
-            <span>更新时间<strong>${escapeHtml(file.updated)}</strong></span>
-          </div>
-          <div class="file-preview-body">
-            <h4>内容预览</h4>
-            <p>${escapeHtml(file.summary || "该文件已进入知识库，完整内容可用于检索和小智问答。")}</p>
-            <div class="file-preview-snippet">
-              ${escapeHtml(file.name)}<br>
-              ${escapeHtml(file.summary || "暂无可展示的正文片段。")}<br>
-              本预览用于表达文件选中后的页面态，实际正文由文件解析结果展示。
+          <div class="document-preview-shell">
+            <aside class="document-outline" aria-label="文档大纲">
+              <div class="document-outline-head">
+                <span>大纲</span>
+                <button type="button" aria-label="收起大纲">×</button>
+              </div>
+              <div class="document-outline-list">${renderPreviewOutline(file)}</div>
+            </aside>
+            <div class="document-body">
+              ${renderPreviewBody(file)}
             </div>
           </div>
         </section>
