@@ -2329,9 +2329,9 @@
 
     .assistant-wake {
       position: fixed;
-      right: 24px;
-      top: 96px;
-      z-index: 60;
+      right: 78px;
+      top: 24px;
+      z-index: 160;
       min-width: 124px;
       height: 46px;
       display: none;
@@ -2351,7 +2351,8 @@
       transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
     }
 
-    .assistant.collapsed .assistant-wake {
+    .app.assistant-collapsed .assistant-wake,
+    .app.file-preview-reading .assistant-wake {
       display: inline-flex;
     }
 
@@ -8782,14 +8783,14 @@
             </div>
           </div>
           <div class="assistant-rail" id="assistantRail" aria-label="小智能力与任务队列"></div>
-          <button class="assistant-wake" id="assistantWake" type="button" aria-label="问问小智">
-            <span class="assistant-wake-icon">智</span>
-            <span class="assistant-wake-text">问问小智</span>
-            <span class="assistant-wake-badge" id="assistantWakeBadge">0</span>
-          </button>
         </aside>
       </section>
     </main>
+    <button class="assistant-wake" id="assistantWake" type="button" aria-label="问问小智">
+      <span class="assistant-wake-icon">智</span>
+      <span class="assistant-wake-text">问问小智</span>
+      <span class="assistant-wake-badge" id="assistantWakeBadge">0</span>
+    </button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -8957,6 +8958,7 @@
       taskGenerationState: "idle",
       taskQueueCollapsed: true,
       assistantCollapsed: false,
+      previewAssistantOpen: false,
       assistantExpandedWidth: 440,
       markmapModalOpen: false,
       markmapPreviewFile: null,
@@ -9213,6 +9215,7 @@
     function selectFolder(folderId) {
       state.selectedFolder = folderId || workspaceRootId();
       state.selectedFile = null;
+      state.previewAssistantOpen = false;
       state.folderMenuOpen = null;
       render();
     }
@@ -9222,6 +9225,7 @@
       if (!file) return;
       state.selectedFolder = file.folder;
       state.selectedFile = file.id;
+      state.previewAssistantOpen = false;
       state.folderMenuOpen = null;
       expandFolderAncestors(file.folder);
       render();
@@ -10339,6 +10343,7 @@
       const childFolderCount = state.activeWorkspace === "files" && !previewFile ? directChildFolders(state.selectedFolder || workspaceRootId()).length : 0;
       const directFiles = state.activeWorkspace === "files" && !previewFile ? directFileCount(state.selectedFolder || workspaceRootId()) : 0;
       const isPreview = !!previewFile;
+      const isPreviewReading = isPreview && !state.previewAssistantOpen;
       els.pageTitle.textContent = config.navTitle;
       els.pageSubtitle.textContent = config.navSubtitle;
       if (previewFile) {
@@ -10357,7 +10362,7 @@
       if (els.ingestCards) els.ingestCards.style.display = isPreview ? "none" : "";
       if (els.toolbar) els.toolbar.style.display = state.activeWorkspace === "voice" || isPreview ? "none" : "";
       if (els.contentList) els.contentList.classList.toggle("preview-mode", isPreview);
-      if (els.appShell) els.appShell.classList.toggle("file-preview-reading", isPreview);
+      if (els.appShell) els.appShell.classList.toggle("file-preview-reading", isPreviewReading);
       els.ingestCards.innerHTML = config.ingest.map(item => `
         <button class="ingest-card ${item.className || ""}" ${item.action ? `data-ingest-action="${escapeHtml(item.action)}"` : `data-toast="${escapeHtml(item.toast)}"`} type="button">
           <span class="ingest-icon"><svg class="icon icon-sm"><use href="#${item.icon}"/></svg></span>
@@ -10390,6 +10395,7 @@
       state.activeWorkspace = workspace;
       state.selectedFolder = workspaceRootId();
       state.selectedFile = null;
+      state.previewAssistantOpen = false;
       state.activeTypeFilter = "全部";
       state.activeTagFilter = "全部";
       state.activeDateFilter = "";
@@ -10683,6 +10689,7 @@
       els.contentList.querySelectorAll("[data-preview-back]").forEach(button => {
         button.addEventListener("click", () => {
           state.selectedFile = null;
+          state.previewAssistantOpen = false;
           render();
         });
       });
@@ -13415,6 +13422,10 @@
 
     function setAssistantCollapsed(collapsed) {
       state.assistantCollapsed = collapsed;
+      if (currentPreviewFile()) {
+        state.previewAssistantOpen = !collapsed;
+        els.appShell.classList.toggle("file-preview-reading", !state.previewAssistantOpen);
+      }
       els.assistantPanel.classList.toggle("collapsed", collapsed);
       els.appShell.classList.toggle("assistant-collapsed", collapsed);
       els.layoutResizer.style.display = collapsed ? "none" : "";
