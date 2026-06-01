@@ -992,6 +992,70 @@
       color: var(--red);
     }
 
+    .folder-create-popover {
+      position: fixed;
+      z-index: 130;
+      width: 248px;
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(216,224,238,0.86);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 18px 42px rgba(31,35,41,0.14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      animation: confirmFadeIn 160ms ease-out;
+    }
+
+    .folder-create-popover strong {
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .folder-create-input {
+      width: 100%;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--text);
+      background: #ffffff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .folder-create-input:focus {
+      border-color: #bedaff;
+      box-shadow: 0 0 0 3px rgba(22,93,255,0.10);
+    }
+
+    .folder-create-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .folder-create-actions button {
+      height: 30px;
+      padding: 0 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .folder-create-cancel {
+      color: var(--muted);
+      background: var(--chip);
+    }
+
+    .folder-create-submit {
+      color: #ffffff;
+      background: var(--blue);
+    }
+
     .tree-item[data-kind="personal"] .tree-icon {
       color: var(--green);
     }
@@ -9894,20 +9958,12 @@
       return id;
     }
 
-    function addPersonalChildFolder(parentId) {
-      const parent = folders.find(folder => folder.id === parentId);
-      if (!isPersonalManagedFolder(parent)) return;
-      if ((parent.depth || 0) >= 3) {
-        showToast("目录层级最多支持 3 级");
-        return;
-      }
-      const name = normalizeFolderName(window.prompt("新建目录名称", "新建目录"));
-      if (!name) return;
+    function createPersonalFolder(parent, name, depth) {
       parent.expanded = true;
       folders.push({
         id: uniquePersonalFolderId(parent.id, name),
         name,
-        depth: (parent.depth || 0) + 1,
+        depth,
         parent: parent.id,
         expanded: true,
         kind: "custom",
@@ -9918,26 +9974,100 @@
       showToast(`已新建目录：${name}`);
     }
 
-    function addPersonalSiblingFolder(folderId) {
+    let folderCreatePopoverEl = null;
+
+    function closeFolderCreatePopover() {
+      if (!folderCreatePopoverEl) return;
+      folderCreatePopoverEl.remove();
+      folderCreatePopoverEl = null;
+    }
+
+    function showFolderCreatePopover({ parentId, title, defaultName = "新建目录", depth, anchor }) {
+      const parent = folders.find(folder => folder.id === parentId);
+      if (!isPersonalManagedFolder(parent)) return;
+      closeFolderCreatePopover();
+      const rect = anchor?.getBoundingClientRect?.();
+      const el = document.createElement("div");
+      el.className = "folder-create-popover";
+      el.innerHTML = `
+        <strong>${escapeHtml(title)}</strong>
+        <input class="folder-create-input" type="text" value="${escapeHtml(defaultName)}" maxlength="24" aria-label="目录名称">
+        <div class="folder-create-actions">
+          <button class="folder-create-cancel" type="button">取消</button>
+          <button class="folder-create-submit" type="button">确认</button>
+        </div>
+      `;
+      if (rect) {
+        el.style.left = Math.max(12, Math.min(rect.right - 248, window.innerWidth - 260)) + "px";
+        el.style.top = Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - 132)) + "px";
+      } else {
+        el.style.left = "50%";
+        el.style.top = "50%";
+        el.style.transform = "translate(-50%, -50%)";
+      }
+      state.folderMenuOpen = null;
+      renderFolders();
+      document.body.appendChild(el);
+      folderCreatePopoverEl = el;
+      const input = el.querySelector(".folder-create-input");
+      const submit = () => {
+        const name = normalizeFolderName(input.value);
+        if (!name) {
+          showToast("请输入目录名称");
+          input.focus();
+          return;
+        }
+        closeFolderCreatePopover();
+        createPersonalFolder(parent, name, depth);
+      };
+      el.querySelector(".folder-create-cancel").addEventListener("click", closeFolderCreatePopover);
+      el.querySelector(".folder-create-submit").addEventListener("click", submit);
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submit();
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeFolderCreatePopover();
+        }
+      });
+      const outsideClick = event => {
+        if (el.contains(event.target)) return;
+        closeFolderCreatePopover();
+        document.removeEventListener("click", outsideClick);
+      };
+      setTimeout(() => document.addEventListener("click", outsideClick), 10);
+      input.focus();
+      input.select();
+    }
+
+    function addPersonalChildFolder(parentId, anchor) {
+      const parent = folders.find(folder => folder.id === parentId);
+      if (!isPersonalManagedFolder(parent)) return;
+      if ((parent.depth || 0) >= 3) {
+        showToast("目录层级最多支持 3 级");
+        return;
+      }
+      showFolderCreatePopover({
+        parentId: parent.id,
+        title: "新建下级目录",
+        depth: (parent.depth || 0) + 1,
+        anchor
+      });
+    }
+
+    function addPersonalSiblingFolder(folderId, anchor) {
       const folder = folders.find(item => item.id === folderId);
       if (!folder || folder.id === "personal" || !isPersonalManagedFolder(folder)) return;
       const parent = folders.find(item => item.id === folder.parent);
       if (!isPersonalManagedFolder(parent)) return;
-      const name = normalizeFolderName(window.prompt("新建同级目录名称", "新建目录"));
-      if (!name) return;
-      parent.expanded = true;
-      folders.push({
-        id: uniquePersonalFolderId(parent.id, name),
-        name,
+      showFolderCreatePopover({
+        parentId: parent.id,
+        title: "新建同级目录",
         depth: folder.depth,
-        parent: parent.id,
-        expanded: true,
-        kind: "custom",
-        note: ""
+        anchor
       });
-      state.folderMenuOpen = null;
-      render();
-      showToast(`已新建同级目录：${name}`);
     }
 
     function renamePersonalFolder(folderId) {
@@ -10191,7 +10321,7 @@
         button.addEventListener("click", event => {
           event.preventDefault();
           event.stopPropagation();
-          addPersonalChildFolder(button.dataset.folderAddChild);
+          addPersonalChildFolder(button.dataset.folderAddChild, button);
         });
       });
 
@@ -10199,7 +10329,7 @@
         button.addEventListener("click", event => {
           event.preventDefault();
           event.stopPropagation();
-          addPersonalSiblingFolder(button.dataset.folderAddSibling);
+          addPersonalSiblingFolder(button.dataset.folderAddSibling, button);
         });
       });
 
@@ -10723,7 +10853,6 @@
             <input class="row-check" type="checkbox" ${state.selectedFolders.has(folder.id) ? "checked" : ""} data-check-folder="${folder.id}" aria-label="选择文件夹 ${escapeHtml(folder.name)}">
           </div>
           <h3>${escapeHtml(folder.name)}</h3>
-          <p>${escapeHtml(folderPathLabel(folder.id))}</p>
           <div class="file-card-footer">
             <span>${folderCount(folder.id)} 个文件</span>
             <span>${directChildFolders(folder.id).length} 个下级目录</span>
@@ -10741,7 +10870,6 @@
               <span class="file-icon">${folderIcon(folder)}</span>
               <span class="file-meta">
                 <span class="file-title">${escapeHtml(folder.name)}</span>
-                <span class="file-sub">${escapeHtml(folderPathLabel(folder.id))}</span>
               </span>
             </div>
           </td>
@@ -10911,7 +11039,6 @@
                     ${!isRecordingView ? `<input class="row-check" type="checkbox" ${state.selectedFiles.has(file.id) ? "checked" : ""} data-check="${file.id}" aria-label="选择 ${file.name}">` : ""}
                   </div>
                   <h3>${escapeHtml(file.name)}</h3>
-                  <p>${escapeHtml(file.summary)}</p>
                   <div class="file-card-footer">
                     <span>${renderStatus(file.ragStatus)}</span>
                     <span>${file.updated.slice(5)}</span>
@@ -11002,7 +11129,6 @@
                         <span class="file-icon">${fileIcon(file)}</span>
                         <span class="file-meta">
                           <span class="file-title">${escapeHtml(file.name)}</span>
-                          <span class="file-sub">${escapeHtml(file.summary)}</span>
                         </span>
                       </div>
                     </td>
@@ -13896,7 +14022,7 @@
       els.rootAddChild?.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
-        addPersonalChildFolder("personal");
+        addPersonalChildFolder("personal", els.rootAddChild);
       });
       els.chat.addEventListener("click", event => {
         const button = event.target.closest("[data-chat-produce]");
