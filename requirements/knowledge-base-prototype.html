@@ -746,6 +746,42 @@
       color: var(--green);
     }
 
+    .space-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .root-add-button {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      color: var(--faint);
+      background: transparent;
+      cursor: pointer;
+      transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .root-add-button:hover {
+      color: var(--blue);
+      border-color: #bedaff;
+      background: #f4f7ff;
+    }
+
+    .space-row.active .root-add-button {
+      color: var(--blue);
+      background: rgba(22,93,255,0.08);
+    }
+
+    .root-add-button svg {
+      width: 14px;
+      height: 14px;
+    }
+
     .tree {
       overflow: auto;
       padding-right: 4px;
@@ -8849,7 +8885,12 @@
               <svg class="icon icon-sm"><use href="#i-book-open"/></svg>
               <span id="folderRootName">我的文件</span>
             </span>
-            <span class="tree-count" id="rootFileCount">87</span>
+            <span class="space-actions">
+              <button class="root-add-button" id="rootAddChild" type="button" title="新建下级目录" aria-label="在我的文件下新建文件夹">
+                <svg class="icon icon-xs"><use href="#i-plus"/></svg>
+              </button>
+              <span class="tree-count" id="rootFileCount">87</span>
+            </span>
           </div>
 
           <div class="tree" id="folderTree"></div>
@@ -9227,6 +9268,7 @@
       folderTree: document.getElementById("folderTree"),
       folderRoot: document.getElementById("folderRoot"),
       folderRootName: document.getElementById("folderRootName"),
+      rootAddChild: document.getElementById("rootAddChild"),
       rootFileCount: document.getElementById("rootFileCount"),
       ingestCards: document.getElementById("ingestCards"),
       mainIntroSection: document.getElementById("mainIntroSection"),
@@ -9998,6 +10040,9 @@
       }
       if (els.folderRootName) {
         els.folderRootName.textContent = rootFolder?.name || "我的文件";
+      }
+      if (els.rootAddChild) {
+        els.rootAddChild.hidden = state.activeWorkspace !== "files" || rootId !== "personal";
       }
       const filesInTree = files.filter(file => !state.deletedFiles.has(file.id) && (file.folder === rootId || parentFolderMatch(file.folder, rootId)));
       const renderFileTreeNode = (file, viewDepth) => `
@@ -13838,11 +13883,20 @@
         showToast(collapsed ? "侧栏已收起" : "侧栏已展开");
       });
       document.getElementById("quickCreate").addEventListener("click", () => showToast("新建知识入口已打开"));
-      els.folderRoot.addEventListener("click", selectFolderRoot);
+      els.folderRoot.addEventListener("click", event => {
+        if (event.target.closest("#rootAddChild")) return;
+        selectFolderRoot();
+      });
       els.folderRoot.addEventListener("keydown", event => {
+        if (event.target.closest("#rootAddChild")) return;
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
         selectFolderRoot();
+      });
+      els.rootAddChild?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        addPersonalChildFolder("personal");
       });
       els.chat.addEventListener("click", event => {
         const button = event.target.closest("[data-chat-produce]");
