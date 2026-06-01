@@ -578,6 +578,138 @@
       color: var(--text);
     }
 
+    .global-search {
+      position: relative;
+      min-width: 0;
+    }
+
+    .global-search .search-box {
+      width: 100%;
+    }
+
+    .global-search-results {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 150;
+      width: min(520px, calc(100vw - 48px));
+      max-height: 430px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid rgba(216,224,238,0.86);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 22px 54px rgba(31,35,41,0.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .global-search-results[hidden] {
+      display: none;
+    }
+
+    .global-search-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 4px 10px;
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .global-search-head strong {
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .global-search-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .global-search-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text);
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .global-search-item:hover,
+    .global-search-item:focus-visible {
+      border-color: rgba(22,93,255,0.14);
+      background: rgba(22,93,255,0.06);
+      outline: none;
+    }
+
+    .global-search-icon {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #21b66f;
+      background: #e8ffea;
+    }
+
+    .global-search-icon.file {
+      color: var(--blue);
+      background: #edf3ff;
+    }
+
+    .global-search-main {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .global-search-title {
+      overflow: hidden;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 760;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .global-search-title mark {
+      color: var(--blue);
+      background: rgba(22,93,255,0.10);
+      border-radius: 4px;
+      padding: 0 2px;
+    }
+
+    .global-search-meta {
+      overflow: hidden;
+      color: var(--faint);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .global-search-type {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .global-search-empty {
+      padding: 24px 8px;
+      color: var(--faint);
+      font-size: 13px;
+      text-align: center;
+    }
+
     .shortcut {
       color: #8994aa;
       font-size: 12px;
@@ -764,6 +896,10 @@
       background: transparent;
       cursor: pointer;
       transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .root-add-button[hidden] {
+      display: none;
     }
 
     .root-add-button:hover {
@@ -8935,11 +9071,14 @@
           <h1 id="pageTitle">文件夹</h1>
           <p id="pageSubtitle">文件存储、智能检索、AI 创作一站式搞定，高效管理知识资产，即刻开启智能知识管理新体验！</p>
         </div>
-        <label class="search-box">
-          <svg class="icon icon-md"><use href="#i-search"/></svg>
-          <input id="globalSearch" type="search" placeholder="全局搜索知识库..." autocomplete="off">
-          <span class="shortcut">⌘ K</span>
-        </label>
+        <div class="global-search" id="globalSearchShell">
+          <label class="search-box">
+            <svg class="icon icon-md"><use href="#i-search"/></svg>
+            <input id="globalSearch" type="search" placeholder="全局搜索文件夹资产..." autocomplete="off" aria-controls="globalSearchResults" aria-expanded="false">
+            <span class="shortcut">⌘ K</span>
+          </label>
+          <div class="global-search-results" id="globalSearchResults" hidden role="listbox" aria-label="全局搜索结果"></div>
+        </div>
       </header>
 
       <section class="workspace">
@@ -9312,6 +9451,8 @@
       deletedFiles: new Set(),
       view: "list",
       query: "",
+      globalQuery: "",
+      globalSearchOpen: false,
       showAdvancedOptions: false
     };
 
@@ -9356,7 +9497,9 @@
       chat: document.getElementById("chat"),
       toast: document.getElementById("toast"),
       promptInput: document.getElementById("promptInput"),
+      globalSearchShell: document.getElementById("globalSearchShell"),
       globalSearch: document.getElementById("globalSearch"),
+      globalSearchResults: document.getElementById("globalSearchResults"),
       fileSearch: document.getElementById("fileSearch"),
       listViewButton: document.getElementById("listViewButton"),
       gridViewButton: document.getElementById("gridViewButton"),
@@ -9569,6 +9712,148 @@
         const queryMatch = !state.query || `${file.name} ${file.type} ${file.systemTags.join(" ")} ${file.summary}`.toLowerCase().includes(state.query.toLowerCase());
         return rootMatch && folderMatch && categoryMatch && updatedMatch && queryMatch;
       });
+    }
+
+    function searchNormalize(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function fuzzyScore(text, query) {
+      const source = searchNormalize(text);
+      const target = searchNormalize(query);
+      if (!target) return 0;
+      const exactIndex = source.indexOf(target);
+      if (exactIndex >= 0) return 300 - exactIndex;
+      let targetIndex = 0;
+      let gap = 0;
+      let lastMatch = -1;
+      for (let i = 0; i < source.length && targetIndex < target.length; i += 1) {
+        if (source[i] === target[targetIndex]) {
+          if (lastMatch >= 0) gap += i - lastMatch - 1;
+          lastMatch = i;
+          targetIndex += 1;
+        }
+      }
+      return targetIndex === target.length ? Math.max(1, 160 - gap - source.length) : 0;
+    }
+
+    function highlightSearchMatch(text, query) {
+      const value = String(text || "");
+      const normalized = value.toLowerCase();
+      const normalizedQuery = searchNormalize(query);
+      const index = normalized.indexOf(normalizedQuery);
+      if (!normalizedQuery || index < 0) return escapeHtml(value);
+      return `${escapeHtml(value.slice(0, index))}<mark>${escapeHtml(value.slice(index, index + normalizedQuery.length))}</mark>${escapeHtml(value.slice(index + normalizedQuery.length))}`;
+    }
+
+    function currentWorkspaceSearchLabel() {
+      return state.activeWorkspace === "voice" ? "语音笔记" : "文件夹";
+    }
+
+    function foldersInCurrentWorkspace() {
+      const rootId = workspaceRootId();
+      return folders.filter(folder => folder.id === rootId || parentFolderMatch(folder.id, rootId));
+    }
+
+    function filesInCurrentWorkspace() {
+      const rootId = workspaceRootId();
+      return files.filter(file => !state.deletedFiles.has(file.id) && (file.folder === rootId || parentFolderMatch(file.folder, rootId)));
+    }
+
+    function globalSearchMatches() {
+      const query = state.globalQuery.trim();
+      if (!query) return [];
+      const folderItems = foldersInCurrentWorkspace()
+        .map(folder => ({ type: "folder", folder, score: fuzzyScore(folder.name, query) }))
+        .filter(item => item.score > 0)
+        .map(item => ({
+          id: item.folder.id,
+          kind: "folder",
+          title: item.folder.name,
+          meta: item.folder.id === workspaceRootId() ? `${currentWorkspaceSearchLabel()}根目录 · ${folderCount(item.folder.id)} 个文件` : `${folderPathLabel(item.folder.parent || workspaceRootId())} · ${folderCount(item.folder.id)} 个文件`,
+          score: item.score
+        }));
+      const fileItems = filesInCurrentWorkspace()
+        .map(file => ({ type: "file", file, score: fuzzyScore(file.name, query) }))
+        .filter(item => item.score > 0)
+        .map(item => ({
+          id: item.file.id,
+          kind: "file",
+          title: item.file.name,
+          meta: `${folderPathLabel(item.file.folder)} · ${item.file.type} · ${item.file.updated}`,
+          score: item.score
+        }));
+      return [...folderItems, ...fileItems]
+        .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, "zh-Hans-CN"))
+        .slice(0, 9);
+    }
+
+    function renderGlobalSearchResults() {
+      if (!els.globalSearchResults || !els.globalSearch) return;
+      const query = state.globalQuery.trim();
+      const shouldOpen = state.globalSearchOpen && !!query;
+      els.globalSearch.setAttribute("aria-expanded", String(shouldOpen));
+      if (!shouldOpen) {
+        els.globalSearchResults.hidden = true;
+        els.globalSearchResults.innerHTML = "";
+        return;
+      }
+      const results = globalSearchMatches();
+      els.globalSearchResults.hidden = false;
+      els.globalSearchResults.innerHTML = `
+        <div class="global-search-head">
+          <strong>${escapeHtml(currentWorkspaceSearchLabel())}内搜索</strong>
+          <span>${results.length > 0 ? `匹配 ${results.length} 项` : "无匹配结果"}</span>
+        </div>
+        ${results.length > 0 ? `
+          <div class="global-search-list">
+            ${results.map(item => `
+              <button class="global-search-item" data-global-result-kind="${item.kind}" data-global-result-id="${item.id}" type="button" role="option">
+                <span class="global-search-icon ${item.kind === "file" ? "file" : ""}">
+                  ${item.kind === "file" ? fileIcon(files.find(file => file.id === item.id) || {}) : folderIcon(folders.find(folder => folder.id === item.id) || {})}
+                </span>
+                <span class="global-search-main">
+                  <span class="global-search-title">${highlightSearchMatch(item.title, query)}</span>
+                  <span class="global-search-meta">${escapeHtml(item.meta)}</span>
+                </span>
+                <span class="global-search-type">${item.kind === "file" ? "文件" : "文件夹"}</span>
+              </button>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="global-search-empty">没有找到匹配的文件名或文件夹名称</div>
+        `}
+      `;
+      els.globalSearchResults.querySelectorAll("[data-global-result-id]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          openGlobalSearchResult(button.dataset.globalResultKind, button.dataset.globalResultId);
+        });
+      });
+    }
+
+    function openGlobalSearchResult(kind, id) {
+      state.globalSearchOpen = false;
+      if (kind === "folder") {
+        state.query = "";
+        els.fileSearch.value = "";
+        selectFolder(id);
+        return;
+      }
+      const file = files.find(item => item.id === id && !state.deletedFiles.has(item.id));
+      if (!file) return;
+      expandFolderAncestors(file.folder);
+      if (state.activeWorkspace === "files") {
+        state.query = "";
+        els.fileSearch.value = "";
+        selectFilePreview(file.id);
+        return;
+      }
+      state.selectedFolder = file.folder;
+      state.selectedFile = null;
+      state.query = file.name;
+      els.fileSearch.value = state.query;
+      render();
     }
 
     function parentFolderMatch(fileFolder, selectedFolder) {
@@ -10796,6 +11081,7 @@
       if (els.toolbar) els.toolbar.style.display = state.activeWorkspace === "voice" || isPreview ? "none" : "";
       if (els.contentList) els.contentList.classList.toggle("preview-mode", isPreview);
       if (els.appShell) els.appShell.classList.toggle("file-preview-reading", isPreviewReading);
+      if (els.globalSearch) els.globalSearch.placeholder = state.activeWorkspace === "voice" ? "全局搜索语音笔记..." : "全局搜索文件夹资产...";
       renderAssistantWake();
       els.ingestCards.innerHTML = config.ingest.map(item => `
         <button class="ingest-card ${item.className || ""}" ${item.action ? `data-ingest-action="${escapeHtml(item.action)}"` : `data-toast="${escapeHtml(item.toast)}"`} type="button">
@@ -10834,6 +11120,8 @@
       state.activeTagFilter = "全部";
       state.activeDateFilter = "";
       state.query = "";
+      state.globalQuery = "";
+      state.globalSearchOpen = false;
       els.globalSearch.value = "";
       els.fileSearch.value = "";
       state.view = "list";
@@ -14089,16 +14377,36 @@
         }
       });
       els.globalSearch.addEventListener("input", event => {
-        state.query = event.target.value;
-        els.fileSearch.value = state.query;
-        updateFilterSummary();
-        renderList();
+        state.globalQuery = event.target.value;
+        state.globalSearchOpen = true;
+        renderGlobalSearchResults();
+      });
+      els.globalSearch.addEventListener("focus", () => {
+        state.globalSearchOpen = true;
+        renderGlobalSearchResults();
+      });
+      els.globalSearch.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          state.globalSearchOpen = false;
+          renderGlobalSearchResults();
+        }
+        if (event.key === "Enter") {
+          const first = els.globalSearchResults?.querySelector("[data-global-result-id]");
+          if (first) {
+            event.preventDefault();
+            openGlobalSearchResult(first.dataset.globalResultKind, first.dataset.globalResultId);
+          }
+        }
       });
       els.fileSearch.addEventListener("input", event => {
         state.query = event.target.value;
-        els.globalSearch.value = state.query;
         updateFilterSummary();
         renderList();
+      });
+      document.addEventListener("click", event => {
+        if (els.globalSearchShell?.contains(event.target)) return;
+        state.globalSearchOpen = false;
+        renderGlobalSearchResults();
       });
       els.listViewButton.addEventListener("click", () => {
         state.view = "list";
@@ -14123,9 +14431,11 @@
         }
         if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
           event.preventDefault();
-          els.fileSearch.focus();
-          els.fileSearch.select();
-          showToast("已聚焦文件搜索");
+          els.globalSearch.focus();
+          els.globalSearch.select();
+          state.globalSearchOpen = true;
+          renderGlobalSearchResults();
+          showToast("已聚焦全局搜索");
         }
         if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "i") {
           event.preventDefault();
@@ -14141,6 +14451,7 @@
       renderFilters();
       renderSelection();
       renderList();
+      renderGlobalSearchResults();
       renderAssistantContext();
       renderTaskMenu();
       renderKnowledgePicker();
