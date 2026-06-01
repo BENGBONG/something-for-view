@@ -1513,6 +1513,10 @@
       table-layout: fixed;
     }
 
+    .content-list table:not(.voice-table) {
+      min-width: 720px;
+    }
+
     table.voice-table {
       min-width: 920px;
     }
@@ -1955,6 +1959,11 @@
 
     .folder-card .file-card-top {
       align-items: center;
+      justify-content: flex-start;
+    }
+
+    .folder-card .row-check {
+      margin-left: auto;
     }
 
     .folder-card .folder-badge {
@@ -8886,7 +8895,7 @@
           <div class="toolbar">
             <div class="selected-summary">
               <span class="select-all"><svg class="icon icon-sm"><use href="#i-check"/></svg></span>
-              <span id="selectionText">已选文件可移动到其他目录</span>
+              <span id="selectionText">已选内容可移动到其他目录</span>
             </div>
             <div class="toolbar-actions">
               <button class="small-button" id="moveButton" type="button">
@@ -8973,7 +8982,7 @@
   <div class="flashcard-preview-modal" id="flashcardPreviewModal" hidden role="dialog" aria-modal="true" aria-label="闪卡预览"></div>
   <div class="flashcard-preview-modal table-preview-modal" id="tablePreviewModal" hidden role="dialog" aria-modal="true" aria-label="表格预览"></div>
   <div class="knowledge-picker-modal" id="knowledgePickerModal" hidden role="dialog" aria-modal="true" aria-label="选择知识库文件"></div>
-  <div class="knowledge-picker-modal" id="moveFolderModal" hidden role="dialog" aria-modal="true" aria-label="移动文件到目录"></div>
+  <div class="knowledge-picker-modal" id="moveFolderModal" hidden role="dialog" aria-modal="true" aria-label="移动内容到目录"></div>
 
   <script>
     const folders = [
@@ -9105,6 +9114,7 @@
       selectedFile: null,
       activeWorkspace: "files",
       selectedFiles: new Set(),
+      selectedFolders: new Set(),
       referencedFiles: new Set(),
       customBackgroundUploaded: false,
       customBackgroundName: "",
@@ -9464,6 +9474,23 @@
       return direct.concat(direct.flatMap(descendantFolderIds));
     }
 
+    function refreshFolderDepths() {
+      const visit = (folderId, depth) => {
+        folders
+          .filter(folder => folder.parent === folderId)
+          .forEach(folder => {
+            folder.depth = depth + 1;
+            visit(folder.id, folder.depth);
+          });
+      };
+      folders
+        .filter(folder => !folder.parent)
+        .forEach(folder => {
+          folder.depth = 0;
+          visit(folder.id, 0);
+        });
+    }
+
     function folderCount(folderId) {
       return files.filter(file => !state.deletedFiles.has(file.id) && (file.folder === folderId || parentFolderMatch(file.folder, folderId))).length;
     }
@@ -9692,6 +9719,14 @@
       return files.filter(file => state.selectedFiles.has(file.id) && !state.deletedFiles.has(file.id));
     }
 
+    function selectedFolders() {
+      return folders.filter(folder => state.selectedFolders.has(folder.id) && isPersonalManagedFolder(folder));
+    }
+
+    function selectedMoveCount() {
+      return selectedFiles().length + selectedFolders().length;
+    }
+
     function isPersonalFolderId(folderId) {
       return folderId === "personal" || parentFolderMatch(folderId, "personal");
     }
@@ -9700,19 +9735,45 @@
       return !!file && isPersonalFolderId(file.folder);
     }
 
+    function isMovablePersonalFolder(folder) {
+      return !!folder && folder.id !== "personal" && isPersonalManagedFolder(folder) && isPersonalFolderId(folder.id);
+    }
+
+    function selectedFolderBlockedTargetIds() {
+      return new Set(selectedFolders().flatMap(folder => [folder.id, ...descendantFolderIds(folder.id)]));
+    }
+
+    function fileCoveredBySelectedFolder(file, selectedFolderIds = selectedFolderBlockedTargetIds()) {
+      return [...selectedFolderIds].some(folderId => file.folder === folderId);
+    }
+
+    function topLevelSelectedFolders() {
+      const selectedIds = new Set(selectedFolders().map(folder => folder.id));
+      return selectedFolders().filter(folder => {
+        let current = folder.parent ? folders.find(item => item.id === folder.parent) : null;
+        while (current) {
+          if (selectedIds.has(current.id)) return false;
+          current = current.parent ? folders.find(item => item.id === current.parent) : null;
+        }
+        return true;
+      });
+    }
+
     function validateMoveSelection(showMessage = true) {
-      const selected = selectedFiles();
-      if (selected.length === 0) {
-        if (showMessage) showToast("请先勾选需要移动的文件");
+      const selectedFileItems = selectedFiles();
+      const selectedFolderItems = selectedFolders();
+      if (selectedFileItems.length + selectedFolderItems.length === 0) {
+        if (showMessage) showToast("请先勾选需要移动的文件或文件夹");
         return false;
       }
       if (state.activeWorkspace !== "files") {
-        if (showMessage) showToast("只有文件夹-我的文件下的文件支持移动");
+        if (showMessage) showToast("只有文件夹-我的文件下的文件和文件夹支持移动");
         return false;
       }
-      const blocked = selected.filter(file => !isMovablePersonalFile(file));
-      if (blocked.length > 0) {
-        if (showMessage) showToast(`只有文件夹-我的文件下的文件支持移动，已选 ${blocked.length} 个不可移动文件`);
+      const blockedFiles = selectedFileItems.filter(file => !isMovablePersonalFile(file));
+      const blockedFolders = selectedFolderItems.filter(folder => !isMovablePersonalFolder(folder));
+      if (blockedFiles.length + blockedFolders.length > 0) {
+        if (showMessage) showToast(`只有文件夹-我的文件下的内容支持移动，已选 ${blockedFiles.length + blockedFolders.length} 个不可移动项`);
         return false;
       }
       return true;
@@ -9721,8 +9782,9 @@
     function personalMoveFolders() {
       const root = folders.find(folder => folder.id === "personal");
       if (!root) return [];
+      const blockedTargetIds = selectedFolderBlockedTargetIds();
       const collect = (parentId, depth) => folders
-        .filter(folder => folder.parent === parentId && isPersonalManagedFolder(folder))
+        .filter(folder => folder.parent === parentId && isPersonalManagedFolder(folder) && !blockedTargetIds.has(folder.id))
         .flatMap(folder => [
           { ...folder, pickerDepth: depth },
           ...(state.moveFolderExpanded.has(folder.id) ? collect(folder.id, depth + 1) : [])
@@ -9902,6 +9964,9 @@
       for (let i = folders.length - 1; i >= 0; i -= 1) {
         if (folderIds.includes(folders[i].id)) folders.splice(i, 1);
       }
+      [...state.selectedFolders].forEach(id => {
+        if (folderIds.includes(id)) state.selectedFolders.delete(id);
+      });
       [...state.selectedFiles].forEach(id => {
         if (removedFileIds.has(id)) state.selectedFiles.delete(id);
       });
@@ -10383,9 +10448,14 @@
 
     function openMoveFolderModal() {
       if (!validateMoveSelection(true)) return;
-      const selected = selectedFiles();
-      const commonFolder = selected.length > 0 && selected.every(file => file.folder === selected[0].folder)
-        ? selected[0].folder
+      const selectedFileItems = selectedFiles();
+      const selectedFolderItems = selectedFolders();
+      const sourceFolders = [
+        ...selectedFileItems.map(file => file.folder),
+        ...selectedFolderItems.map(folder => folder.parent || "personal")
+      ];
+      const commonFolder = sourceFolders.length > 0 && sourceFolders.every(folderId => folderId === sourceFolders[0])
+        ? sourceFolders[0]
         : state.selectedFolder;
       state.moveTargetFolder = isPersonalFolderId(commonFolder) ? commonFolder : "personal";
       expandMoveFolderAncestors(state.moveTargetFolder);
@@ -10408,15 +10478,25 @@
         showToast("请选择可移动的个人文件目录");
         return;
       }
-      const selected = selectedFiles();
-      if (selected.every(file => file.folder === target.id)) {
-        showToast("所选文件已在该目录");
+      const selectedFileItems = selectedFiles();
+      const selectedFolderItems = selectedFolders();
+      const effectiveFolderItems = topLevelSelectedFolders();
+      const blockedTargetIds = selectedFolderBlockedTargetIds();
+      const effectiveFileItems = selectedFileItems.filter(file => !fileCoveredBySelectedFolder(file, blockedTargetIds));
+      const filesAlreadyInTarget = effectiveFileItems.length === 0 || effectiveFileItems.every(file => file.folder === target.id);
+      const foldersAlreadyInTarget = effectiveFolderItems.length === 0 || effectiveFolderItems.every(folder => folder.parent === target.id);
+      if (filesAlreadyInTarget && foldersAlreadyInTarget) {
+        showToast("所选内容已在该目录");
         closeMoveFolderModal();
         return;
       }
-      selected.forEach(file => {
+      effectiveFileItems.forEach(file => {
         file.folder = target.id;
       });
+      effectiveFolderItems.forEach(folder => {
+        folder.parent = target.id;
+      });
+      refreshFolderDepths();
       expandFolderAncestors(target.id);
       state.selectedFolder = target.id;
       state.selectedFile = null;
@@ -10427,7 +10507,7 @@
       renderAssistantContext();
       if (state.assistantView === "task") renderTaskView();
       renderMoveFolderModal();
-      showToast(`已移动 ${selected.length} 个文件到 ${target.name}`);
+      showToast(`已移动 ${selectedFileItems.length + selectedFolderItems.length} 项到 ${target.name}`);
     }
 
     function renderMoveFolderModal() {
@@ -10443,7 +10523,7 @@
         return;
       }
 
-      const selected = selectedFiles();
+      const selectedCount = selectedMoveCount();
       const moveFolders = personalMoveFolders();
       if (!moveFolders.some(folder => folder.id === state.moveTargetFolder)) {
         state.moveTargetFolder = "personal";
@@ -10458,12 +10538,12 @@
               <strong>选择移动位置</strong>
               <span>仅支持移动到“文件夹 - 我的文件”下的目录</span>
             </div>
-            <button class="icon-button" data-move-close type="button" aria-label="关闭移动文件弹窗">
+            <button class="icon-button" data-move-close type="button" aria-label="关闭移动内容弹窗">
               <svg class="icon icon-sm"><use href="#i-x"/></svg>
             </button>
           </div>
           <div class="move-folder-summary">
-            已选 ${selected.length} 个文件，当前目标：${escapeHtml(target?.name || "我的文件")}
+            已选 ${selectedCount} 项，当前目标：${escapeHtml(target?.name || "我的文件")}
           </div>
           <div class="move-folder-options" aria-label="可移动目录范围">
             ${moveFolders.map(folder => `
@@ -10583,6 +10663,7 @@
       els.fileSearch.value = "";
       state.view = "list";
       state.selectedFiles.clear();
+      state.selectedFolders.clear();
       state.folderMenuOpen = null;
       state.moveFolderOpen = false;
       render();
@@ -10590,10 +10671,11 @@
 
     function renderFolderCard(folder) {
       return `
-        <article class="file-card folder-card" data-folder-open="${folder.id}">
+        <article class="file-card folder-card ${state.selectedFolders.has(folder.id) ? "selected" : ""}" data-folder-open="${folder.id}">
           <div class="file-card-top">
             <span class="file-icon">${folderIcon(folder)}</span>
             <span class="folder-badge">文件夹</span>
+            <input class="row-check" type="checkbox" ${state.selectedFolders.has(folder.id) ? "checked" : ""} data-check-folder="${folder.id}" aria-label="选择文件夹 ${escapeHtml(folder.name)}">
           </div>
           <h3>${escapeHtml(folder.name)}</h3>
           <p>${escapeHtml(folderPathLabel(folder.id))}</p>
@@ -10607,9 +10689,10 @@
 
     function renderFolderRow(folder) {
       return `
-        <tr class="folder-row" data-folder-open="${folder.id}">
+        <tr class="folder-row ${state.selectedFolders.has(folder.id) ? "selected" : ""}" data-folder-open="${folder.id}">
           <td>
             <div class="file-cell">
+              <input class="row-check" type="checkbox" ${state.selectedFolders.has(folder.id) ? "checked" : ""} data-check-folder="${folder.id}" aria-label="选择文件夹 ${escapeHtml(folder.name)}">
               <span class="file-icon">${folderIcon(folder)}</span>
               <span class="file-meta">
                 <span class="file-title">${escapeHtml(folder.name)}</span>
@@ -10661,7 +10744,7 @@
         <h2>二、知识库解析状态</h2>
         <p>当前文件状态为：${escapeHtml(file.ragStatus)}。文件可作为小智引用知识库的候选资料，但不会因为在目录中被选中而自动关联到小智。</p>
         <h3>2.1 入库与引用</h3>
-        <p>如需让小智使用该文件，需要在小智对话框中通过“引用知识库”主动选择。文件列表中的勾选仍仅用于移动文件。</p>
+        <p>如需让小智使用该文件，需要在小智对话框中通过“引用知识库”主动选择。文件列表中的勾选仍仅用于移动文件或文件夹。</p>
         <h2>三、后续使用建议</h2>
         <p>建议在预览确认内容后，根据文件主题移动到合适目录，保持个人文件夹结构和知识库引用范围一致。</p>
       `;
@@ -10908,6 +10991,20 @@
         });
       });
 
+      els.contentList.querySelectorAll("[data-check-folder]").forEach(input => {
+        input.addEventListener("change", event => {
+          event.stopPropagation();
+          const id = event.target.dataset.checkFolder;
+          if (event.target.checked) {
+            state.selectedFolders.add(id);
+          } else {
+            state.selectedFolders.delete(id);
+          }
+          renderSelection();
+          renderList();
+        });
+      });
+
       els.contentList.querySelectorAll("[data-preview-back]").forEach(button => {
         button.addEventListener("click", () => {
           state.selectedFile = null;
@@ -10918,7 +11015,7 @@
 
       els.contentList.querySelectorAll("[data-folder-open]").forEach(node => {
         node.addEventListener("click", event => {
-          if (event.target.closest("button, a, svg, use")) return;
+          if (event.target.closest("input, button, a, svg, use")) return;
           selectFolder(node.dataset.folderOpen);
         });
       });
@@ -11005,11 +11102,11 @@
     }
 
     function renderSelection() {
-      const count = state.selectedFiles.size;
+      const count = selectedMoveCount();
       const summary = els.selectionText.closest(".selected-summary");
       if (summary) summary.style.display = count > 0 ? "" : "none";
       els.selectionText.textContent = count > 0
-        ? `已选 ${count} 个文件，可移动到其他目录`
+        ? `已选 ${count} 项，可移动到其他目录`
         : "";
       if (els.moveButton) {
         els.moveButton.disabled = count === 0 || state.activeWorkspace !== "files";
@@ -13531,12 +13628,16 @@
 
     function toggleSelectAll() {
       const visible = visibleFiles();
-      if (!visible.length) return;
-      const allSelected = visible.every(file => state.selectedFiles.has(file.id));
+      const visibleFolders = currentFolderChildFolders();
+      if (!visible.length && !visibleFolders.length) return;
+      const allSelected = visible.every(file => state.selectedFiles.has(file.id))
+        && visibleFolders.every(folder => state.selectedFolders.has(folder.id));
       if (allSelected) {
         visible.forEach(file => state.selectedFiles.delete(file.id));
+        visibleFolders.forEach(folder => state.selectedFolders.delete(folder.id));
       } else {
         visible.forEach(file => state.selectedFiles.add(file.id));
+        visibleFolders.forEach(folder => state.selectedFolders.add(folder.id));
       }
       renderSelection();
       renderList();
