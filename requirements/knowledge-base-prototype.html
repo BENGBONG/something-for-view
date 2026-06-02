@@ -1150,6 +1150,31 @@
       line-height: 1.35;
     }
 
+    .folder-create-popover.warning {
+      width: 286px;
+      border-color: rgba(245,158,11,0.32);
+    }
+
+    .folder-create-popover.blocked {
+      width: 286px;
+      border-color: rgba(229,87,87,0.24);
+    }
+
+    .folder-create-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .folder-create-note strong {
+      color: var(--amber);
+      font-size: inherit;
+    }
+
+    .folder-create-popover.blocked .folder-create-note strong {
+      color: var(--red);
+    }
+
     .folder-create-input {
       width: 100%;
       height: 34px;
@@ -10259,6 +10284,13 @@
       showToast(`已新建目录：${name}`);
     }
 
+    const folderDepthGuideLayer = 5;
+    const folderDepthHardLimit = 10;
+
+    function folderLayer(folder) {
+      return (folder?.depth || 0) + 1;
+    }
+
     let folderCreatePopoverEl = null;
 
     function closeFolderCreatePopover() {
@@ -10327,11 +10359,72 @@
       input.select();
     }
 
+    function showFolderDepthNotice({ parent, anchor, mode }) {
+      closeFolderCreatePopover();
+      const rect = anchor?.getBoundingClientRect?.();
+      const el = document.createElement("div");
+      const isBlocked = mode === "blocked";
+      el.className = `folder-create-popover ${isBlocked ? "blocked" : "warning"}`;
+      el.innerHTML = isBlocked ? `
+        <strong>已达到 10 层上限</strong>
+        <div class="folder-create-note">
+          <strong>${escapeHtml(parent.name)}</strong> 已是第 ${folderLayer(parent)} 层目录，当前不支持继续新建下级目录。建议回到上级目录新建，或移动部分内容优化层级。
+        </div>
+        <div class="folder-create-actions">
+          <button class="folder-create-submit" type="button">知道了</button>
+        </div>
+      ` : `
+        <strong>目录层级较深</strong>
+        <div class="folder-create-note">
+          <strong>${escapeHtml(parent.name)}</strong> 已是第 ${folderLayer(parent)} 层目录，继续新建会进入第 ${folderLayer(parent) + 1} 层。层级过深会降低查找效率，建议优先通过命名、搜索或移动整理目录。
+        </div>
+        <div class="folder-create-actions">
+          <button class="folder-create-cancel" type="button">取消</button>
+          <button class="folder-create-submit" type="button">继续新建</button>
+        </div>
+      `;
+      if (rect) {
+        el.style.left = Math.max(12, Math.min(rect.right - 286, window.innerWidth - 298)) + "px";
+        el.style.top = Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - 172)) + "px";
+      } else {
+        el.style.left = "50%";
+        el.style.top = "50%";
+        el.style.transform = "translate(-50%, -50%)";
+      }
+      state.folderMenuOpen = null;
+      renderFolders();
+      document.body.appendChild(el);
+      folderCreatePopoverEl = el;
+      const close = () => closeFolderCreatePopover();
+      el.querySelector(".folder-create-cancel")?.addEventListener("click", close);
+      el.querySelector(".folder-create-submit").addEventListener("click", () => {
+        closeFolderCreatePopover();
+        if (!isBlocked) {
+          showFolderCreatePopover({
+            parentId: parent.id,
+            title: "新建下级目录",
+            depth: (parent.depth || 0) + 1,
+            anchor
+          });
+        }
+      });
+      const outsideClick = event => {
+        if (el.contains(event.target)) return;
+        closeFolderCreatePopover();
+        document.removeEventListener("click", outsideClick);
+      };
+      setTimeout(() => document.addEventListener("click", outsideClick), 10);
+    }
+
     function addPersonalChildFolder(parentId, anchor) {
       const parent = folders.find(folder => folder.id === parentId);
       if (!isPersonalManagedFolder(parent)) return;
-      if ((parent.depth || 0) >= 3) {
-        showToast("目录层级最多支持 3 级");
+      if (folderLayer(parent) >= folderDepthHardLimit) {
+        showFolderDepthNotice({ parent, anchor, mode: "blocked" });
+        return;
+      }
+      if (folderLayer(parent) >= folderDepthGuideLayer) {
+        showFolderDepthNotice({ parent, anchor, mode: "warning" });
         return;
       }
       showFolderCreatePopover({
@@ -10461,7 +10554,7 @@
       }
       const filesInTree = files.filter(file => !state.deletedFiles.has(file.id) && (file.folder === rootId || parentFolderMatch(file.folder, rootId)));
       const renderFileTreeNode = (file, viewDepth) => `
-        <div class="tree-item file-node depth-${viewDepth} ${state.selectedFile === file.id ? "active" : ""}" data-tree-file="${file.id}" role="button" tabindex="0" title="${escapeHtml(file.name)}">
+        <div class="tree-item file-node depth-${Math.min(viewDepth, 4)} ${state.selectedFile === file.id ? "active" : ""}" style="padding-left:${9 + Math.min(viewDepth, 7) * 12}px" data-tree-file="${file.id}" role="button" tabindex="0" title="${escapeHtml(file.name)}">
           <span class="tree-expand-arrow" style="visibility:hidden">▸</span>
           <span class="space-name">
             ${fileIcon(file)}
@@ -10484,7 +10577,7 @@
           ? `<button class="tree-expand-arrow ${isExpanded ? "expanded" : ""}" data-expand-folder="${folder.id}" type="button" aria-label="${isExpanded ? "折叠" : "展开"}">▸</button>`
           : `<span class="tree-expand-arrow" style="visibility:hidden">▸</span>`;
         return `
-          <div class="tree-item depth-${viewDepth} ${isActive ? "active" : ""}" data-folder="${folder.id}" data-kind="${folder.kind || "custom"}" role="button" tabindex="0">
+          <div class="tree-item depth-${Math.min(viewDepth, 4)} ${isActive ? "active" : ""}" style="padding-left:${9 + Math.min(viewDepth, 7) * 12}px" data-folder="${folder.id}" data-kind="${folder.kind || "custom"}" role="button" tabindex="0">
             ${expandArrow}
             <span class="space-name">
               ${folderIcon(folder)}
@@ -10537,7 +10630,7 @@
             ? `<button class="tree-expand-arrow ${isExpanded ? "expanded" : ""}" data-expand-folder="${folder.id}" type="button" aria-label="${isExpanded ? "折叠" : "展开"}">▸</button>`
             : `<span class="tree-expand-arrow" style="visibility:hidden">▸</span>`;
           return `
-            <div class="tree-item depth-${viewDepth} ${isActive ? "active" : ""}" data-folder="${folder.id}" data-kind="${folder.kind || "custom"}" role="button" tabindex="0">
+            <div class="tree-item depth-${Math.min(viewDepth, 4)} ${isActive ? "active" : ""}" style="padding-left:${9 + Math.min(viewDepth, 7) * 12}px" data-folder="${folder.id}" data-kind="${folder.kind || "custom"}" role="button" tabindex="0">
               ${expandArrow}
               <span class="space-name">
                 ${folderIcon(folder)}
