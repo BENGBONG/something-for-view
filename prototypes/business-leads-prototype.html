@@ -161,6 +161,16 @@ tr.clickable:hover .file-cell{color:var(--primary)}
 .detail-meta{font-size:12px;color:var(--text-3)}
 .detail-meta b{color:var(--text);font-weight:600}
 .detail-meta .hl{color:var(--primary);font-weight:600}
+.grid-toolbar{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.grid-search{height:30px;width:220px;display:flex;align-items:center;gap:7px;padding:0 10px;border:1px solid var(--border-dark);border-radius:7px;background:#fff;color:var(--text-3)}
+.grid-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px rgba(65,78,255,.08)}
+.grid-search input{width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:12px}
+.grid-filter{height:30px;max-width:180px;padding:0 28px 0 10px;border:1px solid var(--border-dark);border-radius:7px;background:#fff;color:var(--text-2);font:inherit;font-size:12px;outline:0}
+.grid-filter:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(65,78,255,.08)}
+.grid-reset{height:30px;padding:0 10px;border:1px solid var(--border-dark);border-radius:7px;color:var(--text-2);font-size:12px;background:#fff}
+.grid-reset:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.grid-reset:disabled{color:#C4C8D0;background:#F7F8FA;cursor:not-allowed}
+.grid-result-count{margin-left:auto;font-size:12px;color:var(--text-3);white-space:nowrap}
 .grid-scroll{flex:1;overflow:auto;min-height:0;border-top:1px solid var(--border)}
 table.grid{border-collapse:separate;border-spacing:0;min-width:1980px;width:100%}
 .grid th{position:sticky;top:0;z-index:5;background:#F7F8FA;font-weight:500;color:var(--text-2);font-size:12px;padding:0 10px;height:38px;border-bottom:1px solid var(--border-dark);border-right:1px solid #F0F1F4;text-align:left;white-space:nowrap}
@@ -171,6 +181,12 @@ td.sticky1{position:sticky;left:0;z-index:4;width:48px;min-width:48px;text-align
 td.sticky2{position:sticky;left:48px;z-index:4;box-shadow:5px 0 6px -5px rgba(0,0,0,.07)}
 th.sticky1{position:sticky;left:0;z-index:6;width:48px;min-width:48px;text-align:center}
 th.sticky2{position:sticky;left:48px;z-index:6;box-shadow:5px 0 6px -5px rgba(0,0,0,.07)}
+.grid-sort-btn{width:100%;height:38px;display:flex;align-items:center;justify-content:flex-start;gap:5px;color:inherit;font-size:12px;white-space:nowrap}
+.grid-sort-btn:hover{color:var(--primary)}
+th.sticky1 .grid-sort-btn{justify-content:center}
+.sort-indicator{font-size:11px;color:#B5BAC3;line-height:1}
+.grid-sort-btn.active .sort-indicator{color:var(--primary)}
+.grid-empty{text-align:center!important;color:var(--text-3)!important;padding:52px 20px!important;height:auto!important;background:#fff!important}
 .co-name{font-weight:500;color:var(--text)}
 .link{color:var(--blue);text-decoration:none}
 .link:hover{text-decoration:underline}
@@ -368,7 +384,13 @@ const state = {
   q: '',
   fileId: 1,
   sheet: 'contacts',   // contacts | nocontact
-  busy: false
+  busy: false,
+  gridQuery: '',
+  gridGrade: '',
+  gridIndustry: '',
+  gridEnhanced: '',
+  gridSortKey: '',
+  gridSortDir: ''
 };
 
 /* 商机线索文件（PRD 6.2 字段） */
@@ -493,6 +515,54 @@ function fileStats(f){
 function sheetLeads(){
   return leads.filter(l => l.sheet === (state.sheet === 'nocontact' ? 'n' : 'c'));
 }
+
+/* TABLE_CONTROL_MODEL_START */
+function gridSearchText(lead, cols){
+  return cols.flatMap(col => {
+    if (col.k === 'op') return [];
+    if (col.k === 'hv'){
+      const cell = lead.hv?.[col.f];
+      return cell?.s === 'unlocked' ? [cell.v ?? ''] : [];
+    }
+    return [lead[col.k] ?? ''];
+  }).join(' ').toLocaleLowerCase();
+}
+
+function applyGridControls(rows, cols, controls){
+  const query = String(controls.query ?? '').trim().toLocaleLowerCase();
+  const enhanced = lead => Object.values(lead.hv ?? {}).some(cell => cell?.s === 'unlocked');
+  const result = rows.filter(lead =>
+    (!query || gridSearchText(lead, cols).includes(query)) &&
+    (!controls.grade || lead.grade === controls.grade) &&
+    (!controls.industry || lead.industry === controls.industry) &&
+    (!controls.enhanced || (controls.enhanced === 'yes') === enhanced(lead))
+  );
+  if (!controls.sortKey || !controls.sortDir) return result;
+  const numeric = new Set(['no', 'icp']);
+  const direction = controls.sortDir === 'desc' ? -1 : 1;
+  return result.slice().sort((left, right) => {
+    const a = left[controls.sortKey], b = right[controls.sortKey];
+    const aEmpty = a === '' || a === null || a === undefined;
+    const bEmpty = b === '' || b === null || b === undefined;
+    if (aEmpty || bEmpty) return aEmpty === bEmpty ? 0 : (aEmpty ? 1 : -1);
+    const comparison = numeric.has(controls.sortKey)
+      ? Number(a) - Number(b)
+      : String(a).localeCompare(String(b), 'zh-CN', { numeric: true, sensitivity: 'base' });
+    return comparison * direction;
+  });
+}
+
+function nextGridSort(sortKey, sortDir, key){
+  if (sortKey !== key) return { sortKey: key, sortDir: 'asc' };
+  if (sortDir === 'asc') return { sortKey: key, sortDir: 'desc' };
+  return { sortKey: '', sortDir: '' };
+}
+
+function hasActiveGridControls(controls){
+  return Boolean(controls.query || controls.grade || controls.industry || controls.enhanced || controls.sortKey || controls.sortDir);
+}
+/* TABLE_CONTROL_MODEL_END */
+
 function toast(msg, type){
   const t = document.createElement('div');
   t.className = 'toast' + (type ? ' ' + type : '');
@@ -616,11 +686,82 @@ function viewList(){
  * ================================================================ */
 function openFile(id){
   if (id !== 1){ toast('原型演示：仅《乌克兰重工行业GD5000线索清单》开放详情预览', 'info'); return; }
-  state.fileId = id; state.sheet = 'contacts'; state.view = 'detail';
+  state.fileId = id; state.sheet = 'contacts'; state.view = 'detail'; resetGridControls(false);
   render();
 }
 function backToList(){ state.view = 'ent-leads'; render(); }
-function switchSheet(s){ state.sheet = s; render(); }
+function switchSheet(s){ state.sheet = s; resetGridControls(false); render(); }
+
+function gridControls(){
+  return {
+    query: state.gridQuery,
+    grade: state.gridGrade,
+    industry: state.gridIndustry,
+    enhanced: state.gridEnhanced,
+    sortKey: state.gridSortKey,
+    sortDir: state.gridSortDir
+  };
+}
+
+function filteredGridLeads(){
+  const cols = state.sheet === 'nocontact' ? COLS_N : COLS_C;
+  return applyGridControls(sheetLeads(), cols, gridControls());
+}
+
+function setGridControl(name, value){
+  state[name] = value;
+  refreshGrid();
+}
+
+function resetGridControls(renderNow = true){
+  Object.assign(state, {
+    gridQuery: '',
+    gridGrade: '',
+    gridIndustry: '',
+    gridEnhanced: '',
+    gridSortKey: '',
+    gridSortDir: ''
+  });
+  if (renderNow) render();
+}
+
+function toggleGridSort(key){
+  const next = nextGridSort(state.gridSortKey, state.gridSortDir, key);
+  state.gridSortKey = next.sortKey;
+  state.gridSortDir = next.sortDir;
+  refreshGrid();
+}
+
+function gridToolbarHTML(){
+  const industries = [...new Set(sheetLeads().map(lead => lead.industry).filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, 'zh-CN'));
+  const industryOptions = industries.map(industry =>
+    `<option value="${esc(industry)}"${state.gridIndustry === industry ? ' selected' : ''}>${esc(industry)}</option>`
+  ).join('');
+  const total = sheetLeads().length;
+  const shown = filteredGridLeads().length;
+  const active = hasActiveGridControls(gridControls());
+  return `<div class="grid-toolbar" aria-label="表格搜索筛选工具栏">
+    <label class="grid-search" for="gridSearch">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <input id="gridSearch" value="${esc(state.gridQuery)}" placeholder="搜索当前 Sheet" oninput="setGridControl('gridQuery',this.value)" />
+    </label>
+    <select class="grid-filter" id="gridGrade" aria-label="按等级筛选" onchange="setGridControl('gridGrade',this.value)">
+      <option value="">全部等级</option>
+      ${['A','B','C'].map(grade => `<option value="${grade}"${state.gridGrade === grade ? ' selected' : ''}>等级 ${grade}</option>`).join('')}
+    </select>
+    <select class="grid-filter" id="gridIndustry" aria-label="按行业筛选" onchange="setGridControl('gridIndustry',this.value)">
+      <option value="">全部行业</option>${industryOptions}
+    </select>
+    <select class="grid-filter" id="gridEnhanced" aria-label="按增强状态筛选" onchange="setGridControl('gridEnhanced',this.value)">
+      <option value="">全部增强状态</option>
+      <option value="yes"${state.gridEnhanced === 'yes' ? ' selected' : ''}>已增强</option>
+      <option value="no"${state.gridEnhanced === 'no' ? ' selected' : ''}>未增强</option>
+    </select>
+    <button class="grid-reset" id="gridReset" type="button" onclick="resetGridControls(true)"${active ? '' : ' disabled'}>重置</button>
+    <span class="grid-result-count" id="gridResultCount">显示 ${shown} / ${total} 条</span>
+  </div>`;
+}
 
 function viewDetail(){
   const f = FILES[0];
@@ -635,6 +776,7 @@ function viewDetail(){
         <span class="detail-title"><span class="xls">X</span>${f.name}</span>
         <span class="detail-meta">线索数量 <b>${leads.filter(l=>l.sheet==='c').length}</b> · 已增强线索 <b class="hl" id="enhancedCnt">${leads.filter(isEnhanced).length}</b> · 已解锁字段 <b class="hl" id="unlockedCnt">${leads.reduce((s,l)=>s+HV.filter(k=>l.hv[k]&&l.hv[k].s==='unlocked').length,0)}</b> · 更新于 ${f.updated}</span>
       </div>
+      ${gridToolbarHTML()}
     </div>
     <div class="grid-scroll" id="gridScroll">${gridHTML()}</div>
     <div class="sheet-tabs">
@@ -651,6 +793,14 @@ function refreshGrid(){
   sc.scrollLeft = l; sc.scrollTop = t;
   const e = $('enhancedCnt'); if (e) e.textContent = leads.filter(isEnhanced).length;
   const u = $('unlockedCnt'); if (u) u.textContent = leads.reduce((s,l2)=>s+HV.filter(k=>l2.hv[k]&&l2.hv[k].s==='unlocked').length,0);
+  syncGridToolbar();
+}
+
+function syncGridToolbar(){
+  const count = $('gridResultCount');
+  if (count) count.textContent = `显示 ${filteredGridLeads().length} / ${sheetLeads().length} 条`;
+  const reset = $('gridReset');
+  if (reset) reset.disabled = !hasActiveGridControls(gridControls());
 }
 
 function hvHead(field){
@@ -718,18 +868,31 @@ function cellHtml(l, c){
   return v ? `<span title="${esc(v)}">${esc(v)}</span>` : '<span style="color:var(--text-3)">—</span>';
 }
 
+function gridHeaderHTML(col, index){
+  if (col.k === 'hv') return hvHead(col.f);
+  const className = index === 0 ? 'sticky1' : (index === 1 ? 'sticky2' : '');
+  const classAttr = className ? ` class="${className}"` : '';
+  const styleAttr = col.min ? ` style="min-width:${col.min}px"` : '';
+  if (col.k === 'op') return `<th${classAttr}${styleAttr}>${col.t}</th>`;
+  const active = state.gridSortKey === col.k;
+  const ariaSort = active ? (state.gridSortDir === 'asc' ? 'ascending' : 'descending') : 'none';
+  const indicator = active ? (state.gridSortDir === 'asc' ? '↑' : '↓') : '↕';
+  return `<th${classAttr}${styleAttr} aria-sort="${ariaSort}">
+    <button class="grid-sort-btn${active ? ' active' : ''}" type="button" onclick="toggleGridSort('${col.k}')" title="点击排序：升序、降序、默认顺序">
+      ${col.t}<span class="sort-indicator" aria-hidden="true">${indicator}</span>
+    </button>
+  </th>`;
+}
+
 function gridHTML(){
   const isN = state.sheet === 'nocontact';
   const cols = isN ? COLS_N : COLS_C;
-  const head = cols.map((c, i) => {
-    if (i === 0) return '<th class="sticky1">#</th>';
-    if (i === 1) return `<th class="sticky2"${c.min ? ` style="min-width:${c.min}px"` : ''}>${c.t}</th>`;
-    if (c.k === 'hv') return hvHead(c.f);
-    return `<th${c.min ? ` style="min-width:${c.min}px"` : ''}>${c.t}</th>`;
-  }).join('');
-  const body = sheetLeads().map(l => '<tr>' + cols.map((c, i) =>
+  const head = cols.map(gridHeaderHTML).join('');
+  const visibleLeads = filteredGridLeads();
+  const body = visibleLeads.map(l => '<tr>' + cols.map((c, i) =>
     `<td${i === 0 ? ' class="sticky1"' : (i === 1 ? ' class="sticky2"' : '')}>${cellHtml(l, c)}</td>`).join('') + '</tr>').join('');
-  return `<table class="grid" style="min-width:${isN ? 3000 : 3800}px"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  const empty = `<tr><td class="grid-empty" colspan="${cols.length}">没有符合当前条件的线索</td></tr>`;
+  return `<table class="grid" style="min-width:${isN ? 3000 : 3800}px"><thead><tr>${head}</tr></thead><tbody>${body || empty}</tbody></table>`;
 }
 
 /* ================================================================
