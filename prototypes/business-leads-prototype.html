@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>百智AI工作台 · 商机线索</title>
+<style>
+:root{
+  --primary:#414EFF; --primary-deep:#2B42F7; --primary-hover:#3243E6; --primary-light:#EFF2FF; --primary-border:#D5DBFF;
+  --bg:#F6F7F9; --card:#FFFFFF; --border:#ECEEF2; --border-dark:#E3E6EB;
+  --text:#1D2129; --text-2:#4E5969; --text-3:#969AA3;
+  --green:#16A34A; --green-bg:#ECFDF3; --green-border:#CDEBD9;
+  --red:#EF4444; --red-bg:#FEF2F2;
+  --blue:#2E6BE6; --blue-light:#F0F6FF; --blue-border:#D6E4FF;
+  --gold-text:#B25E09; --gold-bg:#FFF7E6; --gold-border:#FFE7BA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;font-size:13px;color:var(--text);background:var(--bg);overflow:hidden}
+button{font-family:inherit;background:none;border:none;cursor:pointer}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#D8DBE0;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#C2C6CD}
+::-webkit-scrollbar-track{background:transparent}
+
+.app{display:flex;height:100vh}
+
+/* ================= 一级侧边栏 ================= */
+.side1{width:200px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo-row{display:flex;align-items:center;gap:8px;padding:14px 14px 12px}
+.logo-badge{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#8B6DFF,#3D2EFB);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:600;flex:1;letter-spacing:.2px}
+.side-collapse{color:var(--text-3);padding:3px;border-radius:5px;display:flex;cursor:pointer}
+.side-collapse:hover{background:#F2F3F5}
+.new-task{margin:0 12px 12px;height:34px;background:#DFE5FF;color:#3D55F5;border-radius:8px;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px}
+.new-task:hover{background:#CFD9FF}
+.new-task .nt-right{display:flex;align-items:center;gap:3px;margin-left:2px;opacity:.75}
+.nav{flex:1;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:2px 10px;border-radius:8px;color:var(--text-2);font-size:13px;cursor:pointer;user-select:none}
+.nav-item:hover{background:#F5F6F8}
+.nav-item.active{background:var(--primary-light);color:var(--primary-deep);font-weight:500}
+.nav-item .arrow{margin-left:auto;color:var(--text-3);display:flex}
+.nav-sub{margin:0 10px 0 34px}
+.nav-sub .nav-item{margin:0;padding:7px 12px;font-size:12.5px}
+.nav-empty{margin:6px 10px 0 46px;font-size:12px;color:#C0C4CC}
+.user-card{border-top:1px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.user-card:hover{background:#FAFBFC}
+.avatar{width:32px;height:32px;border-radius:50%;background:#3D4A6B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:500;flex-shrink:0}
+.user-meta{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:500}
+.user-org{font-size:11px;color:var(--text-3);margin-top:1px}
+.user-badge{font-size:11px;color:var(--blue)}
+.user-card .arrow{color:#C0C4CC;display:flex}
+
+/* ================= 二级侧边栏 ================= */
+.right{flex:1;display:flex;min-width:0}
+.side2{width:216px;background:#FBFCFD;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative}
+.side2-scroll{flex:1;overflow-y:auto;padding:12px 10px}
+.sub-group{margin-bottom:16px}
+.sub-group-head{display:flex;align-items:center;gap:7px;padding:7px 10px;font-size:13px;font-weight:500;color:var(--text)}
+.sub-group-head svg{color:var(--primary-deep)}
+.sub-group-head .cnt{margin-left:auto;font-size:11.5px;color:var(--text-3);font-weight:400}
+.sub-item{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 25px;border-radius:7px;color:var(--text-2);font-size:12.5px;cursor:pointer;user-select:none}
+.sub-item:hover{background:#F2F3F6}
+.sub-item.active{background:var(--primary-light);color:var(--primary-deep);font-weight:500}
+.sub-item svg{color:#8A94A6;flex-shrink:0}
+.sub-item.active svg{color:var(--primary-deep)}
+.sub-item .cnt{margin-left:auto;font-size:11.5px;color:var(--text-3);font-weight:400}
+.sub-item.active .cnt{color:var(--primary-deep)}
+.side2-foot{padding:8px 10px}
+.recycle-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;color:var(--text-2);font-size:12.5px;cursor:pointer;user-select:none}
+.recycle-item:hover{background:#F2F3F6}
+.recycle-item.active{background:var(--primary-light);color:var(--primary-deep);font-weight:500}
+.side2-handle{position:absolute;right:-9px;top:46%;width:18px;height:46px;background:#fff;border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#B9BDC5;z-index:5;cursor:pointer;font-size:11px}
+.side2-handle:hover{color:var(--primary)}
+
+/* ================= 主区域 ================= */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0}
+.topbar-title h1{font-size:15px;font-weight:600}
+.topbar-title p{font-size:11px;color:var(--text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.search-box{display:flex;align-items:center;gap:7px;background:#F5F6F8;border:1px solid transparent;border-radius:7px;padding:0 11px;height:32px;width:210px}
+.search-box:focus-within{background:#fff;border-color:var(--primary)}
+.search-box input{border:none;outline:none;background:transparent;font-size:12.5px;width:100%;color:var(--text)}
+.ask-btn{display:flex;align-items:center;gap:5px;height:30px;padding:0 11px;background:var(--blue-light);border:1px solid var(--blue-border);color:var(--blue);border-radius:7px;font-size:12.5px;font-weight:500}
+.ask-btn:hover{background:#E3EFFF}
+.ask-btn kbd{font-size:10px;font-family:inherit;background:#fff;border:1px solid var(--blue-border);border-radius:3px;padding:0 4px;line-height:15px;font-weight:400}
+.credits-pill{display:flex;align-items:center;gap:5px;color:var(--blue);font-size:12.5px;font-weight:500;padding:5px 8px;border-radius:7px;cursor:default}
+.credits-pill.flash{animation:flash .5s}
+@keyframes flash{0%{background:#CFE2FF}100%{background:transparent}}
+.icon-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--text-2)}
+.icon-btn:hover{background:#F2F3F5}
+
+#view{flex:1;overflow-y:auto;padding:14px 16px;min-height:0}
+#view.fill{display:flex;flex-direction:column;overflow:hidden}
+.statusbar{height:26px;background:#fff;border-top:1px solid #F0F1F3;display:flex;align-items:center;gap:26px;padding:0 16px;font-size:11px;color:var(--text-3);flex-shrink:0}
+.sb-group{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.sb-ring{width:10px;height:10px;border-radius:50%;border:2px solid var(--primary);border-right-color:#E3E6EB;transform:rotate(-30deg)}
+
+/* ================= 卡片 / 表格（与截图一致） ================= */
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px}
+.card-head{position:relative;padding:16px 16px 10px}
+.card-title{font-size:14px;font-weight:600}
+.card-desc{font-size:12px;color:var(--text-3);margin-top:4px;line-height:1.6}
+.card-toggles{position:absolute;right:14px;top:14px;display:flex;gap:4px}
+.card-toggles .icon-btn{width:28px;height:28px;border-radius:6px;color:var(--text-3)}
+.card-toggles .icon-btn.on{color:var(--primary);background:var(--primary-light)}
+.card-count{padding:0 16px 8px;font-size:12px;color:var(--text-3)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:12px;color:var(--text-3);font-weight:400;text-align:left;padding:9px 12px;border-top:1px solid #F0F1F3;border-bottom:1px solid #F0F1F3;white-space:nowrap}
+.tbl td{padding:12px;font-size:13px;border-bottom:1px solid #F5F6F8;vertical-align:middle;white-space:nowrap}
+.tbl tbody tr{transition:background .12s}
+.tbl tbody tr:hover{background:#F8F9FA}
+.tbl tbody tr.clickable{cursor:pointer}
+.chk{width:14px;height:14px;border:1.5px solid #C9CDD4;border-radius:3px;display:inline-block;vertical-align:-2px;cursor:pointer;background:#fff}
+.chk:hover{border-color:var(--primary)}
+.xls{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:#1FA264;color:#fff;font-size:10px;font-weight:700;margin-right:8px;vertical-align:-5px;flex-shrink:0}
+.file-cell{display:inline-flex;align-items:center;color:var(--text);font-weight:500;max-width:420px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+tr.clickable:hover .file-cell{color:var(--primary)}
+.num-cell{font-variant-numeric:tabular-nums}
+.enhanced-num{color:var(--primary);font-weight:600}
+.pill-btn{height:24px;padding:0 12px;border-radius:999px;background:var(--primary);color:#fff;font-size:12px;display:inline-flex;align-items:center;gap:4px;font-weight:500;vertical-align:middle}
+.pill-btn:hover{background:var(--primary-hover)}
+.pill-btn.big{height:30px;padding:0 15px;font-size:12.5px}
+.pill-btn svg{flex-shrink:0}
+.txt-btn{color:var(--text-2);font-size:12.5px;padding:4px 8px;border-radius:5px;vertical-align:middle}
+.txt-btn:hover{background:var(--primary-light);color:var(--primary)}
+.txt-btn.danger:hover{background:var(--red-bg);color:var(--red)}
+.op-icon-btn{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-3);vertical-align:middle}
+.op-icon-btn:hover{background:#F2F3F6;color:var(--text-2)}
+.op-icon-btn.danger:hover{background:var(--red-bg);color:var(--red)}
+.op-sep{color:#E3E6EB;margin:0 1px}
+
+/* ================= 详情（Excel 预览） ================= */
+.detail-wrap{display:flex;flex-direction:column;flex:1;min-height:0}
+.detail-inner-head{padding:12px 16px 10px}
+.detail-row1{display:flex;align-items:center;gap:6px}
+.detail-row1 .spacer{flex:1}
+.detail-title-row{display:flex;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px}
+.detail-title{font-size:14px;font-weight:600;display:inline-flex;align-items:center}
+.detail-meta{font-size:12px;color:var(--text-3)}
+.detail-meta b{color:var(--text);font-weight:600}
+.detail-meta .hl{color:var(--primary);font-weight:600}
+.grid-scroll{flex:1;overflow:auto;min-height:0;border-top:1px solid var(--border)}
+table.grid{border-collapse:separate;border-spacing:0;min-width:1980px;width:100%}
+.grid th{position:sticky;top:0;z-index:5;background:#F7F8FA;font-weight:500;color:var(--text-2);font-size:12px;padding:0 10px;height:38px;border-bottom:1px solid var(--border-dark);border-right:1px solid #F0F1F4;text-align:left;white-space:nowrap}
+.grid td{padding:0 10px;height:46px;border-bottom:1px solid #F0F1F4;border-right:1px solid #F4F5F7;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff;max-width:230px}
+.grid tbody tr:hover td{background:#F8F9FB}
+.grid tbody tr:hover td.sticky1,.grid tbody tr:hover td.sticky2{background:#F8F9FB}
+td.sticky1{position:sticky;left:0;z-index:4;width:48px;min-width:48px;text-align:center;color:var(--text-3)}
+td.sticky2{position:sticky;left:48px;z-index:4;box-shadow:5px 0 6px -5px rgba(0,0,0,.07)}
+th.sticky1{position:sticky;left:0;z-index:6;width:48px;min-width:48px;text-align:center}
+th.sticky2{position:sticky;left:48px;z-index:6;box-shadow:5px 0 6px -5px rgba(0,0,0,.07)}
+.co-name{font-weight:500;color:var(--text)}
+.link{color:var(--blue);text-decoration:none}
+.link:hover{text-decoration:underline}
+.grade-tag{font-size:11px;border-radius:4px;padding:1px 8px;font-weight:600}
+.grade-A{background:#FEF2F2;color:#DC2626}
+.grade-B{background:#FFF7E6;color:#D97706}
+.grade-C{background:#F0F5FF;color:#2F54EB}
+.icp-num{font-weight:600;font-variant-numeric:tabular-nums}
+.enhanced-tag{font-size:10.5px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-border);border-radius:4px;padding:0 6px;line-height:17px;margin-left:7px;white-space:nowrap}
+th.hv-head{background:#F6F8FF}
+.hv-head-inner{display:flex;align-items:center;gap:5px}
+.hv-head-inner .lock-ico{color:var(--primary)}
+.price-tag{font-size:10px;color:var(--primary-deep);background:var(--primary-light);border-radius:4px;padding:1px 5px;font-weight:400}
+.col-unlock-btn{border:1px solid var(--primary-border);background:#fff;color:var(--primary);border-radius:5px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px}
+.col-unlock-btn:hover{background:var(--primary);color:#fff}
+.lock-cell{display:flex;align-items:center;gap:7px}
+.lock-mask{color:#B9BDC5;display:inline-flex;align-items:center;gap:4px;letter-spacing:1px}
+.unlock-btn{height:22px;padding:0 9px;font-size:11px;border:1px solid var(--primary);color:var(--primary);background:#fff;border-radius:999px;flex-shrink:0}
+.unlock-btn:hover{background:var(--primary);color:#fff}
+.hv-val{color:var(--text)}
+.cell-empty{color:var(--text-3);font-size:12px}
+.cell-fail{color:var(--red);font-size:12px;margin-right:6px}
+.mini-link{color:var(--primary);font-size:12px;padding:0;text-decoration:underline}
+.cell-querying{display:inline-flex;align-items:center;gap:6px;color:var(--text-3);font-size:12px}
+.spinner{width:13px;height:13px;border:2px solid #E3E6EB;border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.row-unlock-btn{height:25px;padding:0 10px;font-size:11.5px;border-radius:999px;border:1px solid var(--primary-border);background:var(--primary-light);color:var(--primary);white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.row-unlock-btn:hover{background:#DDE3FF}
+.row-done{font-size:11.5px;color:var(--green)}
+.row-none{color:var(--text-3)}
+.sheet-tabs{display:flex;background:#FAFBFC;border-top:1px solid var(--border);padding:0 10px;flex-shrink:0}
+.sheet-tab{padding:9px 18px 8px;font-size:12.5px;color:var(--text-2);cursor:pointer;border-top:2px solid transparent;user-select:none;display:flex;align-items:center;gap:6px}
+.sheet-tab:hover{color:var(--text)}
+.sheet-tab.active{background:#fff;color:var(--primary);border-top-color:var(--primary);font-weight:500;border-left:1px solid #F0F1F4;border-right:1px solid #F0F1F4;margin-bottom:-1px}
+.sheet-tab .cnt{font-size:11px;color:var(--text-3)}
+.sheet-tab.active .cnt{color:var(--primary)}
+
+/* ================= 弹窗 / Toast ================= */
+.modal-mask{position:fixed;inset:0;background:rgba(18,22,30,.45);display:flex;align-items:center;justify-content:center;z-index:100;animation:fadeIn .15s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{width:450px;max-width:92vw;background:#fff;border-radius:10px;padding:20px 22px;box-shadow:0 16px 48px rgba(0,0,0,.18);animation:pop .16s}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h3{font-size:15px;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.modal h3 .lock-ico{color:var(--primary)}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;border-bottom:1px dashed #F0F1F4;gap:14px}
+.kv span{color:var(--text-3);flex-shrink:0;min-width:88px}
+.kv b{font-weight:500;flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kv b.cost{color:var(--gold-text);font-weight:600}
+.field-line{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:5px 2px;color:var(--text-2);gap:14px}
+.field-line span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.field-line b{font-weight:500;color:var(--text);flex-shrink:0}
+.modal-note{background:#F8F9FB;border-radius:7px;padding:10px 13px;font-size:12px;color:var(--text-2);line-height:1.7;margin-top:12px}
+.insufficient{background:var(--red-bg);color:#DC2626;border-radius:7px;padding:9px 13px;font-size:12.5px;margin-top:12px}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.btn{height:32px;padding:0 15px;border-radius:7px;font-size:12.5px;border:1px solid var(--border-dark);background:#fff;color:var(--text);display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-hover)}
+.btn.danger{color:var(--red);border-color:#F5C6C6}
+.btn.danger:hover{background:var(--red-bg);border-color:var(--red)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;pointer-events:none}
+.batch-list{max-height:170px;overflow-y:auto;margin-top:8px;border:1px solid #F0F1F4;border-radius:7px;padding:4px 10px}
+#toastRoot{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:#fff;border:1px solid var(--border);border-left:3px solid var(--green);box-shadow:0 8px 28px rgba(0,0,0,.13);border-radius:8px;padding:10px 18px;font-size:13px;animation:slideDown .22s;max-width:520px}
+.toast.warn{border-left-color:#F59E0B}
+.toast.err{border-left-color:var(--red)}
+.toast.info{border-left-color:var(--primary)}
+@keyframes slideDown{from{transform:translateY(-12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.empty-state{padding:80px 0;text-align:center;color:var(--text-3)}
+.empty-state .big{font-size:14px;color:var(--text-2);margin:14px 0 6px;font-weight:500}
+.empty-ico{width:64px;height:64px;border-radius:16px;background:#F2F3F6;display:inline-flex;align-items:center;justify-content:center;color:#C4C9D1}
+.mascot{position:fixed;right:16px;bottom:16px;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#FFC9D9,#FF9EBB);box-shadow:0 4px 14px rgba(255,158,187,.55);display:flex;align-items:center;justify-content:center;z-index:60;cursor:pointer}
+.mascot:hover{transform:scale(1.06)}
+.demo-mark{position:fixed;left:50%;bottom:4px;transform:translateX(-50%);font-size:10px;color:#C6CAD1;z-index:40;user-select:none;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ 一级侧边栏 ============ -->
+  <aside class="side1">
+    <div class="logo-row">
+      <span class="logo-badge">智</span>
+      <span class="logo-text">百智AI工作台</span>
+      <span class="side-collapse" title="收起侧边栏">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><line x1="9.5" y1="4" x2="9.5" y2="20"/></svg>
+      </span>
+    </div>
+    <button class="new-task" onclick="toast('原型演示：新建任务入口','info')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新任务
+      <span class="nt-right">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/></svg>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </button>
+    <nav class="nav">
+      <div class="nav-item" onclick="toast('原型演示：首页','info')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页
+      </div>
+      <div class="nav-item" onclick="toast('原型演示：文件夹','info')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>文件夹
+      </div>
+      <div class="nav-item active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>语音笔记
+      </div>
+      <div class="nav-item" onclick="toast('原型演示：技能','info')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>技能
+      </div>
+      <div class="nav-item" onclick="toast('原型演示：任务','info')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>任务
+        <span class="arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="nav-sub">
+        <div class="nav-item">全部</div>
+        <div class="nav-item">已定时</div>
+      </div>
+      <div class="nav-empty">暂无任务</div>
+    </nav>
+    <div class="user-card">
+      <div class="avatar">小</div>
+      <div class="user-meta">
+        <div class="user-name">小庞</div>
+        <div class="user-org">百智</div>
+      </div>
+      <span class="user-badge">企业用户</span>
+      <span class="arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </div>
+  </aside>
+
+  <div class="right">
+    <!-- ============ 二级侧边栏 ============ -->
+    <aside class="side2">
+      <div class="side2-scroll" id="subScroll"></div>
+      <div class="side2-foot">
+        <div class="recycle-item" id="nav-recycle" onclick="go('recycle')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          回收站
+        </div>
+      </div>
+      <span class="side2-handle" title="收起">‹</span>
+    </aside>
+
+    <!-- ============ 主区域 ============ -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>语音笔记</h1>
+          <p>统一管理语音转写内容、沉淀会议、闪念与结构化数据，持续积累可复用的知识资产。</p>
+        </div>
+        <div class="topbar-right">
+          <div class="search-box">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#969AA3" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input id="searchInput" placeholder="搜索语音笔记" oninput="onSearch(this.value)" />
+          </div>
+          <button class="ask-btn" onclick="toast('原型演示：问问小智','info')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.1L20 10l-5.9 1.9L12 18l-2.1-6.1L4 10l5.9-1.9z"/></svg>
+            问问小智<kbd>⌘K</kbd>
+          </button>
+          <span class="credits-pill" id="creditsPill" title="个人 Credits 余额 · 解锁高价值字段时消耗">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 8l8 14 8-14z"/></svg>
+            Credits：<span id="creditsVal">100,000</span>
+          </span>
+          <button class="icon-btn" title="通知" onclick="toast('原型演示：通知中心','info')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          </button>
+        </div>
+      </header>
+      <section id="view"></section>
+      <footer class="statusbar">
+        <span class="sb-group">个人空间已使用<b style="color:var(--text-2);font-weight:500">1.03 KB/20 GB</b><i class="sb-ring"></i></span>
+        <span class="sb-group">企业空间已使用<b style="color:var(--text-2);font-weight:500">4.37 GB/29.30 TB</b><i class="sb-ring" style="border-top-color:#2E6BE6"></i></span>
+      </footer>
+    </main>
+  </div>
+  <div class="mascot" title="小智助手" onclick="toast('原型演示：小智助手','info')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="10" r=".6" fill="#fff"/><circle cx="15.5" cy="10" r=".6" fill="#fff"/><path d="M8 14.5c1 1.2 2.4 1.8 4 1.8s3-.6 4-1.8"/></svg>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<div class="demo-mark">商机线索模块 · 高保真交互原型 V1.0</div>
+
+<script>
+/* ================================================================
+ * 数据模型（PRD 第 4、9 章）
+ * ================================================================ */
+const FIELD_PRICES = { scale: 50, name: 100, title: 80, email: 120, linkedin: 60 };
+const FIELD_LABELS = { scale: '实际规模', name: '联系人姓名', title: '职位', email: '邮箱', linkedin: 'LinkedIn' };
+const FIELD_KEYS   = { scale: 'actual_scale', name: 'contact_name', title: 'job_title', email: 'email', linkedin: 'linkedin_url' };
+const HV = ['scale', 'name', 'title', 'email', 'linkedin'];
+
+const state = {
+  view: 'ent-leads',   // mine-leads | ent-leads | ai-data | recycle | notes-* | detail
+  credits: 100000,
+  q: '',
+  fileId: 1,
+  sheet: 'contacts',   // contacts | nocontact
+  busy: false
+};
+
+/* 商机线索文件（PRD 6.2 字段） */
+const FILES = [
+  { id: 1, name: '乌克兰重工行业GD5000线索清单_20260722_1643.xlsx', creator: '小庞', created: '2026-07-22 16:43', updated: '2026-07-28 11:48', agent: '海外线索 Agent', staticLeads: null, staticEnhanced: null },
+  { id: 2, name: '乌克兰冶金行业GD5000线索清单_20260724_0915.xlsx', creator: '小庞', created: '2026-07-24 09:15', updated: '2026-07-27 18:30', agent: '海外线索 Agent', staticLeads: 8, staticEnhanced: 1 },
+  { id: 3, name: '乌克兰能源行业GD5000线索清单_20260726_1530.xlsx', creator: '李静', created: '2026-07-26 15:30', updated: '2026-07-28 10:11', agent: '海外线索 Agent', staticLeads: 23, staticEnhanced: 0 }
+];
+let recycled = [
+  { name: '企业-东南亚市场线索.xlsx', deleted: '2026-07-05 16:20', days: 21, by: '小庞' }
+];
+const AI_FILES = [
+  { name: '企业-销售全景表.xlsx', size: '101.3 KB', src: 'AI生成', updated: '2026-07-28 11:48' },
+  { name: '企业-门店经营全景表.xlsx', size: '17.3 KB', src: 'AI生成', updated: '2026-07-28 10:11' },
+  { name: '企业-万春测试销售—取消企业名称字段、删除参会人.xlsx', size: '10.4 KB', src: 'AI生成', updated: '2026-07-28 11:15' },
+  { name: '企业-删除.xlsx', size: '13.5 KB', src: 'AI生成', updated: '2026-07-28 11:48' }
+];
+
+/* 线索数据：hv 单元格状态 s = locked | querying | unlocked | empty | failed */
+const leads = [
+  { id:1, no:"1", sheet:'c', company:"Kyivteploenergo Municipal Enterprise / КП «Київтеплоенерго»", site:"https://kte.kmda.gov.ua/", city:"乌克兰 · 基辅", type:"终端客户", industry:"电力与能源", profile:"工业自动化/中高压变频器/终端客户/电力与能源", profileReq:"中大型及以上（各行业见细分）", business:"Kyivteploenergo运营Kyiv CHP-5和CHP-6，并负责基辅大范围供热、热网和泵站设施，两座CHP许可装机容量分别为825MW和600MW。企业拥有大量泵、电动机和热网循环设备，是GD5000在热网泵、循环水泵及锅炉风机上的高优先级终端客户。", products:"热电联产、城市集中供热、热网运营、大型泵站和锅炉设施检修", competitors:"", channel:"拥有约8400名员工和专业CHP检修团队，官方资料显示两座CHP一次检修超过1100台设备；具备市政公开采购、设备维修、技术审计和国际融资项目执行能力。", signal:"企业2023年和2025年采购记录均出现频率转换器，2025年采购包含15kW、18.5kW和30kW设备；官方还披露CHP-5与CHP-6维修超过250台泵和800台电动机，形成明确的存量改造基础。", recProduct:"GD5000中高压变频器", advice:"以既有低压变频器采购和泵站改造为准入基础，选择热网循环泵或CHP大型辅机建设GD5000节能示范，量化节电、水锤抑制、阀门节流损耗下降和设备寿命提升。", icp:98, grade:"A", scoreNote:"大型市政热电和热网终端完全命中，频率转换器采购及大规模泵电机维修构成强需求，规模超大型；市政采购周期、战时信息限制和基辅设施受袭风险扣2分；联系人依据：官方采购文件验证。",
+    hv:{ scale:{s:'locked',v:"超大型（员工8417人，2024年；营收2024年约343.23亿格里夫纳）"}, name:{s:'unlocked',v:"Коцюбняк Катерина Володимирівна"}, title:{s:'locked',v:"采购经理/战略寻源经理"}, email:{s:'unlocked',v:"kotsiubniak.kv@kte.kmda.gov.ua"}, linkedin:{s:'empty'} } },
+  { id:2, no:"2", sheet:'c', company:"乌克兰石油运输公司（JSC Ukrtransnafta／АТ «Укртранснафта»）", site:"https://www.ukrtransnafta.com/", city:"乌克兰 · 基辅（运营全国石油主干管道及泵站）", type:"终端客户", industry:"石油天然气与炼化", profile:"工业自动化/中高压变频器/终端客户/石油天然气与炼化", profileReq:"中大型及以上（各行业见细分）", business:"Naftogaz全资持有的石油管道运营商，负责乌克兰原油及部分成品油主干管道运输。公开资料显示其系统拥有约4772.6公里管线、28座输油泵站及Pivdennyi海运石油终端，是数MW中压泵类驱动的直接终端用户。", products:"原油和成品油管道运输、输油泵站运营、油码头及储运服务", competitors:"", channel:"通过Prozorro采购大型泵组、6kV电机及变频系统，并采用生命周期成本评价，具备中压驱动选型、泵站改造、工程验收及长期运维能力。", signal:"Naftogaz集团2025需求目录明确为Ukrtransnafta列出8套中压变速驱动器和19套带变频器的泵组模块，适配6kV、约160-2500kW异步或同步电机，用于提高主泵设施能效。2025年另采购4套离心增压泵组，预估1.17024亿UAH；2025年12月采购4台6kV、2500kW防爆异步电机，预估7398.38万UAH。", recProduct:"GD5000中高压变频器", advice:"最高优先级。直接对标其8套中压变速驱动器及19套变频泵组模块需求，提交6kV、160-2500kW同步/异步电机兼容方案，突出低谐波、工频旁路、油品工况防爆适配、生命周期成本和战时备件保障。", icp:98, grade:"A", scoreNote:"准确命中乌克兰石油输送终端、目标行业和国家（ICP30）；已公开8套中压变速驱动器、19套变频泵组模块及6kV/2500kW电机需求（采购20、产品15）；员工与营收均达到大型客户档（价值15）；关键基础设施存在战时损伤和交付风险（风险-2）；未执行联系人搜索（联系人0）；联系人依据：官方采购文件验证。",
+    hv:{ scale:{s:'locked',v:"大型（员工约2727人（2024年）；营收约107.13亿UAH（2024年））"}, name:{s:'unlocked',v:"Шолок Олександр Ігорович"}, title:{s:'locked',v:"采购专员/买方/授权采购人员"}, email:{s:'locked',v:"o.sholok@ukrtransnafta.com"}, linkedin:{s:'empty'} } },
+  { id:3, no:"3", sheet:'c', company:"PJSC Centrenergo / ПАТ «Центренерго»", site:"https://www.centrenergo.com/", city:"乌克兰 · 基辅", type:"终端客户", industry:"电力与能源", profile:"工业自动化/中高压变频器/终端客户/电力与能源", profileReq:"中大型及以上（各行业见细分）", business:"Centrenergo是乌克兰大型国有火力发电企业，由Trypilska、Zmiivska、Vuhlehirska三座火电站及Remenergo维修单位组成。Trypilska与Zmiivska火电站在2024年遭到毁灭性袭击，恢复工程中的泵、风机和大功率电机系统与中高压变频器高度匹配。", products:"火力发电、热力生产、电站检修和设备修复、电力供应", competitors:"", channel:"拥有Remenergo维修单位及大型火电站工程团队，具备设备修复、技术规格编制和公开采购能力；项目通常由国家资金、国有资产管理及公开招标体系推动。", signal:"乌克兰政府2024年拨款7.256亿格里夫纳恢复Zmiivska和Trypilska火电站；Trypilska火电站2026年4月和7月公开电气设备采购均明确包含频率转换器。", recProduct:"GD5000中高压变频器", advice:"跟踪Trypilska与Zmiivska恢复设备包，以现有频率转换器采购作为供应商准入入口，重点推动引风机、送风机、循环水泵和锅炉给水泵的6–10kV改造。", icp:96, grade:"A", scoreNote:"大型火电终端完全命中画像，政府恢复拨款及频率转换器公开采购构成强需求，规模达标；核心电站严重战损、被占领资产及国企重组使项目连续性和付款来源存在较高风险；联系人依据：官方采购API邮箱+官方采购文件职位验证。",
+    hv:{ scale:{s:'locked',v:"大型（员工3406人，截至2024年12月31日；营收2024年约130.26亿格里夫纳）"}, name:{s:'locked',v:"Діхтяренко Ірина Олександрівна"}, title:{s:'locked',v:"采购专员/买方/授权采购人员"}, email:{s:'locked',v:"iryna.dikhtiarenko@centrenergo.com"}, linkedin:{s:'empty'} } },
+  { id:4, no:"4", sheet:'c', company:"INFOCOM Ltd / ТОВ «ІНФОКОМ ЛТД»", site:"https://ia.ua/", city:"乌克兰 · 扎波罗热", type:"系统集成商", industry:"矿山、钢铁、水泥、电力、油气、水务重工自动化", profile:"工业自动化/中高压变频器/集成商/矿山、钢铁、水泥、电力、油气、水务重工自动化", profileReq:"员工≥10人，或具备可核验的6-35kV中压电气/大功率驱动重工项目案例与本地工程服务团队", business:"INFOCOM是乌克兰大型工业自动化与电力系统集成商，拥有30年以上经验和1000多个项目。公司是Siemens系统集成伙伴，具备6-35kV工业供配电、SINAMICS驱动、冶金和矿山自动化、泵站及港口物料搬运项目经验。", products:"6-35kV供配电、Siemens SINAMICS驱动、PLC/SCADA/PCS7、控制柜、Arc Flash研究和工业软件现代化", competitors:"Siemens、Schneider Electric、Danfoss", channel:"具备国际项目工程、软件、控制柜、供配电设计、现场调试和驱动诊断维修能力。", signal:"2025年完成多个转运综合体、油脂加工和国际工厂自动化升级项目；历史冶金项目使用SINAMICS，形成明确友商替换和联合集成入口。", recProduct:"GD5000中高压变频器", advice:"从矿山泵站、冶金辅助驱动、粮食码头和供配电升级项目切入，提供GD5000与Siemens控制系统兼容方案。", icp:94, grade:"A", scoreNote:"大型重工自动化、6-35kV供配电和Siemens驱动能力高度命中（ICP30）；2025项目活跃（需求20）；具体MV VFD项目仍待确认（产品11）；营收和项目规模高（价值15），扎波罗热风险扣2；联系人依据：官方团队页确认当前Chief Commercial Officer，独立公开页面明确披露个人工作邮箱；Apollo exact match未返回email_status，不声明为Apollo verified。",
+    hv:{ scale:{s:'locked',v:"大型（按营收与项目规模）（营收3.5933亿UAH（2025年））"}, name:{s:'locked',v:"Oksana Ignatenko"}, title:{s:'locked',v:"Chief Commercial Officer"}, email:{s:'locked',v:"oksana@ia.ua"}, linkedin:{s:'empty'} } },
+  { id:5, no:"5", sheet:'c', company:"Interpipe Niko Tube（INTERPIPE尼科管厂）", site:"https://nikotube.interpipe.biz/", city:"乌克兰 · 尼科波尔（Nikopol）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"Interpipe旗下大型无缝钢管生产基地，拥有连续式穿孔和轧管机组、热处理、液压试验和管端加工设施。穿孔机、轧管机、热处理炉风机、淬火及循环水泵系统具有重载变频和中压驱动潜力。", products:"油井管、管线管、机械结构用无缝管、锅炉管和工业用无缝管", competitors:"", channel:"", signal:"集团公开的投资项目包括3770万美元热处理线、1680万美元穿孔机工作机架更换、430万美元管端成形压力机和610万美元自动液压试验线；因卡霍夫卡水坝被毁建设的TPЦ-2循环供水系统于2024年完成，投资约7110万乌克兰格里夫纳。", recProduct:"GD5000中高压变频器", advice:"围绕新循环水系统、热处理炉风机和穿孔轧管辅传动开展电机功率核查，优先从泵风机节能改造切入，再验证主轧机高动态应用。", icp:94, grade:"A", scoreNote:"大型钢管终端，热处理、穿孔机及循环供水项目形成明确设备投资信号，中高压泵风机和重载辅传动匹配度高；尼科波尔前线炮击风险影响现场实施，联系人待补；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工4045；营收237.62亿乌克兰格里夫纳（2024年））"}, name:{s:'locked',v:"Alexander Yankovsky"}, title:{s:'locked',v:"Head of Purchasing Department（INTERPIPE集团集中采购，覆盖Niko Tube）"}, email:{s:'locked',v:"alexander.yankovsky@interpipe.biz",outcome:'failOnce'}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/alexander-yankovsky-423a69131"} } },
+  { id:6, no:"6", sheet:'c', company:"Kamet Steel（卡梅特钢铁）", site:"https://ks.metinvestholding.com/", city:"乌克兰 · 卡缅斯克（Kamianske）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"Metinvest旗下大型综合钢铁联合企业，覆盖焦化、烧结、高炉、转炉炼钢、连铸和长材轧制。高炉鼓风、压缩空气、返循环水泵站、除尘风机和400/200轧机均是重载连续运行驱动场景。", products:"钢坯、螺纹钢、盘条、圆钢、磨球和焦炭", competitors:"", channel:"", signal:"2024年企业对1号透平鼓风机实施大修、对压缩空气生产系统进行节能现代化，并大修返循环水8A泵站和高炉设备；2025年继续完成9号高炉及400/200轧机关键设备更新。", recProduct:"GD5000中高压变频器", advice:"从已公开强调节能的压缩空气系统、8A泵站或高炉辅助风机切入，以可量化节电和减少设备冲击建立首个替换业绩。", icp:94, grade:"A", scoreNote:"大型综合钢铁终端，鼓风机、压缩空气和循环水泵均有具体大修或节能现代化事实，产品匹配和采购能力强；战争环境及2024年亏损形成中等成交风险，联系人待补；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工6795；营收523.88亿乌克兰格里夫纳（2024年））"}, name:{s:'locked',v:"Vladimir Zelenkov"}, title:{s:'locked',v:"Head of Procurement of Equipment and Materials（Metinvest集团集中采购，覆盖Kamet Steel）"}, email:{s:'locked',v:"vladimir.zelenkov@metinvestholding.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/%d0%b2%d0%bb%d0%b0%d0%b4%d0%b8%d0%bc%d0%b8%d1%80-%d0%b7%d0%b5%d0%bb%d0%b5%d0%bd%d0%ba%d0%be%d0%b2-5b25101b9"} } },
+  { id:7, no:"7", sheet:'c', company:"CEMARK / CRH Ukraine（乌克兰水泥业务）", site:"https://www.cemark.ua/en/zavodi/at-podilskiy-cement", city:"乌克兰 · 胡门齐（Humentsi），赫梅利尼茨基州", type:"终端客户", industry:"水泥与建材", profile:"工业自动化/中高压变频器/终端客户/水泥与建材", profileReq:"中大型及以上（各行业见细分）", business:"CEMARK在乌克兰的核心全流程熟料和水泥基地，设计水泥产能约205万吨/年。2011年投产大型干法熟料线，工艺覆盖矿山破碎、原料制备、预热预分解、回转窑、熟料冷却、粉磨、输送和包装，并为集团其他乌克兰工厂供应熟料；本账户合并覆盖的乌克兰运营工厂包括：CEMARK / CRH Ukraine（乌克兰水泥业务）、ПрАТ «Миколаївцемент»（Mykolaivcement，CEMARK/CRH）、ТОВ «ЦЕМЕНТ»，敖德萨水泥厂（Odesa Cement，CEMARK/CRH）。", products:"熟料、袋装及散装水泥、集团内部熟料供应", competitors:"", channel:"隶属CRH，具备跨国集团工程、EHS、集中采购、供应商准入和公开招标体系；大型连续干法熟料线具有严格的可靠性和能源管理要求。", signal:"2011年大型干法熟料线持续承担CEMARK乌克兰多厂熟料供应；官网设供应商准入和招标渠道，但未发现公开的中高压变频器专项招标。；90万吨/年粉磨及发运资产持续运行，CEMARK设统一招标和供应商注册；未发现该厂公开的中高压变频器专项采购。；CEMARK设统一招标和供应商注册；2025年企业净亏损约1.87亿格里夫纳，节能项目需提供明确回收期，但未发现中高压变频器专项采购。", recProduct:"GD5000中高压变频器", advice:"从CRH供应商准入进入，重点提交窑尾引风机、生料磨及水泥磨风机、熟料冷却风机和大型输送设备的生命周期节能方案；先核验现役电机参数、谐波标准和集团批准品牌清单。", icp:93, grade:"A", scoreNote:"目标终端客户和全流程大型干法水泥行业命中（ICP30）；核心熟料线连续运行并设正式招标准入，存在持续改造和MRO需求（需求15）；窑尾风机、磨机、冷却风机及输送为GD5000经典场景（产品13）；大型客户（价值15）；未发现需扣分的制裁或失信事实（风险0）；官网自动抓取返回403但官方索引和页面资料存在；按要求未搜索联系人（联系人0）；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工513人（2025年）；营收6,471,489,000格里夫纳（2025年））"}, name:{s:'locked',v:"Volodymyr Shargunov"}, title:{s:'locked',v:"Supply Chain Director"}, email:{s:'locked',v:"vshargunov@crhukraine.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/volodymyr-s-8174a230"} } },
+  { id:8, no:"8", sheet:'c', company:"VIPCEM Ukraine（Volyn-Cement / Pivden-Cement）", site:"https://vipcem.com.ua/about-us.html", city:"乌克兰 · 兹多尔布尼夫（Zdolbuniv），里夫内州", type:"终端客户", industry:"水泥与建材", profile:"工业自动化/中高压变频器/终端客户/水泥与建材", profileReq:"中大型及以上（各行业见细分）", business:"VIPCEM旗下大型全流程水泥厂，公开设计水泥产能约216万吨/年、熟料产能约192万吨/年。工厂具备自有矿山以及破碎、原料制备、回转窑、熟料冷却、水泥粉磨、输送、除尘和包装等完整工艺；本账户合并覆盖的乌克兰运营工厂包括：VIPCEM Ukraine（Volyn-Cement / Pivden-Cement）、ПрАТ «ВІПЦЕМ»—“Південь-Цемент”分厂（Pivden-Cement）。", products:"水泥、熟料、油气井特种水泥、自有矿山原料、袋装和散装水泥", competitors:"", channel:"VIPCEM设集中采购和承包商文件体系，拥有自有矿山和 accredited实验室；2024年原Dyckerhoff乌克兰资产转入CRH体系，具备跨厂工程和备件标准化条件。", signal:"2024年控制权变更后存在跨厂工程标准化和关键备件统一的潜在窗口；官网公开集中采购渠道，但未发现中高压变频器专项招标。；公开环境资料涉及约每小时3400—3500袋25千克水泥的包装线现代化；官网设集中采购渠道，但未发现中高压变频器专项招标。", recProduct:"GD5000中高压变频器", advice:"围绕并购后标准化主题，优先核验窑尾引风机、生料磨和水泥磨、熟料冷却风机、矿山破碎及长距离输送设备；先确认当前采购授权、产能利用率、现役品牌和集团技术规范。", icp:93, grade:"A", scoreNote:"目标大型全流程水泥终端命中（ICP30）；连续生产、集中采购及并购后标准化形成改造窗口（需求15）；窑、磨、风机、破碎和输送均匹配GD5000（产品13）；大型客户（价值15）；未发现需扣分的制裁或失信事实（风险0）；按要求未搜索联系人（联系人0）；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工948人（VIPCEM公司级，2025年；分厂人数未公开）；营收4,747,155,000格里夫纳（VIPCEM公司级，2025年））"}, name:{s:'locked',v:"Oleksandr Sova"}, title:{s:'locked',v:"Director of Purchasing"}, email:{s:'locked',v:"oleksandr.sova@vipcem.com.ua"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/alexandersova"} } },
+  { id:9, no:"9", sheet:'c', company:"ТОВ «Клесівський кар'єр нерудних копалин “Технобуд”»（Klesiv Quarry Technobud）", site:"https://www.technobudgroup.com/en/enterprise/klesiv-aggregates-quarry-technobud/", city:"乌克兰 · 克列西夫（Klesiv），里夫内州萨尔内区", type:"终端客户", industry:"水泥与建材", profile:"工业自动化/中高压变频器/终端客户/水泥与建材", profileReq:"中大型及以上（各行业见细分）", business:"Technobud Group规模最大的花岗岩骨料基地，公开年产能约640万吨。生产体系包括采矿、破碎筛分、公路运输、铁路运输和能源车间，是高吞吐、高磨损且大功率驱动集中的矿物建材终端。", products:"花岗岩碎石、筛下料、洗砂、花岗岩砂及砂石混合料、铁路批量发运", competitors:"", channel:"拥有采矿、破碎筛分、能源和铁路物流车间，官网称基地已进行六次改造；集团具备多矿区运营、产品认证和设备备件采购能力。", signal:"官网确认基地历经六次改造并达到640万吨/年产能，表明存在持续扩能和MRO需求；未发现中高压变频器专项招标。", recProduct:"GD5000中高压变频器", advice:"从能源车间和高吞吐破碎筛分系统切入，核验大型破碎机、主皮带机、给料机、洗砂循环泵和除尘风机的电压等级、启动电流、负载波动和联锁要求，优先提出软启动和节能试点。", icp:93, grade:"A", scoreNote:"目标大型骨料终端命中（ICP30）；六次改造和高吞吐连续生产形成持续MRO需求（需求15）；破碎、筛分、输送、泵和风机适配GD5000（产品13）；大型客户（价值15）；未发现需扣分的制裁或失信事实（风险0）；按要求未搜索联系人（联系人0）；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工794人（2025年）；营收2,374,785,000格里夫纳（2025年））"}, name:{s:'locked',v:"Sergey Kudlay"}, title:{s:'locked',v:"Head of Procurement"}, email:{s:'locked',v:"sergey.kudlay@technobudgroup.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/sergey-kudlay"} } },
+  { id:10, no:"10", sheet:'c', company:"中央采矿选矿联合企业（Central GOK / ПрАТ «Центральний ГЗК»）", site:"https://cgok.metinvestholding.com/uk-ua/about-us/", city:"乌克兰 · 克里维里赫", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"Metinvest旗下大型铁矿采选和球团企业，名义年产能约470万吨铁精矿和230万吨球团。生产链覆盖破碎、球磨、磁选、循环水与矿浆泵站、输送机、焙烧和烟气排风设备。", products:"铁矿石开采、铁精矿、铁矿球团", competitors:"", channel:"非渠道商；具备内部设备检修和持续改善能力，可实施大型磨机、电机、破碎机、输送机及泵站维修项目。", signal:"2024年主磨机同步电机因频繁强制启停出现支撑结构损坏和对中偏差；企业另提出以高效泵替换技术水及矿浆泵站现有泵，预计年经济效益1900万格里夫纳。", recProduct:"GD5000中高压变频器", advice:"优先在技术水泵或矿浆泵开展节能试点，再进入磨机同步电机启动冲击、输送机和烟气排风机改造；方案需兼容Metinvest现有自动化接口。", icp:92, grade:"A", scoreNote:"磨机同步电机、节能泵、输送机和排风机均有近期明确事实，产品应用高度吻合；集团采购和战时运营环境构成主要风险；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工3484人（2024）；营收158.30亿乌克兰格里夫纳（2024））"}, name:{s:'locked',v:"Maksym Zhuravlov"}, title:{s:'locked',v:"Procurement Director (Raw Materials & Energy Resources)（Metinvest集团集中采购，覆盖Central GOK）"}, email:{s:'locked',v:"maksym.zhuravlov@metinvestholding.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/maksym-zhuravlov-a3abb643"} } },
+  { id:11, no:"11", sheet:'c', company:"联合矿业化工公司（UMCC Titanium / АТ «Об’єднана гірничо-хімічна компанія»）", site:"https://www.umcc-titanium.com/en/", city:"乌克兰 · 伊尔尚斯克、维利诺希尔斯克", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"公司运营伊尔尚斯克采矿选矿厂和维利诺希尔斯克采矿冶金厂，生产钛铁矿、金红石和锆英砂精矿。工艺覆盖矿砂输送、洗矿脱泥、分级、重选、脱水、干燥和电磁分选。", products:"钛铁矿精矿、金红石精矿、锆英砂及其他重矿物精矿", competitors:"", channel:"非渠道商；拥有两个大型生产分厂、内部工程团队和公开年度采购计划，2025年私有化完成后由Cemin Ukraine/NEQSOL控制。", signal:"2024年采购计划为维利诺希尔斯克分厂安排2400万格里夫纳的泵、泵零部件和泵组；伊尔尚斯克分厂另安排WARMAN、Metso VASA HD及多类矿浆泵零部件采购。", recProduct:"GD5000中高压变频器", advice:"以公开采购计划中的矿浆泵和工艺水泵为入口，联合泵厂提供泵、电机和变频器整体节能方案；结合私有化现代化投资及污水处理改造推动示范项目。", icp:92, grade:"A", scoreNote:"官方采购计划直接出现大额泵及矿浆泵零部件需求，规模、工艺和现代化义务均支持中压驱动机会；私有化过渡及历史财务环保负担构成风险；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工4056人（截至2024年6月30日）；营收15.11亿乌克兰格里夫纳（2025））"}, name:{s:'locked',v:"Dimitri Kalandadze"}, title:{s:'locked',v:"Chief Executive Officer"}, email:{s:'locked',v:"dimitri.kalandadze@umcc-titanium.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/dimitri-kalandadze-b1520744"} } },
+  { id:12, no:"12", sheet:'c', company:"Lvivteploenergo Municipal Enterprise / ЛМКП «Львівтеплоенерго»", site:"https://www.lte.lviv.ua/", city:"乌克兰 · 利沃夫", type:"终端客户", industry:"电力与能源", profile:"工业自动化/中高压变频器/终端客户/电力与能源", profileReq:"中大型及以上（各行业见细分）", business:"Lvivteploenergo是利沃夫市属集中供热与热电联产运营企业，运营CHP-1及城市供热设施，并持续通过公开采购维护生产设备。2023年和2024年连续采购CHP-1高压电动机大修，其中一批明确为5台，显示存在可核验的中高压电机存量，是GD5000在热电辅机、循环泵和风机节能改造上的直接目标客户。", products:"热电联产、城市集中供热、CHP-1运行维护、热网与能源设备公开采购", competitors:"", channel:"具备市属热力设施运营、CHP设备检修和持续公开采购能力；2026年仍有多笔设备与服务招标。", signal:"2023年采购CHP-1五台高压电动机大修，2024年再次采购CHP-1高压电动机大修，形成连续两年的明确高压驱动维护信号。", recProduct:"GD5000中高压变频器", advice:"以CHP-1既有高压电机大修为入口，优先核对循环水泵、热网泵、引送风机的电压和功率，提交工频旁路、节能测算及短停机窗口改造方案。", icp:91, grade:"A", scoreNote:"市属热电与供热终端完全命中画像，连续两年CHP-1高压电机大修构成强需求，产品应用明确；规模数值未公开按信息不足档计，战时能源基础设施风险扣2分；联系人依据：官方采购文件验证。",
+    hv:{ scale:{s:'locked',outcome:'empty'}, name:{s:'locked',v:"Наталія КОЗАК"}, title:{s:'locked',v:"采购专员/买方/授权采购人员"}, email:{s:'locked',v:"kozak_natalia@lte.lviv.ua"}, linkedin:{s:'empty'} } },
+  { id:13, no:"13", sheet:'c', company:"北部采矿选矿联合企业（Northern GOK / ПрАТ «Північний ГЗК»）", site:"https://sevgok.metinvestholding.com/ua", city:"乌克兰 · 克里维里赫", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"Metinvest旗下大型露天铁矿采选企业，名义年产能约1420万吨铁精矿和1110万吨球团。现场拥有破碎输送系统、两座选矿厂、球团设施、矿浆泵站和技术供水系统。", products:"铁矿石开采、铁精矿、铁矿球团", competitors:"", channel:"非渠道商；拥有内部选矿、机电、自动化和检修团队，采购及产能调配已纳入Metinvest统一矿业管理平台。", signal:"2024年检修覆盖RZF-1、RZF-2选矿厂和1号矿浆泵站的泵、阀门、管线；同期更换两台真空泵和SB-1输送机，公开报道将减少事故停机列为项目目标。", recProduct:"GD5000中高压变频器", advice:"以矿浆泵站、技术供水泵和长距离输送机为首批场景，提交能耗基线、泵曲线匹配、工频旁路和多泵联控方案；从Metinvest统一矿业技术与采购体系切入。", icp:90, grade:"A", scoreNote:"规模和泵、输送、选矿负载高度匹配，且有近期设备更新；因集团集中采购、产能统一调配及战时供电风险扣分；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工4596人（2024）；营收289.60亿乌克兰格里夫纳（2024））"}, name:{s:'locked',v:"Viktor Braginets"}, title:{s:'locked',v:"Procurement Manager（Metinvest集团集中采购，覆盖Northern GOK）"}, email:{s:'locked',v:"viktor.braginets@metinvestholding.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/viktor-braginets-44b44b346"} } },
+  { id:14, no:"14", sheet:'c', company:"S-Engineering LLC / ТОВ «С-ІНЖИНІРИНГ»", site:"https://se.ua/", city:"乌克兰 · 敖德萨/乔尔诺莫尔斯克", type:"系统集成商/电气设备制造商", industry:"矿山、钢铁、水泥、电力、油气、水务重工自动化", profile:"工业自动化/中高压变频器/集成商/矿山、钢铁、水泥、电力、油气、水务重工自动化", profileReq:"员工≥10人，或具备可核验的6-35kV中压电气/大功率驱动重工项目案例与本地工程服务团队", business:"S-Engineering是乌克兰大型全周期工程与自动化集成商，拥有自有制造和测试基地，公开称完成700多个项目。公司是Siemens自动化、PCS7、Drives & Motion及SIVACON合作伙伴，提供最高24kV中压设备和油气、能源、矿山等工业项目。", products:"中压开关设备、供配电系统、工业自动化、Siemens驱动与运动控制、控制柜制造、安装调试", competitors:"Siemens", channel:"约87名员工，自有约7500平方米生产基地，可设计、制造、测试、安装和调试中低压设备并提供售后培训。", signal:"2025年披露油气平台高/中压供电和自动化能力，2026年仍参加Siemens伙伴活动并持续招聘培养工程人才。", recProduct:"GD5000中高压变频器", advice:"从油气、水泥、矿山辅机和老旧中压电机节能改造切入，提供GD5000与其现有Siemens自动化/配电系统的接口及联合投标支持。", icp:89, grade:"A", scoreNote:"大型本地工程商且覆盖中压、驱动和重工行业（ICP30）；近期油气与Siemens合作活动构成中等需求（15）；具体中压VFD品牌项目待确认（产品11）；规模强（价值15），沿海战时风险扣2；联系人依据：3名管理/商业决策人均由Apollo bulk_match返回verified工作邮箱。",
+    hv:{ scale:{s:'locked',v:"大型集成商（员工约87人（Apollo）；营收3.59717亿UAH（2025年））"}, name:{s:'locked',v:"Ivan Kiryazov"}, title:{s:'locked',v:"CEO"}, email:{s:'locked',v:"ivan.kiryazov@se.ua"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/ivan-kiryazov-298757127"} } },
+  { id:15, no:"14", sheet:'c', company:"S-Engineering LLC / ТОВ «С-ІНЖИНІРИНГ»", site:"https://se.ua/", city:"乌克兰 · 敖德萨/乔尔诺莫尔斯克", type:"系统集成商/电气设备制造商", industry:"矿山、钢铁、水泥、电力、油气、水务重工自动化", profile:"工业自动化/中高压变频器/集成商/矿山、钢铁、水泥、电力、油气、水务重工自动化", profileReq:"员工≥10人，或具备可核验的6-35kV中压电气/大功率驱动重工项目案例与本地工程服务团队", business:"S-Engineering是乌克兰大型全周期工程与自动化集成商，拥有自有制造和测试基地，公开称完成700多个项目。公司是Siemens自动化、PCS7、Drives & Motion及SIVACON合作伙伴，提供最高24kV中压设备和油气、能源、矿山等工业项目。", products:"中压开关设备、供配电系统、工业自动化、Siemens驱动与运动控制、控制柜制造、安装调试", competitors:"Siemens", channel:"约87名员工，自有约7500平方米生产基地，可设计、制造、测试、安装和调试中低压设备并提供售后培训。", signal:"2025年披露油气平台高/中压供电和自动化能力，2026年仍参加Siemens伙伴活动并持续招聘培养工程人才。", recProduct:"GD5000中高压变频器", advice:"从油气、水泥、矿山辅机和老旧中压电机节能改造切入，提供GD5000与其现有Siemens自动化/配电系统的接口及联合投标支持。", icp:89, grade:"A", scoreNote:"大型本地工程商且覆盖中压、驱动和重工行业（ICP30）；近期油气与Siemens合作活动构成中等需求（15）；具体中压VFD品牌项目待确认（产品11）；规模强（价值15），沿海战时风险扣2；联系人依据：3名管理/商业决策人均由Apollo bulk_match返回verified工作邮箱。",
+    hv:{ scale:{s:'locked',v:"大型集成商（员工约87人（Apollo）；营收3.59717亿UAH（2025年））"}, name:{s:'locked',v:"Batyr Annaiev"}, title:{s:'locked',v:"Founder"}, email:{s:'locked',v:"batyr@se.ua"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/batyr-annaiev-03085b25b"} } },
+  { id:16, no:"14", sheet:'c', company:"S-Engineering LLC / ТОВ «С-ІНЖИНІРИНГ»", site:"https://se.ua/", city:"乌克兰 · 敖德萨/乔尔诺莫尔斯克", type:"系统集成商/电气设备制造商", industry:"矿山、钢铁、水泥、电力、油气、水务重工自动化", profile:"工业自动化/中高压变频器/集成商/矿山、钢铁、水泥、电力、油气、水务重工自动化", profileReq:"员工≥10人，或具备可核验的6-35kV中压电气/大功率驱动重工项目案例与本地工程服务团队", business:"S-Engineering是乌克兰大型全周期工程与自动化集成商，拥有自有制造和测试基地，公开称完成700多个项目。公司是Siemens自动化、PCS7、Drives & Motion及SIVACON合作伙伴，提供最高24kV中压设备和油气、能源、矿山等工业项目。", products:"中压开关设备、供配电系统、工业自动化、Siemens驱动与运动控制、控制柜制造、安装调试", competitors:"Siemens", channel:"约87名员工，自有约7500平方米生产基地，可设计、制造、测试、安装和调试中低压设备并提供售后培训。", signal:"2025年披露油气平台高/中压供电和自动化能力，2026年仍参加Siemens伙伴活动并持续招聘培养工程人才。", recProduct:"GD5000中高压变频器", advice:"从油气、水泥、矿山辅机和老旧中压电机节能改造切入，提供GD5000与其现有Siemens自动化/配电系统的接口及联合投标支持。", icp:89, grade:"A", scoreNote:"大型本地工程商且覆盖中压、驱动和重工行业（ICP30）；近期油气与Siemens合作活动构成中等需求（15）；具体中压VFD品牌项目待确认（产品11）；规模强（价值15），沿海战时风险扣2；联系人依据：3名管理/商业决策人均由Apollo bulk_match返回verified工作邮箱。",
+    hv:{ scale:{s:'locked',v:"大型集成商（员工约87人（Apollo）；营收3.59717亿UAH（2025年））"}, name:{s:'locked',v:"Stanislav Shestopalov"}, title:{s:'locked',v:"Commercial Director"}, email:{s:'locked',v:"stanislav.shestopalov@se.ua"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/stanislav-shestopalov-b93933142"} } },
+  { id:17, no:"15", sheet:'c', company:"Ukrnafta（PJSC Ukrnafta／ПАТ «Укрнафта»）", site:"https://www.ukrnafta.com/en/", city:"乌克兰 · 基辅（油气田分布于多个州）", type:"终端客户", industry:"石油天然气与炼化", profile:"工业自动化/中高压变频器/终端客户/石油天然气与炼化", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰国家控制的大型石油和天然气生产商，同时运营油田服务、油气处理和成品油零售网络。2025年钻成25口新井，油气总产量同比增长3.39%，成熟油田井口降压、液体举升、注水和集输构成明确驱动场景。", products:"石油与天然气开采、油气处理、井下作业、油田技术服务及成品油零售", competitors:"", channel:"官网持续公布采购需求，并通过公开采购体系采购压缩机、离心泵、电潜泵部件及处理设施改造。拥有超过2万名员工和内部生产、服务及研发组织。", signal:"2025年采购燃气内燃机压缩机备件，预估9260万UAH；采购分段离心泵机组及泵，预估970万UAH；另有井口降压压缩机组安装改造、压缩机租赁和4320万UAH电潜离心泵附件采购。公司将压缩机站现代化和增压站安装列入生产计划。", recProduct:"GD5000中高压变频器", advice:"从成熟油田固定式井口降压压缩机、中央处理站和注水泵站切入，比较租赁燃气活塞压缩机与固定电驱压缩机的全生命周期成本。针对现有电潜泵体系，优先提供地面中压供电、调速、谐波治理和泵站群控。", icp:89, grade:"A", scoreNote:"准确命中油气开采和处理终端（ICP30）；有压缩机改造、租赁、离心泵和电潜泵部件采购，但尚无明确GD5000同规格VFD招标（采购15、产品11）；规模为超大型（价值15）；2025年12月设施连续遇袭并有产能暂时停用（风险-2）；未执行联系人搜索（联系人0）；联系人依据：官方采购文件验证。",
+    hv:{ scale:{s:'locked',v:"超大型（员工约20000-22000人（2025年官方口径）；营收约996亿UAH（2025年））"}, name:{s:'locked',v:"Манелюк Наталія Вікторівна"}, title:{s:'locked',v:"采购负责人/总监"}, email:{s:'locked',v:"nataliia.maneliuk@ukrnafta.com"}, linkedin:{s:'empty'} } },
+  { id:18, no:"16", sheet:'c', company:"乌克兰天然气储存公司（JSC Ukrtransgaz／АТ «Укртрансгаз»）", site:"https://utg.ua/", city:"乌克兰 · 基辅（主要储气资产位于乌克兰西部及其他地区）", type:"终端客户", industry:"石油天然气与炼化", profile:"工业自动化/中高压变频器/终端客户/石油天然气与炼化", profileReq:"中大型及以上（各行业见细分）", business:"Naftogaz集团地下储气库运营商，储气总能力约310亿立方米。公开口径为11座储气库位于政府控制区，另有1座位于卢甘斯克临时被占领地区，注气、采气和库区处理需要大型压缩机及辅助泵组。", products:"地下储气、注气与采气、储气库压缩和处理设施运营、储气容量服务", competitors:"", channel:"通过Prozorro采购压缩机组检修、燃气轮机驱动维修和站场重建服务，拥有储气设施工程及内部检修体系；监管机构已批准2024-2033年储气系统发展计划。", signal:"2025年Stryi地下储气生产设施采购燃气压缩机组设备维修，预估1622.43万UAH；同年采购Opary启动空气压缩机设施重建及燃气轮机驱动维修。发展计划披露2024年计划资金约9.983亿UAH、十年约145.3亿UAH。", recProduct:"GD5000中高压变频器", advice:"优先开发Stryi等西部政府控制区储气设施，先从冷却、循环、润滑、注水和通风等连续电机负载切入，再评估燃气轮机主压缩机改为电驱的技术经济性。提供旁路、弱电网适应和快速备件方案。", icp:89, grade:"A", scoreNote:"准确命中地下储气和注采压缩终端（ICP30）；有压缩机组维修、空气压缩机重建和长期发展投资，但主机电驱规格未确认（采购15、产品11）；规模为大型（价值15）；储气设施遇袭且一座资产位于俄占区（风险-2）；未执行联系人搜索（联系人0）；联系人依据：官方采购API邮箱+官方采购文件职位验证。",
+    hv:{ scale:{s:'locked',v:"大型（员工约4459人（2024年）；营收约68.05亿UAH（2024年））"}, name:{s:'locked',v:"Януш Юлія Євгенівна"}, title:{s:'locked',v:"采购负责人/总监"}, email:{s:'locked',v:"yanush-ye@utg.ua"}, linkedin:{s:'empty'} } },
+  { id:19, no:"17", sheet:'c', company:"乌克兰天然气开采公司（JSC Ukrgasvydobuvannya／АТ «Укргазвидобування»）", site:"https://ugv.com.ua/", city:"乌克兰 · 基辅（主要生产区为波尔塔瓦、哈尔科夫、苏梅等州）", type:"终端客户", industry:"石油天然气与炼化", profile:"工业自动化/中高压变频器/终端客户/石油天然气与炼化", profileReq:"中大型及以上（各行业见细分）", business:"Naftogaz集团核心上游公司，也是乌克兰最大的天然气生产商。2024年商品气产量约139亿立方米并投产83口新井，大规模集输、增压、天然气处理和井场公用工程形成持续的压缩机、泵和风机驱动需求。", products:"天然气及凝析油勘探开采、钻井、集输增压、天然气处理和井下作业", competitors:"", channel:"拥有大型内部钻井、油田服务和分区域生产组织，通过Prozorro持续采购电机、泵、模块化压缩机站及备件，能够组织站场建设、设备试运和持续维护。", signal:"2025年公开采购包括模块化压缩机站、多个电动机批次、液压泵、移动式氮气压缩站部件和钻机增压泵备件。2024年投产83口井并完成超过37万米钻井，成熟气田降压增产和新井集输均会推动固定式增压压缩及泵类设备升级。", recProduct:"GD5000中高压变频器", advice:"优先开发政府控制区内固定式增压站和天然气处理设施，先核实压缩机驱动方式及6kV/10kV电机功率。方案应突出弱电网适应、低谐波、旁路冗余、黑启动电源接口、快速更换功率单元和远程诊断。", icp:89, grade:"A", scoreNote:"准确命中大型天然气开采和处理终端（ICP30）；持续钻井并有压缩机站、电机和泵类公开采购，但未查到直接点名中压VFD的招标（采购15、产品11）；规模为超大型（价值15）；2025年生产设施多次遭袭并造成产量损失（风险-2）；未执行联系人搜索（联系人0）；联系人依据：官方采购API邮箱+官方采购文件职位验证。",
+    hv:{ scale:{s:'locked',v:"超大型（员工约17317人（2024年）；营收约1005.96亿UAH（2024年登记数据））"}, name:{s:'locked',v:"Вадим Андріященко"}, title:{s:'locked',v:"采购专员/买方/授权采购人员"}, email:{s:'locked',v:"vadym.andriiashchenko@ugv.com.ua"}, linkedin:{s:'empty'} } },
+  { id:20, no:"18", sheet:'c', company:"乌克兰天然气输送系统运营商（LLC Gas TSO of Ukraine／ТОВ «Оператор ГТС України»）", site:"https://tsoua.com/en/", city:"乌克兰 · 基辅（运营全国天然气主干管网）", type:"终端客户", industry:"石油天然气与炼化", profile:"工业自动化/中高压变频器/终端客户/石油天然气与炼化", profileReq:"中大型及以上（各行业见细分）", business:"负责乌克兰天然气主干管网、跨境互联点、调度平衡和国内输气。2025年1月停止俄罗斯天然气过境后，系统继续承担国内供气和欧洲方向天然气进口，压缩机站仍是核心生产资产。", products:"天然气主干输送、跨境容量、系统调度平衡、压缩机站及计量站运营", competitors:"", channel:"通过Prozorro开展采购并具备大型压缩机站工程和运维能力；已与Sumitomo Corporation、Kawasaki Heavy Industries开展压缩机站现代化及移动式燃气轮机合作。", signal:"2024年宣布推进天然气压缩机站现代化和移动式燃气轮机合作，Komarno压缩机站重建用于提高波兰至乌克兰方向输气能力；2025年又对移动式天然气压缩机组开展市场咨询，表明压缩能力处于更新和重构阶段。", recProduct:"GD5000中高压变频器", advice:"优先选择政府控制区内的西部和南部进口通道站场，先确认燃气轮机、燃气发动机及电机驱动比例。以电驱压缩机改造、冷却风机和辅助泵为入口，突出低谐波、旁路冗余、模块化快速复产和备件支持。", icp:89, grade:"A", scoreNote:"准确命中天然气输送和压缩机站终端（ICP30）；存在压缩机站现代化、重建和移动压缩机咨询，但公开项目以燃机方案为主且未点名MV VFD（采购15、产品11）；规模为超大型（价值15）；设施遭袭和部分站点失控增加执行风险（风险-2）；未执行联系人搜索（联系人0）；联系人依据：官方采购文件验证。",
+    hv:{ scale:{s:'locked',v:"超大型（员工约8986人（2024年登记数据）；营收约385.09亿UAH（2024年追溯调整净营业收入））"}, name:{s:'locked',v:"Тодорова Юлія Вадимівна"}, title:{s:'locked',v:"采购负责人/总监"}, email:{s:'locked',v:"todorova-yv@tsoua.com"}, linkedin:{s:'empty'} } },
+  { id:21, no:"19", sheet:'c', company:"ТОВ СП «НІБУЛОН» / NIBULON", site:"https://www.nibulon.com/", city:"乌克兰 · 米科拉伊夫；在乌克兰多地运营码头和粮食设施", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"NIBULON是乌克兰大型粮食生产、仓储、河运和出口物流集团，运营转运码头、筒仓、船队及船厂。其输送机、斗式提升机、装船机、通风除尘设备、泵和浮吊形成大量连续及重载驱动场景。", products:"粮食采购、储存和出口，河港及海港转运，河运和海运物流，船舶建造与维修", competitors:"", channel:"集团拥有跨区域工程、维修、码头运营和船队技术能力，可执行多终端驱动标准化；设备采购可能由集团集中采购、具体码头项目或国际融资恢复项目实施。", signal:"2025年官方信息显示米科拉伊夫转运码头向合作伙伴开放使用，反映相关资产正在恢复利用；集团部分码头和物流资产受战争影响，复运、检修和设备标准化可能形成需求，但未发现近期公开中压变频器招标。", recProduct:"GD5000中高压变频器", advice:"优先选择已经恢复或正在复运的具体终端，不直接以集团全部资产为报价边界；对主输送机、装船机和大型通风系统先做电机功率及电压审计，再以单条输送线改造和关键备件切入多终端标准化。", icp:88, grade:"A", scoreNote:"目标终端客户和港口重载物料搬运场景命中(ICP30)；米科拉伊夫码头重新开放合作并存在复运检修信号，但暂无明确VFD招标(需求10)；GD5000适配大功率主输送和装船负载(产品13)；集团员工、营收和资产网络均为大型(价值15)；联系人待补；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工2149；营收2025年18,458,174,000 UAH）"}, name:{s:'locked',v:"Andriy Vadaturskyy"}, title:{s:'locked',v:"Chief Executive Officer"}, email:{s:'locked',v:"vadaturskyy@nibulon.ua"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/andriy-vadaturskyy-b77667204"} } },
+  { id:22, no:"20", sheet:'c', company:"ArcelorMittal Kryvyi Rih（安赛乐米塔尔克里维里赫）", site:"https://ukraine.arcelormittal.com/", city:"乌克兰 · 克里维里赫（Kryvyi Rih）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰规模最大的综合钢铁和铁矿石企业之一，覆盖采矿、选矿、焦化、烧结、高炉炼铁、炼钢和长材轧制。烧结主抽风机、高炉鼓风及除尘、矿山选矿泵站和轧机辅机等环节具备数MW级驱动场景。", products:"钢坯、螺纹钢、盘条、型钢、生铁、铁矿石精矿和焦炭", competitors:"", channel:"", signal:"2024年企业完成6号高炉历时296天的延长大修，并检修8号高炉筛分、上料和闸门设备；官网持续发布烧结车间2号烧结机及湿法、干法烟气净化系统重建项目的后评估监测结果。", recProduct:"GD5000中高压变频器", advice:"优先选择烧结除尘风机、循环水泵和选矿泵站等非核心连续负载开展节能示范，取得运行记录后再进入高炉关键风机系统。", icp:87, grade:"A", scoreNote:"超大型综合钢铁和矿业终端，烧结、高炉和选矿场景与GD5000基本匹配，且有持续大修重建事实；2024年巨额亏损、电力及物流压力增加成交风险，联系人待补；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"大型（员工13273；营收645.91亿乌克兰格里夫纳（2024年））"}, name:{s:'locked',v:"Ihor Serdiuk"}, title:{s:'locked',v:"Procurement Manager (capex)"}, email:{s:'locked',v:"ihor.serdiuk@arcelormittal.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/ihor-serdiuk-0268b3241"} } },
+  { id:23, no:"21", sheet:'c', company:"Centravis Production Ukraine（森特拉维斯乌克兰生产公司）", site:"https://www.centravis.com/", city:"乌克兰 · 尼科波尔（Nikopol）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰主要无缝不锈钢管生产企业，尼科波尔工厂包括热挤压、冷轧和冷拔生产环节。管坯加热、挤压液压泵、冷轧冷拔辅机、循环水及除尘系统存在变频应用，但具体中压电机功率仍需现场核验。", products:"无缝不锈钢管、热挤压母管、冷轧管、冷拔管和特种行业管材", competitors:"", channel:"", signal:"公司计划在2024年上半年现代化管材挤压线以减少金属废料；2024年9月继续披露坯料准备设备升级、160毫米小坯工具配置及38至42毫米热挤压母管试制。", recProduct:"GD5000中高压变频器", advice:"先核实挤压液压站、加热炉风机和循环水泵的电机电压及功率，确认达到中压门槛后以稳定压力、减少待机能耗和降低金属损耗切入。", icp:85, grade:"A", scoreNote:"中型不锈钢管终端且有具体挤压线和坯料设备升级事实，规模达到画像要求；但公开资料未确认相关负载为中压数MW规格，且尼科波尔现场安全风险较高，联系人待补；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"中型（员工1400；营收52.27亿乌克兰格里夫纳（2024年））"}, name:{s:'locked',v:"Yuriy Atanasov"}, title:{s:'locked',v:"CEO"}, email:{s:'locked',v:"yatanasov@centravis.com"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/yuriy-atanasov-9274088"} } },
+  { id:24, no:"22", sheet:'c', company:"Poltava Petroleum Company（JV PPC／СП «Полтавська газонафтова компанія»）", site:"https://www.ppc.net.ua/", city:"乌克兰 · 波尔塔瓦", type:"终端客户", industry:"石油天然气与炼化", profile:"工业自动化/中高压变频器/终端客户/石油天然气与炼化", profileReq:"中大型及以上（各行业见细分）", business:"从事石油、天然气和凝析油勘探开采及初级处理，拥有生产基地、油气初级处理站、装油终端和原油储罐区。2024年产天然气约1.052亿立方米、石油和凝析油约2.13万吨，规模低于国有巨头但具备明确的压缩和泵举场景。", products:"油气勘探开采、油气初级处理、装油和储罐运营", competitors:"", channel:"具备低压天然气压缩、气举、泵举和电潜离心泵应用能力，并拥有内部生产及处理设施；采购透明度低于国企，通常需通过JKX/PPC商业采购渠道进入。", signal:"公司官网明确披露使用低压天然气压缩用大功率压缩机、电潜离心泵系统、气举和泵举设备。2024年管理层参加民营气企与Naftogaz工作会议并表示行业计划扩大生产和投资技术升级，但未查到具体中压VFD采购。", recProduct:"GD5000中高压变频器", advice:"先核实单台压缩机、中央处理站泵和装油泵的电机功率及电压；若单机未达到中压门槛，可从多机并联群控或新增固定式增压机组切入。强调模块化、较短交期、远程调试和适合中型企业现金流的分阶段改造。", icp:73, grade:"B", scoreNote:"准确命中乌克兰油气开采和处理终端（ICP30）；公开证明存在大功率压缩机和电潜泵，但没有明确中压VFD招标或功率参数（采购10、产品7）；规模处于中型档（价值10）；原JKX关联受益人受制裁且2025年公司办公室遭安全部门搜查，PPC/JKX未查到被直接制裁（风险-4）；未执行联系人搜索（联系人0）；联系人依据：Apollo verified工作邮箱；完整姓名、Tier岗位、Ukraine所在地、组织和允许域名通过白名单校验。",
+    hv:{ scale:{s:'locked',v:"中型（员工约248人（2025年）；营收约22.91亿UAH（2025年））"}, name:{s:'locked',v:"Vitaliy Dorogan"}, title:{s:'locked',v:"Chief Executive Officer"}, email:{s:'locked',v:"vitaliy.dorogan@ppc.net.ua"}, linkedin:{s:'locked',v:"http://www.linkedin.com/in/vitaliy-dorogan-b688645a"} } },
+  { id:25, no:"1", sheet:'n', company:"DTEK Energy B.V. / ДТЕК Енерго", site:"https://energo.dtek.com/en/", city:"乌克兰 · 基辅", type:"终端客户", industry:"电力与能源", profile:"工业自动化/中高压变频器/终端客户/电力与能源", profileReq:"中大型及以上（各行业见细分）", business:"DTEK Energy从事煤炭开采和大型火力发电，发电业务包括DTEK Dniproenergo与DTEK Zakhidenergo等主体，2024年末在运机组装机容量约7665MW。其多座火电站正在持续修复战损设备，给水泵、循环水泵、引风机、送风机等大功率辅机与GD5000中高压变频器高度匹配。", products:"燃煤火力发电、煤炭开采、电站检修与战损恢复、电力生产和销售", competitors:"", channel:"具备集团化火电运维、检修、工程改造和大规模恢复投资能力；2024年向受损火电站修复及煤炭生产投入约110亿格里夫纳，可按集团技术标准组织电站级设备采购。", signal:"2024年公司披露约90%的可用火力发电能力一度受损或被摧毁；截至2024年12月，旗下火电站自全面战争开始以来累计遭受超过200次导弹、无人机或炮击，持续修复形成明确的主辅机替换需求。", recProduct:"GD5000中高压变频器", advice:"优先针对已获批恢复的机组，以引风机、送风机和循环水泵为切入口，提供旧电机兼容、自动旁路、弱电网适应、快速交付功率单元及乌克兰本地调试方案。", icp:76, grade:"B", scoreNote:"大型火电终端、行业与区域完全命中；战损修复投资和辅机替换需求明确，规模超大型；但设施反复受袭、现场交付和项目连续性风险较高，信任风险扣4分。",
+    hv:{ scale:{s:'locked',v:"超大型（员工DTEK Energy单体未公开；DTEK集团约55000人；营收2024年约577.56亿格里夫纳）"} } },
+  { id:26, no:"2", sheet:'n', company:"EKNIS LLC / ТОВ «ЕКНІС»", site:"https://eknis.net/", city:"乌克兰 · 基辅", type:"系统集成商", industry:"中压配电与大型电机驱动系统集成", profile:"工业自动化/中高压变频器/集成商/中压配电与大型电机驱动系统集成", profileReq:"员工≥10人，或具备可核验的6-35kV中压电气/大功率驱动重工项目案例与本地工程服务团队", business:"EKNIS是乌克兰电力和工业系统集成商，覆盖6-750kV变电站、继电保护、SCADA以及同步电机和发电机控制保护。其项目包括Rivneazot同步电机励磁、Dniprostal 35kV无功补偿、Kyiv CHP-5控制恢复及发电设施调试。", products:"6-750kV电力系统、同步电机/发电机控制保护、变电站自动化、SCADA、无功补偿和现场调试", competitors:"Siemens、Hitachi Energy、GE", channel:"100名员工，可承担高/中压设计、设备供应、安装监督、调试、维护及长期技术支持。", signal:"2025年营收和员工数大幅增长；35kV工业项目、同步电机控制及化工/钢铁/电站客户证明其具备大型电机和中压工程入口。", recProduct:"GD5000中高压变频器", advice:"以同步电机、泵风机和高耗能辅机调速改造为切入，联合评估GD5000与其保护、励磁、SCADA及电能质量方案的集成。", icp:76, grade:"B", scoreNote:"大型高/中压与电机控制集成商完全命中（ICP30）；近期增长及多项35kV/同步电机项目形成强需求（20）；未直接披露MV VFD品牌，产品匹配11；规模高（15）；联系人闭环已穷尽，未获合格直邮。",
+    hv:{ scale:{s:'locked',v:"大型（员工100人（2025年）；营收3.997649亿UAH（2025年））"} } },
+  { id:27, no:"3", sheet:'n', company:"Ferrexpo Poltava Mining / Poltava GOK（费瑞克斯波尔塔瓦矿业及球团厂）", site:"https://www.ferrexpo.com/what-we-do/operations/poltava/", city:"乌克兰 · 霍里什尼普拉夫尼（Horishni Plavni）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"Ferrexpo旗下大型露天铁矿、选矿和球团综合基地，工艺覆盖破碎、磨矿、磁选、浓缩、过滤和四条球团生产线。矿浆泵、压滤泵、球团炉助燃及排烟风机、除尘和物料输送均存在大功率连续驱动场景，是中高压变频器的高价值终端。", products:"高品位铁矿球团、铁矿石精矿、直接还原级球团及相关采矿选矿生产", competitors:"", channel:"", signal:"Ferrexpo披露2024年集团资本开支为1.02亿美元；上半年投入1700万美元提升压滤系统、1000万美元用于选矿和球团Wave 1项目，并实施球团线技术升级及管式炉部件更换。", recProduct:"GD5000中高压变频器", advice:"优先对接压滤系统、选矿矿浆与工艺水泵、球团炉助燃和排烟风机改造，主打节能、低谐波、电网暂降穿越及远程运维。", icp:76, grade:"B", scoreNote:"乌克兰大型选矿球团终端且持续投入压滤、选矿和球团现代化，泵风机类中高压驱动匹配度高；员工和营收均达大型标准，未发现明确付款或合规负面，联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型（员工4353；营收237.08亿乌克兰格里夫纳（2024年））"} } },
+  { id:28, no:"4", sheet:'n', company:"JSC NNEGC Energoatom / АТ «НАЕК «Енергоатом»", site:"https://www.energoatom.com.ua/en/", city:"乌克兰 · 基辅", type:"终端客户", industry:"电力与能源", profile:"工业自动化/中高压变频器/终端客户/电力与能源", profileReq:"中大型及以上（各行业见细分）", business:"Energoatom是乌克兰国有核电运营商，负责Rivne、South Ukraine、Khmelnytskyi及被占领的Zaporizhzhia核电站，2024年发电量约534亿千瓦时。公司拥有大量常规岛循环水、技术供水、通风和水处理系统，但GD5000应优先切入非核安全级辅助驱动。", products:"核电生产、核电机组检修和寿期管理、核设施工程与设备采购、电力销售", competitors:"Danfoss", channel:"拥有约30000名员工、专业核电检修体系及Atomremontservice等分支机构；2024年通过Prozorro完成4854项采购，具备严格的资格审查、质量保证、材料追溯和技术文件体系。", signal:"Atomremontservice在2025年发布频率转换器采购；Khmelnytskyi核电站2026年采购清单明确列出Danfoss VLT Micro Drive FC-51或同等品，证明企业存在持续变频设备采购，但公开实例主要为低压小功率设备。", recProduct:"GD5000中高压变频器", advice:"从非核安全级常规岛循环水泵、大型通风风机和水处理系统切入，提前准备核电质量保证、受控软件变更、长期备件、可追溯BOM及网络安全文件。", icp:74, grade:"B", scoreNote:"超大型发电终端和持续变频采购证据明确，客户价值高；GD5000品类匹配但核电认证与安全分级需确认，因此产品匹配为11分，被占领资产和电网袭击风险扣2分。",
+    hv:{ scale:{s:'locked',v:"超大型（员工约30000人；营收2024年约2070.3亿格里夫纳）"} } },
+  { id:29, no:"5", sheet:'n', company:"Zaporizhstal（扎波罗热钢铁厂）", site:"https://zaporizhstal.com/", city:"乌克兰 · 扎波罗热（Zaporizhzhia）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"Metinvest旗下大型综合钢铁厂，拥有烧结、高炉、炼钢、热轧和冷轧等连续生产流程。六台烧结机、高炉铸铁场除尘、轧机、循环水和液压系统形成大量中高压大功率驱动场景。", products:"热轧卷板及板材、冷轧卷板及板材、钢带、钢坯和生铁", competitors:"", channel:"", signal:"2024年企业投入9.38亿乌克兰格里夫纳维护和现代化产能，其中超过2.3亿用于2号、3号和4号高炉检修，两台烧结机完成大修；2号和4号高炉项目明确包括铸铁场及料仓栈桥抽吸除尘系统维护。", recProduct:"GD5000中高压变频器", advice:"利用高炉和烧结设备大修窗口，从烧结及铸铁场除尘风机、循环水泵切入，提供工频旁路、低谐波和电网波动适应方案。", icp:74, grade:"B", scoreNote:"大型综合钢铁终端，2024年存在明确高炉、烧结和除尘系统投资，风机泵类与中高压变频器基本匹配；规模价值高，但临近前线带来交付和停机窗口风险，联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型（员工8577；营收703.08亿乌克兰格里夫纳（2024年））"} } },
+  { id:30, no:"6", sheet:'n', company:"ДП «Морський торговельний порт «Південний»» / SE Sea Trade Port Pivdennyi", site:"https://www.port-yuzhny.com.ua/", city:"乌克兰 · 皮夫登内，敖德萨州", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"皮夫登内海运贸易港是乌克兰大型国有装卸企业，处理矿石、煤炭、粮食和其他散货及普通货物。设施包括铁路翻车机、板式给料机、长距离带式输送机、门座起重机以及规划中的高能力装船和堆取料系统。", products:"散货和普通货物装卸、船舶装载及卸载、铁路货物接卸、堆场和仓储服务", competitors:"", channel:"具备大型连续散货系统、港口起重机和高压供配电设施的自有维护能力；作为国有企业主要通过Prozorro和主管部门批准的投资计划采购。", signal:"2025年环境评估和技术资料涉及散货综合体扩建，包括5000吨/小时装船机、5000吨/小时取料机及新增输送线；资料还确认现有铁路翻车机、板式给料机、多段带式输送机和大型门座起重机。", recProduct:"GD5000中高压变频器", advice:"重点跟踪散货综合体扩建和老旧门座起重机电控改造的公开采购；联合拥有港机检修及中压施工资质的乌克兰承包商，提前准备乌克兰语技术文件、类似业绩、投标保证和分阶段验收方案。", icp:73, grade:"B", scoreNote:"目标终端客户和港口重载输送场景命中(ICP30)；环境文件明确5000吨/小时装船、取料及新增输送线扩建(需求15)；GD5000与大功率主输送、堆取料和装船驱动高度匹配(产品13)；国有大型港口且员工、营收规模突出(价值15)；联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型（员工2150；营收2025年3,198,620,000 UAH）"} } },
+  { id:31, no:"7", sheet:'n', company:"КП «Чернівціводоканал» / Chernivtsivodokanal", site:"https://vodokanal.cv.ua/", city:"乌克兰 · 切尔诺夫策", type:"终端客户", industry:"水处理与市政基础设施", profile:"工业自动化/中高压变频器/终端客户/水处理与市政基础设施", profileReq:"中大型及以上（各行业见细分）", business:"切尔诺夫策市综合水务运营商，负责取水、长距离输水、配水、污水收集和处理。企业在KfW及德国政府支持下实施泵站、管网和SCADA现代化，并已公开披露6kV大功率变频应用。", products:"城市供水、污水收集与处理、取水及输水泵站运营、水务基础设施现代化", competitors:"", channel:"具备国际融资项目实施、公开采购、中压泵站和SCADA升级经验，能够制定6kV、800kW级变频设备技术要求，适合以等效替换、备件和长期服务合同切入。", signal:"官方投资计划明确为Митків一级泵站配置一台800kW、6kV变频器；Шубранець泵站已实施变频泵组节能改造，官方称每日可减少约6000kWh用电；2024年另有Шубранець泵站至清水水库压力管线重建采购。", recProduct:"GD5000中高压变频器", advice:"围绕6kV、800kW现有应用制作逐项等效表，提前取得电机铭牌、泵曲线、单线图、安装尺寸和通信协议；通过具备乌克兰中压安装资质及KfW项目经验的伙伴投标，并配置自动旁路及关键功率单元备件。", icp:73, grade:"B", scoreNote:"目标终端客户和中压泵站场景命中(ICP30)；官方文件明确出现6kV、800kW变频器并有量化节能案例(需求15)；与GD5000电压及功率范围直接匹配(产品13)；虽营收低于通用门槛，但员工规模、城市关键基础设施和明确中压负载使客户价值按大型项目级计(价值15)；联系人待补。",
+    hv:{ scale:{s:'locked',v:"中型关键基础设施运营商（员工577；营收2025年301,636,000 UAH）"} } },
+  { id:32, no:"8", sheet:'n', company:"ЛМКП «Львівводоканал» / Lvivvodokanal", site:"https://lvivvodokanal.com.ua/", city:"乌克兰 · 利沃夫", type:"终端客户", industry:"水处理与市政基础设施", profile:"工业自动化/中高压变频器/终端客户/水处理与市政基础设施", profileReq:"中大型及以上（各行业见细分）", business:"利沃夫市主要供排水企业，负责地下水取水、远距离高扬程输水、城市配水、污水收集和处理。长距离泵送及大型污水处理设施使其对主泵、污水泵、鼓风机和能源管理系统的效率高度敏感。", products:"地下水取水、长距离输水和城市配水、污水收集与处理、泵站及管网维护", competitors:"", channel:"具备长距离泵站群调度、污水处理和国际融资项目执行能力；EBRD项目采用国际采购和环境社会合规要求，适合通过有国际金融机构项目经验的EPC或系统集成商进入。", signal:"EBRD正在支持两座运行中污水处理厂的关键改造，公开项目涉及主污水泵站设备、新鼓风机、空气流量控制、离心机和污泥泵；2025年另有Kholodnovidka污水泵站重建项目设计审查采购。", recProduct:"GD5000中高压变频器", advice:"重点跟踪污水处理厂和污水泵站设备包，以长距离泵站单位输水电耗和鼓风机能耗测算切入；提前准备英语及乌克兰语技术文件、国际项目业绩、环境合规资料和本地调试方案。", icp:73, grade:"B", scoreNote:"目标终端客户、长距离输水及污水处理场景命中(ICP30)；EBRD改造明确覆盖主污水泵站、鼓风机和污泥泵，且2025年有泵站重建设计采购(需求15)；GD5000适配高扬程输水和大型污水泵负载(产品13)；规模大型且国际融资项目能力明确(价值15)；联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型（员工1776；营收2025年1,459,948,000 UAH）"} } },
+  { id:33, no:"9", sheet:'n', company:"МКП «Миколаївводоканал» / Mykolaivvodokanal", site:"https://vodokanal.mk.ua/", city:"乌克兰 · 米科拉伊夫", type:"终端客户", industry:"水处理与市政基础设施", profile:"工业自动化/中高压变频器/终端客户/水处理与市政基础设施", profileReq:"中大型及以上（各行业见细分）", business:"米科拉伊夫市主要供排水企业，负责取水、净水、输配水、污水提升和污水处理。企业在战争期间受到设施损伤，并持续推进污水泵站、三级供水泵站和电气控制系统恢复及改造。", products:"城市供水、污水收集与处理、供水及污水泵站运营、战损基础设施恢复", competitors:"INVT、Hitachi", channel:"已采购多个功率等级的变频器，并规划在多座污水泵站更换泵组及安装频率变换器，具备低压VFD应用和泵站改造经验；不同项目可能由折旧资金、市政预算、EIB或国际援助分别采购。", signal:"企业投资计划明确在КНС №18、№9、№4а和№6更换泵组并安装变频器，其中КНС №4а规划预算约9,800,000 UAH；2023年公开采购文件还列出INVT GD200A和Hitachi NE-S1多个功率等级的变频器。", recProduct:"GD5000中高压变频器", advice:"先以现有INVT和Hitachi低压变频器的兼容替换、统一备件和多泵控制建立关系，再对三级供水泵站及大型污水泵站开展6kV电机审计；按具体项目核实资金来源，不默认低压采购记录可直接转化为中压项目。", icp:73, grade:"B", scoreNote:"目标终端客户和市政泵站场景命中(ICP30)；投资计划直接列明多座污水泵站安装变频器，且公开采购确认INVT和Hitachi在用(需求15)；GD5000适合向三级泵站及大型污水泵中压场景延伸(产品13)；员工规模大型且承担城市关键基础设施(价值15)；联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型关键基础设施运营商（员工1261；营收2025年431,458,000 UAH）"} } },
+  { id:34, no:"10", sheet:'n', company:"ПрАТ «Івано-Франківськцемент»（Ivano-Frankivskcement）", site:"https://www.ifcem.if.ua/en/", city:"乌克兰 · 亚姆尼察（Yamnytsia），伊万诺-弗兰科夫斯克州", type:"终端客户", industry:"水泥与建材", profile:"工业自动化/中高压变频器/终端客户/水泥与建材", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰大型综合水泥与矿物建材生产企业，拥有多条干法水泥生产线和自有原料开采、运输体系，水泥年产能力约400万吨。工艺覆盖破碎、生料制备、回转窑、熟料冷却、水泥粉磨、除尘、提升输送和包装，属于中高压电机密集型终端。", products:"水泥、熟料、石膏制品、干混建材、纤维水泥及屋面材料、预制混凝土", competitors:"", channel:"具备自有矿山、三条现代化水泥线、气体净化系统、实验室及公开招标平台；公开资料出现FLS、MFL工艺设备和AUMUND提升输送设备，能够管理国际设备和复杂备件体系。", signal:"2025年报披露约7.53亿格里夫纳机器设备采购承诺，现代化项目预计延续至2026—2027年；官网2026年招标涉及水泥磨1号、2号AUMUND提升机及沸石输送机部件。", recProduct:"GD5000中高压变频器", advice:"优先围绕窑尾高温风机、生料磨和水泥磨循环风机、破碎机及大型提升输送设备开展负载审计，以节能、软启动和减少机械冲击切入；报价前核验电机电压、功率、负载曲线、旁路要求和停机窗口。", icp:73, grade:"B", scoreNote:"目标终端客户、乌克兰水泥与建材行业命中（ICP30）；有明确机器设备采购承诺和现行磨机输送设备招标（需求15）；窑、磨、风机、破碎和输送均为GD5000适用负载（产品13）；大型高产能客户（价值15）；未发现需扣分的制裁或失信事实（风险0）；按要求未搜索联系人（联系人0）。",
+    hv:{ scale:{s:'locked',v:"大型（员工1904人（2025年）；营收16,253,172,000格里夫纳（2025年））"} } },
+  { id:35, no:"11", sheet:'n', company:"ПрАТ «АК «Київводоканал» / Kyivvodokanal", site:"https://vodokanal.kiev.ua/", city:"乌克兰 · 基辅", type:"终端客户", industry:"水处理与市政基础设施", profile:"工业自动化/中高压变频器/终端客户/水处理与市政基础设施", profileReq:"中大型及以上（各行业见细分）", business:"基辅市核心综合水务运营商，负责原水取水、净化、输配水、污水收集和处理。企业运营大型取水泵站、增压泵站、污水提升泵站及博尔特尼奇污水处理系统，是典型的连续运行型大功率驱动终端。", products:"城市自来水生产与输配、污水收集与处理、供水及污水泵站运营、管网维修和水质监测", competitors:"", channel:"拥有泵站、电气、自动化和调度运维团队，具备大型水务工程及世界银行项目实施经验；采购通常通过公共招标、投资计划或国际融资项目执行。", signal:"官方资料显示，第聂伯河供水站改造已更换大型泵组并安装变频器和新电气设备；Жовтнева、Перемога、Винзавод等供水或污水泵站也采用或规划变频调速，形成存量驱动维护、备件和后续标准化需求。", recProduct:"GD5000中高压变频器", advice:"优先针对已采用变频调速的一级取水、长距离输水和大型污水泵站开展兼容替换及备件标准化；以节电率、压力稳定、水锤抑制、自动旁路和停电后自动恢复为核心，并联合具备Prozorro投标及中压施工能力的本地伙伴进入。", icp:73, grade:"B", scoreNote:"目标终端客户、乌克兰市政水务及大型泵站场景命中(ICP30)；多个官方泵站项目明确采用变频器或变频调速(需求15)；GD5000与大型取水泵和污水提升泵匹配(产品13)；首都级水务企业且员工、营收均为大型(价值15)；联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型（员工5881；营收2025年5,499,929,000 UAH）"} } },
+  { id:36, no:"12", sheet:'n', company:"ПрАТ «Кривий Ріг Цемент»（Kryvyi Rih Cement）", site:"https://krcement.com/", city:"乌克兰 · 克里维里赫及卡缅斯克，聂伯彼得罗夫斯克州", type:"终端客户", industry:"水泥与建材", profile:"工业自动化/中高压变频器/终端客户/水泥与建材", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰大型多资产水泥、混凝土和花岗岩骨料生产商，主要可开发资产位于克里维里赫、卡缅斯克及Rybalsky采石场。克里维里赫厂公开设备包括干法回转窑、预热塔、预分解炉和四个水泥粉磨工段，卡缅斯克厂另有三台水泥磨。", products:"水泥、熟料、预拌混凝土、花岗岩骨料、石灰石和黏土等矿山原料", competitors:"", channel:"官网设供应商资格程序，并公开征集机械、电气、起重及专用设备维修维护承包商；Rybalsky采石场拥有每小时约250吨破碎系统、三级加工和自动装载控制。", signal:"官网明确征集电气设备和机械设备维修维护承包商以及设备材料供应商，是直接采购信号；未披露中高压变频器品牌和数量。", recProduct:"GD5000中高压变频器", advice:"通过公开供应商资格程序进入，分别针对窑尾风机、磨机和选粉风机，以及Rybalsky采石场破碎、筛分和输送负载做技术审计；合同和销售范围必须排除被占领区Amvrosiivka资产。", icp:73, grade:"B", scoreNote:"目标大型水泥和骨料终端命中（ICP30）；官网直接征集电气和机械维护及设备材料供应商（需求15）；窑、磨、风机、破碎和输送均适配GD5000（产品13）；大型多资产客户（价值15）；评分对象仅限乌克兰政府控制区资产，未发现需扣分的制裁或失信事实（风险0）；官网本次自动抓取失败但官方索引存在；按要求未搜索联系人（联系人0）。",
+    hv:{ scale:{s:'locked',outcome:'empty'} } },
+  { id:37, no:"13", sheet:'n', company:"ТОВ «ДП Ворлд ТІС Південний» / DP World TIS Pivdennyi", site:"https://www.dpworld.com/en/ports-terminals/ukraine/pivdennyi", city:"乌克兰 · 维兹尔卡，敖德萨州，皮夫登内港区", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"DP World TIS Pivdennyi是乌克兰大型深水集装箱和多用途码头，年设计能力最高约60万TEU。码头运营STS岸桥、RTG场桥、门座起重机、重型堆场设备、铁路设施及大型变电系统。", products:"集装箱装卸和堆场服务、散货及普通货物处理、铁路和公路多式联运、冷藏箱及仓储服务", competitors:"", channel:"属于DP World国际港口体系，具有成熟的港机维护、HSE、网络安全和供应商准入标准；进入需满足集团技术规范，并具备国际港口项目业绩、本地服务和长期备件支持。", signal:"2025年审计财报披露，2025年12月袭击损坏了为主要生产过程供电的变电站，并损坏部分起重机；企业将损坏评估为可修复并启动专家评估，是明确的港机和供配电修复信号。", recProduct:"GD5000中高压变频器", advice:"围绕受损起重机和变电站形成修复、升级和备件三层方案，并优先申请集团供应商准入；重点核实大型港机辅助系统、集中输送或泵类负载的中压电机清单，再将GD5000与谐波治理、自动恢复和远程监测组合切入。", icp:73, grade:"B", scoreNote:"目标终端客户和港机重载场景命中(ICP30)；审计财报明确变电站和部分起重机受到可修复损坏(需求15)；GD5000适用于经设备清单核实的港口中压驱动及辅助系统(产品13)；国际港口集团、员工和收入规模合格且设备价值高(价值15)；联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型国际港口终端（员工517；营收2025年约841,000,000 UAH）"} } },
+  { id:38, no:"14", sheet:'n', company:"Dniprospetsstal（第聂伯特钢）", site:"https://dniprospetsstal.com/", city:"乌克兰 · 扎波罗热（Zaporizhzhia）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰特种钢和合金钢生产企业，采用电弧炉、氩氧转炉、钢包精炼，并配置1050/950、550、325和280轧机。炼钢烟气净化、透平压缩站、冷却水泵、加热炉风机和轧机传动均与中高压变频器高度相关。", products:"工具钢、轴承钢、不锈钢、耐热及高温合金钢、合金钢长材和锻轧坯", competitors:"", channel:"", signal:"2024年管理报告明确列出透平压缩机站不间断电源、化学水处理系统，并启动炼钢二车间4号和6号炉烟气净化装置重建设计；全年固定资产和在建工程增加约2.719亿乌克兰格里夫纳。", recProduct:"GD5000中高压变频器", advice:"在4号和6号炉烟气净化项目设计阶段导入GD5000方案，联合设计单位完成风量调节、谐波、旁路及电机绝缘评估，并延伸至压缩站和水处理泵。", icp:72, grade:"B", scoreNote:"特钢电炉和轧制终端与画像完全匹配，烟气净化重建处于公开设计阶段，产品场景明确且规模达标；企业持续亏损、负债承压且位于扎波罗热，成交风险较高，联系人待补。",
+    hv:{ scale:{s:'locked',v:"中大型（员工3147；营收56.86亿乌克兰格里夫纳（2024年））"} } },
+  { id:39, no:"15", sheet:'n', company:"Nikopol Ferroalloy Plant / NZF（尼科波尔铁合金厂）", site:"https://www.nzf.com.ua/", city:"乌克兰 · 尼科波尔（Nikopol）", type:"终端客户", industry:"钢铁与金属加工", profile:"工业自动化/中高压变频器/终端客户/钢铁与金属加工", profileReq:"中大型及以上（各行业见细分）", business:"乌克兰大型锰系铁合金生产企业，主要采用矿热炉生产硅锰和锰铁。矿热炉烟气抽吸及袋式除尘、烧结通风、炉体循环水、原料输送和压缩空气系统存在大功率连续驱动场景。", products:"硅锰合金、高碳锰铁、中低碳锰铁及锰系烧结料", competitors:"", channel:"", signal:"企业公开表示持续维修和现代化被炮击损坏的设备及能源基础设施；2024年发展计划投入约1.969亿乌克兰格里夫纳，重点包括能源独立和能源设施保护，并恢复两台熔炼机组按电价时段运行。", recProduct:"GD5000中高压变频器", advice:"从矿热炉烟气除尘风机、烧结通风和炉体循环水泵切入，突出峰谷调节、软启动降低母线冲击、电网暂降穿越和模块化快速维修。", icp:72, grade:"B", scoreNote:"大型铁合金终端，能源设施和生产设备存在明确修复现代化投入，矿热炉除尘风机及循环水泵匹配度高；巨额亏损、炮击和供电不确定带来较高付款及实施风险，联系人待补。",
+    hv:{ scale:{s:'locked',v:"大型（员工3010；营收78.13亿乌克兰格里夫纳（2024年））"} } }
+];
+
+/* ================================================================
+ * 工具函数
+ * ================================================================ */
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString('zh-CN');
+function getLead(id){ return leads.find(l => l.id === id); }
+function isEnhanced(l){ return rowFields(l).some(f => l.hv[f] && l.hv[f].s === 'unlocked'); }
+function rowTargets(l){ return rowFields(l).filter(f => l.hv[f] && (l.hv[f].s === 'locked' || l.hv[f].s === 'failed')); }
+function rowFields(l){ return l.sheet === 'n' ? ['scale'] : HV; }
+function fileStats(f){
+  if (f.id === 1) return { leads: leads.filter(l => l.sheet === 'c').length, enhanced: leads.filter(isEnhanced).length };
+  return { leads: f.staticLeads, enhanced: f.staticEnhanced };
+}
+function sheetLeads(){
+  return leads.filter(l => l.sheet === (state.sheet === 'nocontact' ? 'n' : 'c'));
+}
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.textContent = msg;
+  $('toastRoot').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 320); }, 3200);
+}
+function updateCredits(){
+  $('creditsVal').textContent = fmt(state.credits);
+  const p = $('creditsPill');
+  p.classList.remove('flash'); void p.offsetWidth; p.classList.add('flash');
+}
+function openModal(html){
+  $('modalRoot').innerHTML = '<div class="modal-mask" onclick="if(event.target===this)closeModal()"><div class="modal">' + html + '</div></div>';
+}
+function closeModal(){ $('modalRoot').innerHTML = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+const ICO = {
+  mic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
+  doc: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  lead: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8" fill="currentColor"/></svg>',
+  lock: '<svg class="lock-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  bolt: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11L9.5 22 19 9.5h-6.5z"/></svg>',
+  back: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  download: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  task: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  listOn: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
+  gridOff: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>'
+};
+
+/* ================================================================
+ * 二级侧边栏
+ * ================================================================ */
+function renderSubbar(){
+  const mineCnt = FILES.filter(f => f.creator === '小庞').length;
+  const v = state.view;
+  $('subScroll').innerHTML = `
+    <div class="sub-group">
+      <div class="sub-group-head">${ICO.mic}我的笔记<span class="cnt">${1 + mineCnt}</span></div>
+      <div class="sub-item" data-v="notes-meeting" onclick="go('notes-meeting')">${ICO.doc}会议笔记<span class="cnt">1</span></div>
+      <div class="sub-item" data-v="notes-flash" onclick="go('notes-flash')">${ICO.doc}闪念笔记<span class="cnt">0</span></div>
+      <div class="sub-item" data-v="mine-leads" onclick="go('mine-leads')">${ICO.lead}商机线索<span class="cnt">${mineCnt}</span></div>
+    </div>
+    <div class="sub-group">
+      <div class="sub-group-head">${ICO.mic}企业笔记<span class="cnt">${644 + FILES.length}</span></div>
+      <div class="sub-item" data-v="notes-ent-meeting" onclick="go('notes-ent-meeting')">${ICO.doc}会议笔记<span class="cnt">640</span></div>
+      <div class="sub-item" data-v="ai-data" onclick="go('ai-data')">${ICO.doc}AI全景数据<span class="cnt">4</span></div>
+      <div class="sub-item" data-v="ent-leads" onclick="go('ent-leads')">${ICO.lead}商机线索<span class="cnt">${FILES.length}</span></div>
+    </div>`;
+  document.querySelectorAll('.sub-item').forEach(el => el.classList.toggle('active', el.dataset.v === v));
+  $('nav-recycle').classList.toggle('active', v === 'recycle');
+}
+
+/* ================================================================
+ * 视图路由
+ * ================================================================ */
+function go(view){
+  state.view = view;
+  render();
+}
+function render(){
+  renderSubbar();
+  const el = $('view');
+  el.className = '';
+  el.id = 'view';
+  if (state.view === 'mine-leads' || state.view === 'ent-leads') el.innerHTML = viewList();
+  else if (state.view === 'detail') { el.classList.add('fill'); el.innerHTML = viewDetail(); }
+  else if (state.view === 'ai-data') el.innerHTML = viewAIData();
+  else if (state.view === 'recycle') el.innerHTML = viewRecycle();
+  else el.innerHTML = viewNotes();
+}
+function onSearch(q){ state.q = q.trim(); if (state.view === 'mine-leads' || state.view === 'ent-leads') render(); }
+
+/* ================================================================
+ * 商机线索 - 文件列表（PRD 6.2）
+ * ================================================================ */
+function viewList(){
+  const mineOnly = state.view === 'mine-leads';
+  let list = FILES.filter(f => mineOnly ? f.creator === '小庞' : true);
+  if (state.q) list = list.filter(f => f.name.includes(state.q));
+
+  const rows = list.map(f => {
+    const st = fileStats(f);
+    return `<tr class="clickable" onclick="openFile(${f.id})">
+      <td onclick="event.stopPropagation()" style="width:36px"><span class="chk" onclick="toast('原型演示：批量选择','info')"></span></td>
+      <td><span class="file-cell"><span class="xls">X</span><span style="overflow:hidden;text-overflow:ellipsis">${f.name}</span></span></td>
+      <td class="num-cell">${st.leads}</td>
+      <td class="num-cell ${st.enhanced ? 'enhanced-num' : ''}">${st.enhanced}</td>
+      <td>${f.creator}</td>
+      <td style="color:var(--text-3)">${f.created}</td>
+      <td style="color:var(--text-3)">${f.updated}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="txt-btn" onclick="viewTask()">原任务</button>
+        <button class="op-icon-btn danger" title="删除" onclick="deleteFile(${f.id},'${f.name}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-head">
+      <div class="card-title">商机线索</div>
+      <div class="card-desc">指定 Agent 的线索结果自动沉淀为可持续更新的线索文件，可预览、导出，并使用个人 Credits 解锁高价值字段，解锁权益归企业所有。</div>
+      <div class="card-toggles">
+        <button class="icon-btn on" title="列表视图">${ICO.listOn}</button>
+        <button class="icon-btn" title="宫格视图" onclick="toast('原型演示：宫格视图','info')">${ICO.gridOff}</button>
+      </div>
+    </div>
+    <div class="card-count">共 ${list.length} 个商机线索文件</div>
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:36px"><span class="chk"></span></th><th style="width:36%">文件名</th><th>线索数量</th><th>已增强线索</th><th>创建人</th><th>创建时间</th><th>更新时间</th><th style="width:110px">操作</th>
+      </tr></thead>
+      <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:var(--text-3);padding:44px">暂无符合条件的文件</td></tr>'}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ================================================================
+ * 商机线索 - 文件详情预览（PRD 6.3 / 6.4）
+ * ================================================================ */
+function openFile(id){
+  if (id !== 1){ toast('原型演示：仅《乌克兰重工行业GD5000线索清单》开放详情预览', 'info'); return; }
+  state.fileId = id; state.sheet = 'contacts'; state.view = 'detail';
+  render();
+}
+function backToList(){ state.view = 'ent-leads'; render(); }
+function switchSheet(s){ state.sheet = s; render(); }
+
+function viewDetail(){
+  const f = FILES[0];
+  return `<div class="card detail-wrap">
+    <div class="detail-inner-head">
+      <div class="detail-row1">
+        <button class="txt-btn" onclick="backToList()" style="padding-left:0">${ICO.back} 返回列表</button>
+        <span class="spacer"></span>
+        <button class="pill-btn big" onclick="exportFile('${f.name}')">${ICO.download} 导出 Excel</button>
+      </div>
+      <div class="detail-title-row">
+        <span class="detail-title"><span class="xls">X</span>${f.name}</span>
+        <span class="detail-meta">线索数量 <b>${leads.filter(l=>l.sheet==='c').length}</b> · 已增强线索 <b class="hl" id="enhancedCnt">${leads.filter(isEnhanced).length}</b> · 已解锁字段 <b class="hl" id="unlockedCnt">${leads.reduce((s,l)=>s+HV.filter(k=>l.hv[k]&&l.hv[k].s==='unlocked').length,0)}</b> · 更新于 ${f.updated}</span>
+      </div>
+    </div>
+    <div class="grid-scroll" id="gridScroll">${gridHTML()}</div>
+    <div class="sheet-tabs">
+      <div class="sheet-tab ${state.sheet==='contacts'?'active':''}" onclick="switchSheet('contacts')">有联系人线索<span class="cnt">${leads.filter(l=>l.sheet==='c').length}</span></div>
+      <div class="sheet-tab ${state.sheet==='nocontact'?'active':''}" onclick="switchSheet('nocontact')">目标客户（无联系人）<span class="cnt">${leads.filter(l=>l.sheet==='n').length}</span></div>
+    </div>
+  </div>`;
+}
+
+function refreshGrid(){
+  const sc = $('gridScroll');
+  const l = sc ? sc.scrollLeft : 0, t = sc ? sc.scrollTop : 0;
+  sc.innerHTML = gridHTML();
+  sc.scrollLeft = l; sc.scrollTop = t;
+  const e = $('enhancedCnt'); if (e) e.textContent = leads.filter(isEnhanced).length;
+  const u = $('unlockedCnt'); if (u) u.textContent = leads.reduce((s,l2)=>s+HV.filter(k=>l2.hv[k]&&l2.hv[k].s==='unlocked').length,0);
+}
+
+function hvHead(field){
+  return `<th class="hv-head"><div class="hv-head-inner">${ICO.lock}${FIELD_LABELS[field]}<span class="price-tag">${FIELD_PRICES[field]}/条</span>
+    <button class="col-unlock-btn" title="一键解锁本列（当前 Sheet 内全部冻结字段）" onclick="tryUnlockCol('${field}')">${ICO.bolt}</button></div></th>`;
+}
+
+function hvCell(lead, field){
+  const c = lead.hv[field];
+  if (c.s === 'unlocked'){
+    const val = field === 'linkedin'
+      ? `<a class="link" href="#" onclick="event.preventDefault();toast('原型演示：跳转 LinkedIn','info')">${c.v}</a>`
+      : (field === 'email' ? `<a class="link" href="#" onclick="event.preventDefault()">${c.v}</a>` : `<span class="hv-val">${c.v}</span>`);
+    return val;
+  }
+  if (c.s === 'querying') return `<span class="cell-querying"><span class="spinner"></span>查询中…</span>`;
+  if (c.s === 'empty')    return `<span class="cell-empty">暂无有效数据</span>`;
+  if (c.s === 'failed')   return `<span class="cell-fail">查询失败</span><button class="mini-link" onclick="tryUnlock(${lead.id},'${field}')">重试</button>`;
+  return `<div class="lock-cell"><span class="lock-mask">${ICO.lock}••••••</span><button class="unlock-btn" title="解锁消耗 ${FIELD_PRICES[field]} Credits，成功才扣费" onclick="tryUnlock(${lead.id},'${field}')">解锁</button></div>`;
+}
+
+const COLS_C = [
+  { k:'no', t:'#' },
+  { k:'company', t:'公司名称', min:210 },
+  { k:'site', t:'官网' },
+  { k:'city', t:'国家·城市', min:150 },
+  { k:'type', t:'客户类型' },
+  { k:'industry', t:'客户所属行业/应用场景', min:160 },
+  { k:'profile', t:'匹配画像', min:180 },
+  { k:'profileReq', t:'画像规模要求', min:160 },
+  { k:'hv', f:'scale' },
+  { k:'business', t:'主营业务简介', min:250 },
+  { k:'products', t:'核心产品/服务', min:150 },
+  { k:'competitors', t:'在用/代理对标友商', min:140 },
+  { k:'channel', t:'渠道/技术能力', min:230 },
+  { k:'signal', t:'需求/替换信号', min:250 },
+  { k:'recProduct', t:'推荐切入产品', min:150 },
+  { k:'advice', t:'切入建议', min:250 },
+  { k:'icp', t:'ICP评分' },
+  { k:'grade', t:'等级' },
+  { k:'scoreNote', t:'评分说明', min:250 },
+  { k:'hv', f:'name' },
+  { k:'hv', f:'title' },
+  { k:'hv', f:'email' },
+  { k:'hv', f:'linkedin' },
+  { k:'op', t:'操作', min:132 }
+];
+const COLS_N = COLS_C.filter(c => !(c.k === 'hv' && c.f !== 'scale'));
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function cellHtml(l, c){
+  if (c.k === 'no') return l.no;
+  if (c.k === 'company') return `<span class="co-name" title="${esc(l.company)}">${esc(l.company)}</span>${isEnhanced(l) ? '<span class="enhanced-tag">已增强</span>' : ''}`;
+  if (c.k === 'site'){ const d = l.site.replace(/^https?:\/\//,'').replace(/\/$/,''); return d ? `<a class="link" href="#" onclick="event.preventDefault()">${esc(d)}</a>` : '—'; }
+  if (c.k === 'icp') return `<span class="icp-num" style="color:${l.icp>=90?'var(--primary)':l.icp>=75?'var(--blue)':'var(--text-2)'}">${l.icp}</span>`;
+  if (c.k === 'grade') return `<span class="grade-tag grade-${l.grade}">${l.grade}</span>`;
+  if (c.k === 'hv') return hvCell(l, c.f);
+  if (c.k === 'op'){
+    const t = rowTargets(l);
+    return t.length ? `<button class="row-unlock-btn" onclick="tryUnlockRow(${l.id})">${ICO.bolt}解锁本行（${t.length}）</button>`
+      : (isEnhanced(l) ? '<span class="row-done">✓ 已增强</span>' : '<span class="row-none">—</span>');
+  }
+  const v = l[c.k];
+  return v ? `<span title="${esc(v)}">${esc(v)}</span>` : '<span style="color:var(--text-3)">—</span>';
+}
+
+function gridHTML(){
+  const isN = state.sheet === 'nocontact';
+  const cols = isN ? COLS_N : COLS_C;
+  const head = cols.map((c, i) => {
+    if (i === 0) return '<th class="sticky1">#</th>';
+    if (i === 1) return `<th class="sticky2"${c.min ? ` style="min-width:${c.min}px"` : ''}>${c.t}</th>`;
+    if (c.k === 'hv') return hvHead(c.f);
+    return `<th${c.min ? ` style="min-width:${c.min}px"` : ''}>${c.t}</th>`;
+  }).join('');
+  const body = sheetLeads().map(l => '<tr>' + cols.map((c, i) =>
+    `<td${i === 0 ? ' class="sticky1"' : (i === 1 ? ' class="sticky2"' : '')}>${cellHtml(l, c)}</td>`).join('') + '</tr>').join('');
+  return `<table class="grid" style="min-width:${isN ? 3000 : 3800}px"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+/* ================================================================
+ * 解锁流程（PRD 7.3 / 7.4 / 7.5 / 11）
+ * ================================================================ */
+function tryUnlock(id, field){
+  if (state.busy) return;
+  const lead = getLead(id), c = lead.hv[field];
+  if (c.s !== 'locked' && c.s !== 'failed') return;
+  const price = FIELD_PRICES[field];
+  const enough = state.credits >= price;
+  openModal(`
+    <h3>${ICO.lock}解锁高价值字段</h3>
+    <div class="kv"><span>联系人所在公司</span><b title="${lead.company}">${lead.company}</b></div>
+    <div class="kv"><span>解锁字段</span><b>${FIELD_LABELS[field]}</b></div>
+    <div class="kv"><span>字段单价</span><b class="cost">${price} Credits</b></div>
+    <div class="kv"><span>当前余额</span><b>${fmt(state.credits)} Credits</b></div>
+    <div class="modal-note">仅在成功获得有效数据后扣除 Credits，未查询到有效数据不扣费。<br>解锁成功后，企业内具有数据权限的成员均可查看，不重复扣费。</div>
+    ${enough ? '' : `<div class="insufficient">Credits 余额不足：本次解锁需 ${price} Credits，当前余额 ${fmt(state.credits)}，请先充值后再试。</div>`}
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn primary" ${enough ? '' : 'disabled'} onclick="doUnlock(${id},'${field}')">确认解锁</button>
+    </div>`);
+}
+
+function resolveCell(lead, field){
+  const c = lead.hv[field];
+  const price = FIELD_PRICES[field];
+  if (c.outcome === 'empty'){
+    c.s = 'empty';
+    return { type: 'empty' };
+  }
+  if (c.outcome === 'failOnce' && !c.tried){
+    c.tried = true; c.s = 'failed';
+    return { type: 'failed' };
+  }
+  c.s = 'unlocked';
+  state.credits -= price;
+  updateCredits();
+  return { type: 'ok', price };
+}
+
+function doUnlock(id, field){
+  closeModal();
+  const lead = getLead(id), c = lead.hv[field];
+  c.s = 'querying';
+  refreshGrid();
+  setTimeout(() => {
+    const r = resolveCell(lead, field);
+    refreshGrid();
+    if (r.type === 'ok') toast(`解锁成功：已扣除 ${r.price} Credits`);
+    else if (r.type === 'empty') toast('查询完成：未获得有效数据，已标记为空值（不扣费，且不再支持手动增强）', 'info');
+    else toast('查询失败：接口超时，未扣除 Credits，可点击重试', 'err');
+  }, 900 + Math.random() * 600);
+}
+
+function batchModal(title, targets, scopeDesc, onConfirm){
+  const total = targets.reduce((s, t) => s + FIELD_PRICES[t.field], 0);
+  const enough = state.credits >= total;
+  const lines = targets.slice(0, 8).map(t =>
+    `<div class="field-line"><span title="${t.lead.company}">${t.lead.company} · ${FIELD_LABELS[t.field]}</span><b>${FIELD_PRICES[t.field]} Credits</b></div>`).join('')
+    + (targets.length > 8 ? `<div class="field-line" style="color:var(--text-3)">… 等共 ${targets.length} 个冻结字段</div>` : '');
+  openModal(`
+    <h3>${ICO.bolt}${title}</h3>
+    <div class="kv"><span>操作范围</span><b>${scopeDesc}</b></div>
+    <div class="kv"><span>预计最高消耗</span><b class="cost">${fmt(total)} Credits</b></div>
+    <div class="kv"><span>当前余额</span><b>${fmt(state.credits)} Credits</b></div>
+    <div class="batch-list">${lines}</div>
+    <div class="modal-note">仅对<b>成功获得有效值</b>的字段扣除 Credits，未解锁成功的字段不扣费。</div>
+    ${enough ? '' : `<div class="insufficient">余额不足以覆盖预计最高消耗（${fmt(total)} Credits），本次批量操作已整体阻断，请先充值。</div>`}
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn primary" ${enough && targets.length ? '' : 'disabled'} onclick="${onConfirm}">确认解锁（${targets.length} 个字段）</button>
+    </div>`);
+}
+
+function tryUnlockRow(id){
+  if (state.busy) return;
+  const lead = getLead(id);
+  const targets = rowTargets(lead).map(f => ({ lead, field: f }));
+  if (!targets.length) return;
+  batchModal('一键解锁本行', targets, `${lead.company} · ${targets.length} 个冻结字段`, `runBatch(${id},null)`);
+}
+function tryUnlockCol(field){
+  if (state.busy) return;
+  const targets = sheetLeads().filter(l => l.hv[field] && (l.hv[field].s === 'locked' || l.hv[field].s === 'failed')).map(l => ({ lead: l, field }));
+  if (!targets.length){ toast('当前 Sheet 内该列没有可解锁的冻结字段', 'info'); return; }
+  const sheetName = state.sheet === 'gradeA' ? '高潜A级客户' : '线索总表';
+  batchModal(`一键解锁本列 · ${FIELD_LABELS[field]}`, targets, `当前 Sheet「${sheetName}」· ${targets.length} 个冻结字段`, `runBatch(null,'${field}')`);
+}
+
+function runBatch(rowId, colField){
+  closeModal();
+  let targets;
+  if (rowId !== null){
+    const lead = getLead(rowId);
+    targets = rowTargets(lead).map(f => ({ lead, field: f }));
+  } else {
+    targets = sheetLeads().filter(l => l.hv[colField] && (l.hv[colField].s === 'locked' || l.hv[colField].s === 'failed')).map(l => ({ lead: l, field: colField }));
+  }
+  state.busy = true;
+  targets.forEach(t => { t.lead.hv[t.field].s = 'querying'; });
+  refreshGrid();
+  let ok = 0, empty = 0, failed = 0, cost = 0;
+  targets.forEach((t, i) => {
+    setTimeout(() => {
+      const r = resolveCell(t.lead, t.field);
+      if (r.type === 'ok'){ ok++; cost += r.price; }
+      else if (r.type === 'empty') empty++;
+      else failed++;
+      refreshGrid();
+      if (i === targets.length - 1){
+        state.busy = false;
+        toast(`批量解锁完成：成功 ${ok} · 空值 ${empty} · 失败 ${failed}，实际消耗 ${fmt(cost)} Credits`, ok ? '' : (failed ? 'err' : 'info'));
+      }
+    }, 700 + i * 420);
+  });
+}
+
+/* ================================================================
+ * 导出 / 原任务 / 删除 / 回收站（PRD 7.8 / 7.9）
+ * ================================================================ */
+function exportFile(name){
+  toast(`已导出「${name}」：仅包含您有权查看且企业已解锁的高价值字段真实值，未解锁单元格按空值导出`, '');
+}
+function viewTask(){
+  toast('原型演示：跳转至产生该文件的 Agent 会话（需通过原任务权限校验）', 'info');
+}
+function deleteFile(id, name){
+  openModal(`
+    <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>删除文件</h3>
+    <div class="modal-note" style="margin-top:0">确定删除「${name}」吗？文件将进入<b>回收站</b>并保留 30 天，期间可随时恢复。删除不会清除企业解锁权益、已解锁数据与 Credits 流水，恢复后全部保留。</div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn danger" onclick="doDelete(${id})">确认删除</button>
+    </div>`);
+}
+function doDelete(id){
+  closeModal();
+  const i = FILES.findIndex(f => f.id === id);
+  if (i > -1){
+    const f = FILES[i];
+    FILES.splice(i, 1);
+    recycled.unshift({ name: f.name, deleted: '2026-07-28 15:20', days: 30, by: '小庞' });
+    if (state.view === 'detail') state.view = 'ent-leads';
+    render();
+    toast('已删除，文件进入回收站（保留 30 天），解锁权益与 Credits 流水不受影响', 'info');
+  }
+}
+
+/* ================================================================
+ * 其他视图
+ * ================================================================ */
+function viewAIData(){
+  const rows = AI_FILES.map(f => `<tr>
+    <td style="width:36px"><span class="chk" onclick="toast('原型演示：批量选择','info')"></span></td>
+    <td><span class="file-cell"><span class="xls">X</span><span style="overflow:hidden;text-overflow:ellipsis">${f.name}</span></span></td>
+    <td style="color:var(--text-3)">${f.size}</td><td style="color:var(--text-3)">${f.src}</td><td style="color:var(--text-3)">${f.updated}</td>
+    <td><button class="pill-btn" onclick="toast('原型演示：AI 编辑能力','info')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>AI 编辑</button></td>
+  </tr>`).join('');
+  return `<div class="card">
+    <div class="card-head">
+      <div class="card-title">AI全景数据</div>
+      <div class="card-desc">基于会议内容自动抽取关键字段，形成可编辑、可分析的数据表，支持后续的批量洞察与轻量决策。</div>
+      <div class="card-toggles">
+        <button class="icon-btn on" title="列表视图">${ICO.listOn}</button>
+        <button class="icon-btn" title="宫格视图" onclick="toast('原型演示：宫格视图','info')">${ICO.gridOff}</button>
+      </div>
+    </div>
+    <div class="card-count">共 4 个 AI 全景数据</div>
+    <table class="tbl">
+      <thead><tr><th style="width:36px"><span class="chk"></span></th><th style="width:40%">文件名</th><th>文件大小</th><th>文件来源</th><th>更新时间</th><th style="width:110px">操作</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function viewRecycle(){
+  const rows = recycled.map((r, i) => `<tr>
+    <td><span class="file-cell"><span class="xls">X</span><span style="overflow:hidden;text-overflow:ellipsis">${r.name}</span></span></td>
+    <td style="color:var(--text-3)">${r.by}</td><td style="color:var(--text-3)">${r.deleted}</td>
+    <td><span class="grade-tag grade-B">剩余 ${r.days} 天</span></td>
+    <td><button class="txt-btn" onclick="restoreFile(${i})">恢复</button></td>
+  </tr>`).join('');
+  return `<div class="card">
+    <div class="card-head">
+      <div class="card-title">回收站</div>
+      <div class="card-desc">删除的文件保留 30 天。恢复后，原文件标识、字段解锁状态、企业解锁权益、空值状态、已增强线索数量与 Credits 流水均保持不变。</div>
+    </div>
+    <table class="tbl" style="margin-top:6px">
+      <thead><tr><th style="width:42%">文件名</th><th>删除人</th><th>删除时间</th><th>保留期</th><th style="width:110px">操作</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:44px">回收站为空</td></tr>'}</tbody>
+    </table>
+  </div>`;
+}
+function restoreFile(i){
+  const r = recycled[i];
+  recycled.splice(i, 1);
+  FILES.push({ id: Date.now(), name: r.name, creator: r.by, created: '2026-06-18 09:40', updated: '2026-07-05 16:20', agent: '海外线索 Agent', staticLeads: 15, staticEnhanced: 3 });
+  render();
+  toast('已恢复至商机线索列表，原解锁状态与企业权益全部保留', '');
+}
+
+function viewNotes(){
+  const nameMap = { 'notes-meeting': '会议笔记', 'notes-flash': '闪念笔记', 'notes-ent-meeting': '会议笔记' };
+  return `<div class="card"><div class="empty-state">
+    <span class="empty-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+    <div class="big">${nameMap[state.view] || '笔记'}（原型占位）</div>
+    <div>本原型聚焦「商机线索」模块，请点击左侧「商机线索」入口体验完整流程</div>
+  </div></div>`;
+}
+
+/* 初始化 */
+render();
+</script>
+</body>
+</html>
