@@ -449,10 +449,6 @@
     .modal-head h3 { margin: 0; font-size: 16px; }
     .modal-body { padding: 0 20px 18px; } .modal-body p { margin: 4px 0 16px; color: var(--sub); font-size: 13px; line-height: 1.55; }
     .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 13px 20px; border-top: 1px solid var(--line); }
-    .invite-progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 2px 0 18px; }
-    .invite-step { position: relative; padding-top: 8px; border-top: 2px solid #e8e9ee; color: var(--muted); font-size: 11px; line-height: 16px; }
-    .invite-step.active { border-color: var(--blue); color: var(--blue); font-weight: 600; }
-    .invite-step.done { border-color: #69b694; color: var(--green); }
     .field-label { display: block; margin: 12px 0 6px; color: var(--sub); font-size: 12px; font-weight: 550; }
     .field-input { display: block; width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; outline: 0; color: var(--ink); background: #fff; font-size: 13px; }
     .field-input:focus { border-color: rgba(22, 93, 255, 0.4); box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.06); }
@@ -2748,7 +2744,6 @@
   <section class="modal invite-member-modal" id="invite-modal" role="dialog" aria-modal="true" aria-labelledby="invite-modal-title">
     <div class="modal-head"><h3 id="invite-modal-title">邀请成员加入百融智能</h3><button class="close-btn" data-close aria-label="关闭邀请成员弹窗"><svg class="icon"><use href="#ico-x"/></svg></button></div>
     <div class="modal-body">
-      <div class="invite-progress" id="invite-progress"><div class="invite-step active">1　邀请成员</div><div class="invite-step">2　加入企业</div><div class="invite-step">3　安装桌面端</div><div class="invite-step">4　开始协作</div></div>
       <form class="invite-form" id="invite-form" novalidate>
         <p class="invite-form-intro">填写成员信息后，系统将通过管理员添加成员接口创建账号，并向工作邮箱发送企业邀请。</p>
         <div class="invite-field-grid">
@@ -2763,7 +2758,7 @@
       <div class="invite-success" id="invite-success">
         <div class="invite-success-hero"><span class="invite-success-mark">✓</span><strong>邀请邮件已发送</strong><span id="invite-member-preview">成员可通过邮件加入百融智能企业版</span></div>
         <div class="invite-email-preview"><small>邮件预览</small><h4 id="invite-email-subject">有人邀请你加入“百融智能”企业版</h4><p><span id="invite-email-name">成员</span>，管理员邀请你加入百融智能企业版。加入后可在授权范围内使用企业会议、企业文件与团队协作能力。</p><span class="invite-email-cta">加入企业版</span><div class="invite-account-note" id="invite-account-note">邀请链接已发送至工作邮箱，有效期为 7 天。</div></div>
-        <div class="invite-flow"><div class="invite-flow-row"><span class="invite-flow-dot">✓</span><div><strong>成员账号已创建</strong><span id="invite-member-created">管理员添加成员接口已处理</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">2</span><div><strong>等待成员加入企业</strong><span>成员打开邮件链接并完成登录</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">3</span><div><strong>安装百智桌面端</strong><span>按需连接团队桌面工作台</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">4</span><div><strong>开始团队协作</strong><span>共享会议、知识与任务上下文</span></div></div></div>
+        <div class="invite-flow"><div class="invite-flow-row"><span class="invite-flow-dot">✓</span><div><strong>成员账号已创建</strong><span id="invite-member-created">管理员添加成员接口已处理</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">2</span><div><strong>等待成员加入企业</strong><span>成员打开邮件链接并完成登录</span></div></div></div>
       </div>
     </div>
     <div class="modal-foot"><button class="secondary-btn" data-close id="invite-cancel">取消</button><button class="primary-btn" id="send-invite">发送邀请</button><button class="primary-btn" id="invite-done" style="display:none">完成</button></div>
@@ -2808,7 +2803,6 @@
       $("#send-invite").textContent = "发送邀请";
       $("#invite-cancel").style.display = "inline-flex";
       $("#invite-done").style.display = "none";
-      $("#invite-progress").querySelectorAll(".invite-step").forEach((step, index) => { step.classList.toggle("active", index === 0); step.classList.remove("done"); });
     };
     const openInvite = () => { resetInvite(); openModal("#invite-modal"); };
     $("#enterprise-invite-action").addEventListener("click", openInvite);
@@ -3467,7 +3461,6 @@
       $("#invite-account-note").textContent = member.status === "normal" ? "邀请链接已发送至工作邮箱，有效期为 7 天。" : "账号当前为停用状态；成员接受邀请后，需管理员启用才能登录。";
       $("#invite-form").classList.add("hide");
       $("#invite-success").classList.add("show");
-      $("#invite-progress").querySelectorAll(".invite-step").forEach((step, index) => { step.classList.toggle("active", index === 1); step.classList.toggle("done", index === 0); });
       sendButton.style.display = "none";
       $("#invite-cancel").style.display = "none";
       $("#invite-done").style.display = "inline-flex";
