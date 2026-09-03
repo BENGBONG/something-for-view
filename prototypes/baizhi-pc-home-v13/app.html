@@ -141,6 +141,17 @@
     .knowledge-file-leaf { display: grid; width: 100%; min-height: 31px; align-items: center; gap: 6px; padding: 0 8px 0 13px; border: 0; border-radius: 7px; color: #606b7d; background: transparent; cursor: pointer; font-size: 10px; text-align: left; grid-template-columns: 14px minmax(0,1fr); }
     .knowledge-file-leaf:hover, .knowledge-file-leaf.active { color: #2e63b6; background: #f4f6fa; }
     .knowledge-file-leaf .icon { width: 13px; height: 13px; color: #7a8dab; }
+    .knowledge-sidebar-tools { display: grid; gap: 8px; margin: 8px 8px 0 0; padding-top: 10px; border-top: 1px solid #edf0f4; }
+    .recycle-bin-entry { display: flex; width: 100%; min-height: 32px; align-items: center; gap: 7px; padding: 0 9px; border: 0; border-radius: 7px; color: #657083; background: transparent; cursor: pointer; font-size: 11px; text-align: left; }
+    .recycle-bin-entry:hover, .recycle-bin-entry.active { color: var(--blue); background: var(--blue-5); }
+    .recycle-bin-entry .icon { width: 14px; height: 14px; color: #8994a5; }
+    .knowledge-storage { display: grid; gap: 8px; padding: 9px 10px; border: 1px solid #e8ebf0; border-radius: 8px; background: #fafbfc; }
+    .knowledge-storage-item { display: grid; gap: 5px; }
+    .knowledge-storage-copy { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: #8a94a3; font-size: 8px; }
+    .knowledge-storage-copy strong { color: #596579; font-size: 9px; font-weight: 600; white-space: nowrap; }
+    .knowledge-storage-track { height: 3px; overflow: hidden; border-radius: 3px; background: #e9edf3; }
+    .knowledge-storage-track i { display: block; height: 100%; border-radius: inherit; background: #7ba4ed; }
+    .knowledge-storage-meta { color: #a0a8b4; font-size: 7px; line-height: 11px; }
     .knowledge-tree-menu { position: fixed; z-index: 40; display: none; width: 150px; padding: 6px; border: 1px solid #e0e4ea; border-radius: 10px; background: #fff; box-shadow: 0 12px 30px rgba(25,39,59,.14); }
     .knowledge-tree-menu.show { display: grid; }
     .knowledge-tree-menu button { display: flex; min-height: 34px; align-items: center; gap: 8px; padding: 0 9px; border: 0; border-radius: 7px; color: #4d586a; background: transparent; cursor: pointer; font-size: 10px; text-align: left; }
@@ -449,6 +460,11 @@
     .modal-head h3 { margin: 0; font-size: 16px; }
     .modal-body { padding: 0 20px 18px; } .modal-body p { margin: 4px 0 16px; color: var(--sub); font-size: 13px; line-height: 1.55; }
     .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 13px 20px; border-top: 1px solid var(--line); }
+    .danger-btn { display: inline-flex; height: 40px; align-items: center; justify-content: center; padding: 0 15px; border: 1px solid #d94b55; border-radius: 8px; color: #fff; background: #d94b55; cursor: pointer; font-size: 14px; font-weight: 500; }
+    .danger-btn:hover { border-color: #c83e49; background: #c83e49; }
+    .delete-confirm-modal { width: min(440px, calc(100% - 32px)); }
+    .delete-confirm-modal .modal-head { padding-bottom: 10px; }
+    .delete-confirm-modal .modal-body p { margin-bottom: 2px; color: #687386; font-size: 12px; line-height: 1.75; }
     .field-label { display: block; margin: 12px 0 6px; color: var(--sub); font-size: 12px; font-weight: 550; }
     .field-input { display: block; width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; outline: 0; color: var(--ink); background: #fff; font-size: 13px; }
     .field-input:focus { border-color: rgba(22, 93, 255, 0.4); box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.06); }
@@ -2289,6 +2305,34 @@
     .knowledge-workspace.file-open .knowledge-preview-paper h3 { margin-top: 30px; font-size: 14px; }
     .knowledge-workspace.file-open .knowledge-preview-audio { min-height: 720px; }
     .knowledge-workspace.file-open .knowledge-preview-actions { position: sticky; z-index: 2; bottom: 0; }
+    .recycle-workspace { width: calc(100% - 40px); max-width: 1440px; min-height: calc(100vh - 100px); margin: 20px auto; overflow: hidden; border: 1px solid #e1e5ea; border-radius: 16px; background: #fff; }
+    .recycle-header { display: flex; min-height: 96px; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; border-bottom: 1px solid #edf0f4; }
+    .recycle-heading { display: flex; min-width: 0; align-items: flex-start; gap: 12px; }
+    .recycle-heading-mark { display: inline-flex; width: 38px; height: 38px; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 10px; color: #64738a; background: #f1f3f6; }
+    .recycle-heading-mark .icon { width: 18px; height: 18px; }
+    .recycle-heading h1 { margin: 0; color: #202735; font-size: 20px; font-weight: 650; line-height: 28px; }
+    .recycle-heading p { margin: 3px 0 0; color: #8b95a5; font-size: 10px; line-height: 16px; }
+    .recycle-back { display: inline-flex; height: 34px; align-items: center; gap: 6px; padding: 0 11px; border: 1px solid #dfe4ea; border-radius: 8px; color: #536074; background: #fff; cursor: pointer; font-size: 10px; }
+    .recycle-back:hover { color: #285faf; background: #f7faff; }
+    .recycle-back .icon { width: 13px; height: 13px; transform: rotate(90deg); }
+    .recycle-tabs { display: flex; gap: 3px; padding: 12px 22px; border-bottom: 1px solid #edf0f4; background: #fbfcfd; }
+    .recycle-tab { height: 30px; padding: 0 13px; border: 0; border-radius: 7px; color: #788394; background: transparent; cursor: pointer; font-size: 10px; }
+    .recycle-tab.active { color: #2e63b6; background: #fff; box-shadow: 0 1px 4px rgba(35,50,75,.1); font-weight: 600; }
+    .recycle-table-head, .recycle-row { display: grid; align-items: center; gap: 16px; grid-template-columns: minmax(250px,1.6fr) 84px minmax(120px,.8fr) 76px 126px 72px 120px; }
+    .recycle-table-head { min-height: 42px; padding: 0 22px; border-bottom: 1px solid #e4e7eb; color: #778190; background: #fbfcfd; font-size: 9px; }
+    .recycle-row { min-height: 62px; padding: 8px 22px; border-bottom: 1px solid #edf0f3; color: #647084; font-size: 10px; }
+    .recycle-row:hover { background: #fafbfc; }
+    .recycle-file { display: flex; min-width: 0; align-items: center; gap: 10px; }
+    .recycle-file-mark { display: inline-flex; width: 30px; height: 32px; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 7px; color: #66758c; background: #f0f2f5; }
+    .recycle-file-mark .icon { width: 15px; height: 15px; }
+    .recycle-file strong { overflow: hidden; color: #2b3547; font-size: 11px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+    .recycle-expiry { color: #ab7041; }
+    .recycle-actions { display: flex; justify-content: flex-end; gap: 5px; }
+    .recycle-actions button { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; color: #536176; background: transparent; cursor: pointer; font-size: 9px; }
+    .recycle-actions button:hover { color: #2e63b6; background: #edf3fb; }
+    .recycle-actions button[data-recycle-action="permanent"]:hover { color: #c54752; background: #fff0f1; }
+    .recycle-empty { display: grid; min-height: 390px; place-items: center; color: #929ba9; font-size: 11px; }
+    .recycle-empty[hidden] { display: none !important; }
     @media (max-width: 1120px) {
       .knowledge-table-head[data-schema], .knowledge-file-row[data-schema] { gap: 10px; grid-template-columns: 30px minmax(220px,1.4fr) 72px 76px 84px 106px 58px; }
       .knowledge-table-head[data-schema] > :nth-child(4), .knowledge-file-row[data-schema] > :nth-child(4), .knowledge-table-head[data-schema] > :nth-child(6), .knowledge-file-row[data-schema] > :nth-child(6) { display: none; }
@@ -2306,6 +2350,11 @@
       .knowledge-workspace.file-open .knowledge-preview-body { padding: 12px; }
       .knowledge-workspace.file-open .knowledge-preview-paper { width: 100%; min-height: calc(100vh - 150px); padding: 28px 22px; }
       .knowledge-preview-pagination { display: none; }
+      .recycle-workspace { width: calc(100% - 24px); margin: 12px auto; }
+      .recycle-header { align-items: flex-start; flex-direction: column; }
+      .recycle-table-head { display: none; }
+      .recycle-row { grid-template-columns: minmax(0,1fr) auto; padding: 12px 14px; }
+      .recycle-row > :not(:first-child):not(:last-child) { display: none; }
     }
     @media (max-width: 760px) {
       .edition-gate { padding: 20px 14px; }
@@ -2538,6 +2587,13 @@
                 </div></div>
               </div></div>
             </div></div>
+            <div class="knowledge-sidebar-tools">
+              <button class="recycle-bin-entry" id="recycle-bin-entry" type="button"><svg class="icon"><use href="#ico-trash"/></svg><span>回收站</span></button>
+              <div class="knowledge-storage" id="knowledge-storage" aria-label="知识库剩余空间">
+                <div class="knowledge-storage-item" data-storage-space="personal"><div class="knowledge-storage-copy"><span>个人空间</span><strong id="personal-storage-remaining">剩余 49.16 GB</strong></div><div class="knowledge-storage-track"><i id="personal-storage-progress" style="width:1.68%"></i></div><div class="knowledge-storage-meta" id="personal-storage-meta">已用 859.38 MB / 50 GB</div></div>
+                <div class="knowledge-storage-item edition-enterprise-only" data-storage-space="enterprise"><div class="knowledge-storage-copy"><span>企业空间</span><strong id="enterprise-storage-remaining">剩余 7.27 TB</strong></div><div class="knowledge-storage-track"><i id="enterprise-storage-progress" style="width:.62%"></i></div><div class="knowledge-storage-meta" id="enterprise-storage-meta">已用 46.54 GB / 7.32 TB</div></div>
+              </div>
+            </div>
           </div></section>
           <section class="side-group capability-hub"><button class="side-group-head" id="capability-entry" data-main-target="capabilities" aria-current="false"><span class="side-group-title"><svg class="icon"><use href="#ico-agent"/></svg><span class="side-group-label">AI专家· 技能·连接器</span></span></button></section>
         </div>
@@ -2670,6 +2726,14 @@
       </div>
     </section>
 
+    <section class="recycle-workspace" data-main-view="recycle-bin" hidden aria-label="回收站">
+      <header class="recycle-header"><div class="recycle-heading"><span class="recycle-heading-mark"><svg class="icon"><use href="#ico-trash"/></svg></span><div><h1>回收站</h1><p>移入回收站的内容可在 30 天内恢复，30 天后将被永久删除。</p></div></div><button class="recycle-back" id="recycle-back" type="button"><svg class="icon"><use href="#ico-chevron"/></svg>返回知识库</button></header>
+      <nav class="recycle-tabs" aria-label="回收站空间"><button class="recycle-tab active" type="button" data-recycle-space="personal" aria-current="page">个人空间</button><button class="recycle-tab edition-enterprise-only" type="button" data-recycle-space="enterprise">企业空间</button></nav>
+      <div class="recycle-table-head"><span>文件名</span><span>类型</span><span>原位置</span><span>文件大小</span><span>删除时间</span><span>剩余天数</span><span>操作</span></div>
+      <div id="recycle-list"></div>
+      <div class="recycle-empty" id="recycle-empty">回收站暂无内容</div>
+    </section>
+
     <section class="note-detail-workspace" data-main-view="note-detail" hidden aria-label="语音笔记详情">
       <div class="note-detail-layout">
         <aside class="note-detail-sidebar"><div class="note-detail-side-head"><strong>语音内容</strong><button id="note-detail-back">返回首页</button></div><div class="note-detail-list"><button class="note-detail-item active" data-note-detail-item="三季度产品复盘会议" data-note-meta="今天 09:42 · 47 分钟 · 网页录音"><strong>三季度产品复盘会议</strong><small>今天 · 已整理</small></button><button class="note-detail-item" data-note-detail-item="百销产品能力与市场匹配调研" data-note-meta="昨天 16:28 · 58 分钟 · 录音卡"><strong>百销产品能力与市场匹配调研</strong><small>昨天 · 已整理</small></button><button class="note-detail-item" data-note-detail-item="关于首页工作流的想法" data-note-meta="今天 11:06 · 移动端闪念"><strong>关于首页工作流的想法</strong><small>移动端同步 · 已保存</small></button></div></aside>
@@ -2777,8 +2841,11 @@
     <div class="modal-foot"><button class="secondary-btn" data-close id="invite-cancel">取消</button><button class="primary-btn" id="send-invite">发送邀请</button><button class="primary-btn" id="invite-done" style="display:none">完成</button></div>
   </section>
   <section class="modal" id="download-modal"><div class="modal-head"><h3>下载百智桌面端</h3><button class="close-btn" data-close aria-label="关闭"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><p>连接本地文件与团队工作。</p><div class="os-row"><button class="os-btn selected" data-os="macOS">苹果电脑</button><button class="os-btn" data-os="Windows">微软电脑</button><button class="os-btn" data-os="Linux">开源系统</button></div></div><div class="modal-foot"><button class="secondary-btn" data-close>取消</button><button class="primary-btn" id="download-confirm"><svg class="icon"><use href="#ico-download"/></svg>下载苹果电脑版</button></div></section>
+  <section class="modal delete-confirm-modal" id="delete-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title"><div class="modal-head"><h3 id="delete-confirm-title">确认删除文件？</h3><button class="close-btn" data-close aria-label="关闭删除确认"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><p id="delete-confirm-description">删除后文件将移入回收站，30 天内可恢复，超期将永久删除。</p></div><div class="modal-foot"><button class="secondary-btn" data-close>取消</button><button class="danger-btn" id="delete-confirm-submit" type="button">确定</button></div></section>
+  <section class="modal delete-confirm-modal" id="permanent-delete-modal" role="dialog" aria-modal="true" aria-labelledby="permanent-delete-title"><div class="modal-head"><h3 id="permanent-delete-title">确认彻底删除？</h3><button class="close-btn" data-close aria-label="关闭彻底删除确认"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><p>彻底删除后将无法恢复，请确认是否继续。</p></div><div class="modal-foot"><button class="secondary-btn" data-close>取消</button><button class="danger-btn" id="permanent-delete-submit" type="button">彻底删除</button></div></section>
   <div class="toast" id="toast"></div>
 
+  <script src="assets/recycle-bin-model.js"></script>
   <script>
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -2800,6 +2867,8 @@
       $("#connector-config-modal").classList.remove("show");
       $("#invite-modal").classList.remove("show");
       $("#download-modal").classList.remove("show");
+      $("#delete-confirm-modal").classList.remove("show");
+      $("#permanent-delete-modal").classList.remove("show");
     };
     const openModal = (selector) => {
       $(selector).classList.add("show");
@@ -2869,10 +2938,10 @@
     $("#user-card").addEventListener("click", (event) => { event.stopPropagation(); closeSpaceMenu(); const open = !$("#user-menu").classList.contains("show"); $("#user-menu").classList.toggle("show", open); $("#user-card").setAttribute("aria-expanded", String(open)); });
     $("#user-menu").addEventListener("click", (event) => { event.stopPropagation(); const item = event.target.closest("[data-profile-action]"); if (!item) return; const action = item.dataset.profileAction; if (action === "profile") openDrawer("个人中心", '<h4>张伟</h4><div class="drawer-section"><strong>个人资料</strong><p>维护头像、姓名与个人工作信息。</p></div><div class="drawer-section"><strong>我的设备</strong><p>查看已登录的网页端、移动端与桌面端。</p></div>', '<button class="primary-btn" data-toast="个人资料已保存">编辑个人资料</button>'); else if (action === "switch-edition") { closeUserMenu(); $("#edition-gate").hidden = false; return; } else if (action === "download-app") { closeUserMenu(); setAppQrOpen(true); return; } else if (action === "checkin") { item.textContent = "已签到"; item.disabled = true; showToast("签到成功，获得 20 积分"); } else if (action === "logout") showToast("原型演示：退出登录需要二次确认"); else showToast({ upgrade: "正在查看升级方案", points: "正在打开积分明细", "earn-points": "正在打开积分任务", website: "正在打开百智官网", orders: "正在打开我的订单", "agent-workspace": "将按已有逻辑打开 Agent 工作台", intro: "正在打开产品介绍", changelog: "正在打开更新日志", guide: "正在打开新手指南" }[action] || "正在打开个人设置"); closeUserMenu(); });
     document.addEventListener("click", (event) => { if (!event.target.closest(".space-switcher-wrap")) closeSpaceMenu(); if (!event.target.closest(".user-footer")) closeUserMenu(); });
-    const mainViewTitles = { home: "企业AI工作台", knowledge: "知识库", capabilities: "AI专家· 技能·连接器", recording: "语音录制", "note-detail": "语音内容" };
+    const mainViewTitles = { home: "企业AI工作台", knowledge: "知识库", "recycle-bin": "回收站", capabilities: "AI专家· 技能·连接器", recording: "语音录制", "note-detail": "语音内容" };
     const setActiveSidebar = (target) => {
       $$(".side-sub-item, .nav-item, .side-group-head").forEach((row) => { row.classList.remove("active"); row.removeAttribute("aria-current"); });
-      const activeItem = ["home", "note-detail"].includes(target) ? $("#home-entry") : target === "recording" ? $("#start-recording") : target === "knowledge" ? null : $("#capability-entry");
+      const activeItem = ["home", "note-detail"].includes(target) ? $("#home-entry") : target === "recording" ? $("#start-recording") : target === "recycle-bin" ? $("#recycle-bin-entry") : target === "knowledge" ? null : $("#capability-entry");
       if (activeItem) { activeItem.classList.add("active"); activeItem.setAttribute("aria-current", "page"); }
     };
     const showMainView = (target, options = {}) => {
@@ -3008,11 +3077,54 @@
     };
     const knowledgeCatalog = {
       file: [
-        { name: "百智 PC 首页信息架构说明.pdf", meta: "PDF 文档", size: "618 KB", count: "-", type: "PDF", source: "自行上传", state: "已入库", updated: "2026-09-02 11:24", mark: "pdf", icon: "ico-file", preview: "document" },
-        { name: "企业能力中心交互规范.docx", meta: "Word 文档", size: "286 KB", count: "-", type: "DOCX", source: "桌面端同步", state: "已入库", updated: "2026-09-01 18:06", mark: "", icon: "ico-file", preview: "document" },
-        { name: "百智产品设计资料", meta: "文件夹 · 12 项内容", size: "-", count: "12", type: "文件夹", source: "自行创建", state: "已同步", updated: "2026-08-31 16:40", mark: "", icon: "ico-folder", preview: "folder" },
-        { name: "竞品工作台调研", meta: "网页收藏", size: "-", count: "4", type: "网页", source: "网页收藏", state: "已入库", updated: "2026-08-28 09:32", mark: "web", icon: "ico-globe", preview: "document" }
+        { id: "knowledge-1", name: "百智 PC 首页信息架构说明.pdf", meta: "PDF 文档", size: "618 KB", count: "-", type: "PDF", source: "自行上传", state: "已入库", updated: "2026-09-02 11:24", mark: "pdf", icon: "ico-file", preview: "document" },
+        { id: "knowledge-2", name: "企业能力中心交互规范.docx", meta: "Word 文档", size: "286 KB", count: "-", type: "DOCX", source: "桌面端同步", state: "已入库", updated: "2026-09-01 18:06", mark: "", icon: "ico-file", preview: "document" },
+        { id: "knowledge-3", name: "百智产品设计资料", meta: "文件夹 · 12 项内容", size: "-", count: "12", type: "文件夹", source: "自行创建", state: "已同步", updated: "2026-08-31 16:40", mark: "", icon: "ico-folder", preview: "folder" },
+        { id: "knowledge-4", name: "竞品工作台调研", meta: "网页收藏", size: "-", count: "4", type: "网页", source: "网页收藏", state: "已入库", updated: "2026-08-28 09:32", mark: "web", icon: "ico-globe", preview: "document" }
       ]
+    };
+    const assetStore = BaizhiRecycleState.createAssetStore();
+    const meetingRowsById = new Map();
+    let activeRecycleSpace = "personal";
+    let pendingDelete = null;
+    let pendingPermanentDeleteId = null;
+    const enterpriseKnowledgeFolders = new Set(["企业文件", "百智产品迭代", "百智PC版", "百智智能体", "客户项目", "重点客户", "交付文档", "市场资料"]);
+    const knowledgeSpaceForFolder = (folder) => enterpriseKnowledgeFolders.has(folder) ? "enterprise" : "personal";
+    const renderStorageSummary = () => {
+      const personal = BaizhiRecycleState.getStorageSummary({ totalBytes: 50 * 1024 ** 3, usedBytes: 859.38 * 1024 ** 2 });
+      const enterprise = BaizhiRecycleState.getStorageSummary({ totalBytes: 7.32 * 1024 ** 4, usedBytes: 46.54 * 1024 ** 3 });
+      $("#personal-storage-remaining").textContent = `剩余 ${(personal.remainingBytes / 1024 ** 3).toFixed(2)} GB`;
+      $("#personal-storage-meta").textContent = "已用 859.38 MB / 50 GB";
+      $("#personal-storage-progress").style.width = `${personal.usedPercent.toFixed(2)}%`;
+      $("#enterprise-storage-remaining").textContent = `剩余 ${(enterprise.remainingBytes / 1024 ** 4).toFixed(2)} TB`;
+      $("#enterprise-storage-meta").textContent = "已用 46.54 GB / 7.32 TB";
+      $("#enterprise-storage-progress").style.width = `${Math.max(enterprise.usedPercent, .8).toFixed(2)}%`;
+    };
+    renderStorageSummary();
+    const formatDeletedAt = (value) => new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(value)).replace("/", "-");
+    const renderRecycleBin = () => {
+      const edition = document.body.dataset.edition === "personal" ? "personal" : "enterprise";
+      if (edition === "personal") activeRecycleSpace = "personal";
+      $$('[data-recycle-space]').forEach((button) => {
+        const active = button.dataset.recycleSpace === activeRecycleSpace;
+        button.classList.toggle("active", active);
+        if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+      });
+      const items = assetStore.getRecycleItems({ edition, space: activeRecycleSpace });
+      $("#recycle-list").innerHTML = items.map((item) => `<div class="recycle-row" data-recycle-id="${knowledgeEscape(item.recycleId)}"><span class="recycle-file"><span class="recycle-file-mark"><svg class="icon"><use href="#${item.type === "meeting" ? "ico-mic" : "ico-file"}"/></svg></span><strong>${knowledgeEscape(item.name)}</strong></span><span>${item.type === "meeting" ? "录音文件" : knowledgeEscape(item.item.type || "知识文件")}</span><span>${knowledgeEscape(item.originalLocation)}</span><span>${knowledgeEscape(item.size)}</span><span>${knowledgeEscape(formatDeletedAt(item.deletedAt))}</span><span class="recycle-expiry">${item.expiresInDays} 天</span><span class="recycle-actions"><button type="button" data-recycle-action="restore">恢复</button><button type="button" data-recycle-action="permanent">彻底删除</button></span></div>`).join("");
+      $("#recycle-empty").hidden = items.length > 0;
+    };
+    const openDeleteConfirm = ({ title, description, onConfirm }) => {
+      pendingDelete = onConfirm;
+      $("#delete-confirm-title").textContent = title;
+      $("#delete-confirm-description").textContent = description;
+      openModal("#delete-confirm-modal");
+    };
+    const moveKnowledgeToRecycle = (item, originalIndex) => {
+      const storedItem = { ...item, folder: activeKnowledgeFolder, space: knowledgeSpaceForFolder(activeKnowledgeFolder), originalIndex };
+      if (!assetStore.getKnowledge().some((entry) => entry.id === storedItem.id)) assetStore.addKnowledge(storedItem);
+      assetStore.deleteKnowledge(storedItem.id);
+      knowledgeCatalog.file.splice(originalIndex, 1);
     };
     let activeKnowledgeFolder = "我的文件";
     let activeKnowledgeSchema = "file";
@@ -3127,7 +3239,10 @@
       if (event.target.closest(".knowledge-check")) { event.stopPropagation(); updateKnowledgeSelection(); return; }
       const item = knowledgeCatalog[activeKnowledgeSchema][Number(row.dataset.knowledgeIndex)];
       if (!item) return;
-      if (event.target.closest('[data-knowledge-row-action="delete"]')) { showToast(`原型演示：已选择删除「${item.name}」`); return; }
+      if (event.target.closest('[data-knowledge-row-action="delete"]')) {
+        openDeleteConfirm({ title: "确认删除文件？", description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { moveKnowledgeToRecycle(item, Number(row.dataset.knowledgeIndex)); renderKnowledgeFiles(); renderRecycleBin(); showToast("已移入回收站，可在 30 天内恢复"); } });
+        return;
+      }
       openKnowledgePreview(item);
     });
     $("#knowledge-table-head").addEventListener("change", (event) => { if (event.target.id !== "knowledge-check-all") return; $$("#knowledge-file-list .knowledge-check").forEach((checkbox) => { checkbox.checked = event.target.checked; }); updateKnowledgeSelection(); });
@@ -3146,7 +3261,37 @@
     $("#knowledge-root-link").addEventListener("click", () => openKnowledgeFolder(document.body.dataset.edition === "personal" ? "我的文件" : "企业文件"));
     $$('[data-folder-menu]').forEach((button) => button.addEventListener("click", (event) => { event.stopPropagation(); const menu = $("#knowledge-tree-menu"); const fileMenu = button.previousElementSibling?.classList.contains("knowledge-file-leaf"); menu.dataset.folder = button.dataset.folderMenu; $("[data-folder-action=child]", menu).hidden = fileMenu; $("[data-folder-action=sibling]", menu).hidden = fileMenu; menu.style.left = `${Math.min(event.clientX + 8, window.innerWidth - 166)}px`; menu.style.top = `${Math.min(event.clientY + 8, window.innerHeight - 170)}px`; menu.classList.add("show"); }));
     $("#knowledge-tree-menu").addEventListener("click", (event) => { const action = event.target.closest("[data-folder-action]"); if (!action) return; const labels = { child: "新建下级目录", sibling: "新建同级目录", rename: "重命名", delete: "删除" }; showToast(`${labels[action.dataset.folderAction]}「${$("#knowledge-tree-menu").dataset.folder}」`); closeKnowledgeTreeMenu(); });
-    $$("[data-knowledge-bulk]").forEach((button) => button.addEventListener("click", () => showToast(`已选择批量${{ move: "移动", download: "下载", delete: "删除" }[button.dataset.knowledgeBulk]}`)));
+    $$("[data-knowledge-bulk]").forEach((button) => button.addEventListener("click", () => {
+      if (button.dataset.knowledgeBulk !== "delete") { showToast(`已选择批量${{ move: "移动", download: "下载" }[button.dataset.knowledgeBulk]}`); return; }
+      const indices = $$("#knowledge-file-list .knowledge-check:checked").map((checkbox) => Number(checkbox.closest("[data-knowledge-index]").dataset.knowledgeIndex)).sort((a, b) => b - a);
+      if (!indices.length) return;
+      openDeleteConfirm({ title: `确认删除 ${indices.length} 个文件？`, description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { indices.forEach((index) => moveKnowledgeToRecycle(knowledgeCatalog.file[index], index)); renderKnowledgeFiles(); renderRecycleBin(); showToast(`已将 ${indices.length} 个文件移入回收站`); } });
+    }));
+    $("#recycle-bin-entry").addEventListener("click", () => { renderRecycleBin(); showMainView("recycle-bin", { silent: true }); });
+    $("#recycle-back").addEventListener("click", () => openKnowledgeFolder(activeKnowledgeFolder));
+    $$('[data-recycle-space]').forEach((button) => button.addEventListener("click", () => { activeRecycleSpace = button.dataset.recycleSpace; renderRecycleBin(); }));
+    $("#recycle-list").addEventListener("click", (event) => {
+      const action = event.target.closest("[data-recycle-action]");
+      const row = event.target.closest("[data-recycle-id]");
+      if (!action || !row) return;
+      const recycleId = row.dataset.recycleId;
+      if (action.dataset.recycleAction === "permanent") { pendingPermanentDeleteId = recycleId; openModal("#permanent-delete-modal"); return; }
+      const record = assetStore.restore(recycleId);
+      if (!record) return;
+      if (record.type === "knowledge") {
+        const restored = { ...record.item };
+        const insertAt = Math.min(Number(restored.originalIndex) || 0, knowledgeCatalog.file.length);
+        knowledgeCatalog.file.splice(insertAt, 0, restored);
+      } else {
+        const saved = meetingRowsById.get(record.item.id);
+        if (saved) saved.parent.insertBefore(saved.row, saved.nextSibling?.isConnected ? saved.nextSibling : null);
+        if (typeof filterMeetings === "function") filterMeetings();
+      }
+      renderRecycleBin();
+      showToast(`已恢复到「${record.originalLocation}」`);
+    });
+    $("#delete-confirm-submit").addEventListener("click", () => { const action = pendingDelete; pendingDelete = null; closeOverlays(); if (action) action(); });
+    $("#permanent-delete-submit").addEventListener("click", () => { const recycleId = pendingPermanentDeleteId; const record = assetStore.getRecycleItems({ edition: "enterprise" }).find((item) => item.recycleId === recycleId); pendingPermanentDeleteId = null; closeOverlays(); if (recycleId && assetStore.permanentlyDelete(recycleId)) { if (record?.type === "meeting") meetingRowsById.delete(record.item.id); renderRecycleBin(); showToast("已彻底删除，无法恢复"); } });
     $$("[data-knowledge-file]").forEach((item) => item.addEventListener("click", () => { $$(".knowledge-file-leaf").forEach((row) => row.classList.toggle("active", row === item)); openKnowledgeFolder("归档"); item.classList.add("active"); const file = knowledgeCatalog.file.find((entry) => entry.name.includes(item.dataset.knowledgeFile.replace(/\.[^.]+$/, ""))) || knowledgeCatalog.file[0]; openKnowledgePreview(file); }));
     document.addEventListener("click", (event) => { if (!event.target.closest("#knowledge-tree-menu") && !event.target.closest("[data-folder-menu]")) closeKnowledgeTreeMenu(); });
     $("#home-entry").addEventListener("click", () => showMainView("home"));
@@ -3527,11 +3672,12 @@
     xiaozhiInput.addEventListener("input", updateXiaozhiComposer);
     $$('[data-xiaozhi-prompt]').forEach((button) => button.addEventListener("click", () => { xiaozhiInput.value = button.dataset.xiaozhiPrompt; xiaozhiInput.focus(); updateXiaozhiComposer(); }));
     xiaozhiSend.addEventListener("click", () => { showToast("小智正在结合所选资料处理"); xiaozhiInput.value = ""; updateXiaozhiComposer(); });
-    $$(".home-meeting-row", $("#meeting-list")).forEach((row) => {
+    $$(".home-meeting-row", $("#meeting-list")).forEach((row, index) => {
       const replacement = document.createElement("div");
       Array.from(row.attributes).forEach((attribute) => replacement.setAttribute(attribute.name, attribute.value));
       replacement.setAttribute("role", "button");
       replacement.setAttribute("tabindex", "0");
+      replacement.dataset.meetingId = `meeting-${index + 1}`;
       replacement.innerHTML = row.innerHTML;
       const previousAction = $("em", replacement);
       if (previousAction) previousAction.outerHTML = '<span class="meeting-row-actions"><button type="button" data-meeting-action="tag">编辑标签</button><button class="meeting-delete" type="button" data-meeting-action="delete" aria-label="删除会议"><svg class="icon"><use href="#ico-trash"/></svg></button></span>';
@@ -3541,7 +3687,22 @@
       const action = event.target.closest("[data-meeting-action]");
       if (!action) return;
       event.stopPropagation();
-      showToast(action.dataset.meetingAction === "tag" ? "正在编辑会议标签" : "删除会议前需要二次确认");
+      if (action.dataset.meetingAction === "tag") { showToast("正在编辑会议标签"); return; }
+      const row = action.closest(".home-meeting-row");
+      const title = $(".home-meeting-title strong", row)?.textContent.trim() || "录音文件";
+      const size = $(".home-meeting-size", row)?.textContent.trim() || "-";
+      const enterprise = row.dataset.view === "enterprise";
+      openDeleteConfirm({ title: "确认删除录音文件？", description: "删除后文件移入回收站，30 天内可恢复，超期永久删除；相关转写和 AI 总结一并移除。", onConfirm: () => {
+        const id = row.dataset.meetingId;
+        if (!assetStore.getMeetings().some((item) => item.id === id)) assetStore.addMeeting({ id, name: title, size, space: enterprise ? "enterprise" : "personal", folder: enterprise ? "企业会议" : "我的会议" });
+        const nextSibling = row.nextElementSibling;
+        meetingRowsById.set(id, { row, parent: row.parentElement, nextSibling });
+        assetStore.deleteMeeting(id);
+        row.remove();
+        filterMeetings();
+        renderRecycleBin();
+        showToast("已移入回收站，可在 30 天内恢复");
+      } });
     });
     $("#meeting-list").addEventListener("keydown", (event) => {
       const row = event.target.closest(".home-meeting-row");
