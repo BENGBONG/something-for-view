@@ -1117,6 +1117,13 @@
     .meeting-view-tab { height: 36px; padding: 0 13px; border: 1px solid transparent; border-radius: 10px; color: #59667a; background: transparent; cursor: pointer; font-size: 11px; font-weight: 550; }
     .meeting-view-tab:hover { color: #2f5fba; background: #f6f8fb; }
     .meeting-view-tab.active { border-color: #d6e3f7; color: #255fc8; background: #f1f6ff; box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
+    .enterprise-asset-tabs { display: flex; height: 44px; align-items: flex-end; gap: 22px; padding: 0 18px; border-bottom: 1px solid #e7ebf0; }
+    .enterprise-asset-tabs[hidden] { display: none !important; }
+    .enterprise-asset-tab { position: relative; height: 44px; padding: 0 1px; border: 0; color: #747f8f; background: transparent; cursor: pointer; font: 10px var(--font); }
+    .enterprise-asset-tab:hover { color: #315fbd; }
+    .enterprise-asset-tab.active { color: #255fc8; font-weight: 600; }
+    .enterprise-asset-tab.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; border-radius: 2px 2px 0 0; background: #316bd6; content: ""; }
+    .enterprise-asset-tab em { margin-left: 4px; color: #98a1ae; font-size: 9px; font-style: normal; font-weight: 400; }
     .meeting-viewbar .recording-command-actions { width: auto; grid-template-columns: 150px 160px 144px; }
     .meeting-viewbar .recording-command-actions button { height: 50px; }
     .meeting-viewbar .recording-command-actions .recording-primary { grid-template-columns: 22px minmax(0,1fr); }
@@ -2369,15 +2376,10 @@
     .thought-file-row:focus-visible { outline: 2px solid rgba(46, 99, 182, .35); outline-offset: -2px; }
 
     /* 企业会议专属：由后端定时生成和更新的 AI 全景数据资产。 */
-    .ai-panorama-library { margin: 6px 18px 18px; padding-top: 14px; border-top: 1px solid #edf0f4; }
+    .ai-panorama-library { margin: 0 0 18px; }
     .ai-panorama-library[hidden] { display: none !important; }
-    .ai-panorama-library-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
-    .ai-panorama-library-head strong, .ai-panorama-library-head small { display: block; }
-    .ai-panorama-library-head strong { color: #303b4d; font-size: 12px; line-height: 18px; }
-    .ai-panorama-library-head small { margin-top: 2px; color: #8b95a4; font-size: 9px; line-height: 14px; }
-    .ai-panorama-library-count { color: #8791a0; font-size: 9px; white-space: nowrap; }
     .ai-panorama-table-scroll { max-width: 100%; overflow-x: auto; scrollbar-color: #cbd3df transparent; scrollbar-width: thin; }
-    .ai-panorama-table-head, .ai-panorama-row { display: grid; min-width: 720px; align-items: center; gap: 16px; padding: 0 12px; grid-template-columns: minmax(280px, 1fr) 82px 90px 142px 54px; }
+    .ai-panorama-table-head, .ai-panorama-row { display: grid; min-width: 720px; align-items: center; gap: 16px; padding: 0 18px; grid-template-columns: minmax(280px, 1fr) 82px 90px 142px 54px; }
     .ai-panorama-table-head { height: 36px; border-bottom: 1px solid #e9edf2; color: #929baa; background: #fbfcfd; font-size: 9px; }
     .ai-panorama-row { width: 100%; min-height: 58px; border: 0; border-bottom: 1px solid #f0f2f5; color: #667286; background: #fff; cursor: pointer; font: 9px var(--font); text-align: left; }
     .ai-panorama-row:hover { background: #f8faff; }
@@ -2584,6 +2586,7 @@
             </div>
             <div class="home-meeting-toolbar" id="thought-toolbar" hidden><label class="meeting-search"><svg class="icon"><use href="#ico-search"/></svg><input id="thought-file-search" type="search" placeholder="搜索月度文件" aria-label="搜索闪念月度文件" /></label><label class="meeting-source-filter meeting-date-filter"><span class="sr-only">筛选归档月份</span><svg class="icon date-icon"><use href="#ico-clock"/></svg><select id="thought-month-select" aria-label="筛选归档月份"><option value="all">全部月份</option><option value="2026-09">2026 年 9 月</option><option value="2026-08">2026 年 8 月</option><option value="2026-07">2026 年 7 月</option></select><svg class="icon"><use href="#ico-chevron"/></svg></label></div>
           </div>
+          <nav class="enterprise-asset-tabs" id="enterprise-asset-tabs" aria-label="企业会议资产类型" hidden><button class="enterprise-asset-tab active" type="button" data-enterprise-asset="meeting" aria-current="page">会议录音</button><button class="enterprise-asset-tab" type="button" data-enterprise-asset="panorama">AI 全景数据<em>3</em></button></nav>
           <div class="meeting-table-scroll" id="meeting-table-scroll"><div class="home-meeting-table-head"><span id="meeting-name-column">文件名</span><span>文件大小</span><span id="meeting-source-column">文件来源</span><span>标签</span><span id="meeting-duration-column">录音时长</span><span id="meeting-status-column">文件状态</span><span id="meeting-time-column">录音时间</span><span>更新时间</span><span>操作</span></div>
           <div class="home-meeting-table" id="meeting-list">
             <button class="meeting-row home-meeting-row" id="view-panorama" data-view="my" data-date="today" data-source="网页录音"><span class="home-meeting-title"><i><svg class="icon"><use href="#ico-mic"/></svg></i><span><strong>三季度产品复盘会议</strong><small>6 位参与者 · 8 项行动项</small></span></span><span class="home-meeting-size">48.2 MB</span><span>网页录音</span><span class="home-meeting-tag">产品复盘</span><span>47 分钟</span><span class="home-meeting-status ready"><i></i>已总结</span><span class="home-meeting-time">2026-09-02 09:42</span><span class="home-meeting-updated">2026-09-02 10:36</span><em>查看<svg class="icon"><use href="#ico-chevron"/></svg></em></button>
@@ -2599,7 +2602,7 @@
           <div class="thought-workspace" id="thought-workspace" hidden><aside class="thought-category-rail" aria-label="闪念分类"><strong>闪念分类</strong><button class="thought-category-button active" type="button" data-thought-category="inspiration" aria-current="true"><svg class="icon"><use href="#ico-spark"/></svg><span>灵感</span><em>18</em></button><button class="thought-category-button" type="button" data-thought-category="todo"><svg class="icon"><use href="#ico-task"/></svg><span>待办</span><em>12</em></button><button class="thought-category-button" type="button" data-thought-category="ledger"><svg class="icon"><use href="#ico-book"/></svg><span>记账</span><em>9</em></button><button class="thought-category-button" type="button" data-thought-category="other"><svg class="icon"><use href="#ico-more"/></svg><span>其他</span><em>6</em></button></aside><section class="thought-file-pane" aria-labelledby="thought-category-heading"><header class="thought-file-pane-head"><div><strong id="thought-category-heading">灵感</strong><span id="thought-category-description">记录随时产生的想法、观察和临时语音内容。</span></div></header><div class="thought-file-table-scroll"><div class="thought-file-table-head"><span>文件名</span><span>记录数量</span><span>更新时间</span><span>操作</span></div><div id="thought-file-list"></div></div></section></div>
           <div class="meeting-filter-empty" id="meeting-filter-empty" hidden>没有找到匹配的会议</div>
           <div class="recording-empty-state" id="recording-empty-state" hidden><span class="empty-record-orbit"><svg class="icon"><use href="#ico-mic"/></svg></span><strong>记录第一场会议</strong><p>开始录音后，转写与纪要会出现在这里。</p><div><button id="empty-start-recording"><svg class="icon"><use href="#ico-mic"/></svg>开始录音</button></div></div>
-          <section class="ai-panorama-library edition-enterprise-only" id="business-dashboard" hidden aria-labelledby="ai-panorama-library-title"><header class="ai-panorama-library-head"><div><strong id="ai-panorama-library-title">AI 全景数据</strong><small>由后端定时创建与更新，支持只读预览</small></div><span class="ai-panorama-library-count">共 3 个文件</span></header><div class="ai-panorama-table-scroll"><div class="ai-panorama-table-head"><span>文件名</span><span>文件大小</span><span>文件来源</span><span>更新时间</span><span>操作</span></div><div id="ai-panorama-list">
+          <section class="ai-panorama-library edition-enterprise-only" id="business-dashboard" hidden aria-label="AI 全景数据文件列表"><div class="ai-panorama-table-scroll"><div class="ai-panorama-table-head"><span>文件名</span><span>文件大小</span><span>文件来源</span><span>更新时间</span><span>操作</span></div><div id="ai-panorama-list">
             <button class="ai-panorama-row" type="button" data-panorama-file="企业-销售全景表.xlsx" data-panorama-size="19.2 MB" data-panorama-updated="2026-09-03 13:37" data-panorama-sheet="销售全景表" data-panorama-rows="1354"><span class="ai-panorama-file"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-销售全景表.xlsx</strong><small>汇总销售会议中的客户、区域与机会信息</small></span></span><span class="ai-panorama-meta">19.2 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-meta">2026-09-03 13:37</span><span class="ai-panorama-action">预览</span></button>
             <button class="ai-panorama-row" type="button" data-panorama-file="企业-客户机会全景表.xlsx" data-panorama-size="12.8 MB" data-panorama-updated="2026-09-03 12:20" data-panorama-sheet="客户机会" data-panorama-rows="862"><span class="ai-panorama-file"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-客户机会全景表.xlsx</strong><small>沉淀客户需求、商机阶段与后续跟进计划</small></span></span><span class="ai-panorama-meta">12.8 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-meta">2026-09-03 12:20</span><span class="ai-panorama-action">预览</span></button>
             <button class="ai-panorama-row" type="button" data-panorama-file="企业-项目推进全景表.xlsx" data-panorama-size="8.6 MB" data-panorama-updated="2026-09-03 11:48" data-panorama-sheet="项目推进" data-panorama-rows="526"><span class="ai-panorama-file"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-项目推进全景表.xlsx</strong><small>跟踪项目里程碑、风险事项与责任人进展</small></span></span><span class="ai-panorama-meta">8.6 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-meta">2026-09-03 11:48</span><span class="ai-panorama-action">预览</span></button>
@@ -3615,6 +3618,7 @@
     $("#thought-month-select").addEventListener("change", renderThoughtFiles);
     renderThoughtFiles();
     let activeMeetingView = "my";
+    let activeEnterpriseAsset = "meeting";
     const meetingViewContent = {
       my: ["我的会议", "管理录音、转写、纪要和待办"],
       thought: ["我的闪念", "按灵感、待办、记账和其他四类查看月度归档"],
@@ -3635,9 +3639,34 @@
       });
       $("#meeting-filter-empty").hidden = visibleCount !== 0;
     };
+    const syncEnterpriseAssetView = () => {
+      const thoughtMode = activeMeetingView === "thought";
+      const enterpriseMode = activeMeetingView === "enterprise";
+      const panoramaMode = enterpriseMode && activeEnterpriseAsset === "panorama";
+      $("#enterprise-asset-tabs").hidden = !enterpriseMode;
+      $$('[data-enterprise-asset]').forEach((item) => {
+        const active = item.dataset.enterpriseAsset === activeEnterpriseAsset;
+        item.classList.toggle("active", active);
+        if (active) item.setAttribute("aria-current", "page"); else item.removeAttribute("aria-current");
+      });
+      $("#meeting-toolbar").hidden = thoughtMode || panoramaMode;
+      $("#thought-toolbar").hidden = !thoughtMode;
+      $("#meeting-table-scroll").hidden = thoughtMode || panoramaMode;
+      $("#thought-workspace").hidden = !thoughtMode;
+      $("#business-dashboard").hidden = !panoramaMode;
+      $("#meeting-filter-empty").hidden = true;
+      if (enterpriseMode) $("#meeting-view-description").textContent = panoramaMode ? "查看后端定时生成的企业经营数据文件" : "查看企业成员共享的会议内容";
+      setPanoramaPreviewOpen(false);
+      if (thoughtMode) renderThoughtFiles(); else if (!panoramaMode) filterMeetings();
+    };
+    $$('[data-enterprise-asset]').forEach((button) => button.addEventListener("click", () => {
+      activeEnterpriseAsset = button.dataset.enterpriseAsset;
+      syncEnterpriseAssetView();
+    }));
     $$('[data-meeting-view]').forEach((button) => button.addEventListener("click", () => {
       activeMeetingView = button.dataset.meetingView;
       const thoughtMode = activeMeetingView === "thought";
+      if (activeMeetingView === "enterprise") activeEnterpriseAsset = "meeting";
       $$('[data-meeting-view]').forEach((item) => { const active = item === button; item.classList.toggle("active", active); if (active) item.setAttribute("aria-current", "page"); else item.removeAttribute("aria-current"); });
       const content = meetingViewContent[activeMeetingView];
       $("#recent-meeting-title").textContent = content[0];
@@ -3649,16 +3678,9 @@
       $("#meeting-time-column").textContent = "录音时间";
       $("#meeting-search").placeholder = "搜索会议";
       $("#meeting-source-filter").value = "all";
-      $("#business-dashboard").hidden = activeMeetingView !== "enterprise";
-      $("#meeting-toolbar").hidden = thoughtMode;
-      $("#thought-toolbar").hidden = !thoughtMode;
-      $("#meeting-table-scroll").hidden = thoughtMode;
-      $("#thought-workspace").hidden = !thoughtMode;
-      $("#meeting-filter-empty").hidden = true;
-      setPanoramaPreviewOpen(false);
       if (!thoughtMode) { $("#thought-preview").hidden = true; activeThoughtFile = null; }
       setXiaozhiExpanded(false);
-      if (thoughtMode) renderThoughtFiles(); else filterMeetings();
+      syncEnterpriseAssetView();
     }));
     $("#meeting-search").addEventListener("input", filterMeetings);
     $("#meeting-source-filter").addEventListener("change", filterMeetings);
@@ -3697,6 +3719,7 @@
     const previewParams = new URLSearchParams(window.location.search);
     const previewEdition = previewParams.get("edition");
     const previewView = previewParams.get("view");
+    const previewAsset = previewParams.get("asset");
     const previewPage = previewParams.get("page");
     const previewFolder = previewParams.get("folder");
     const previewKnowledgeFile = previewParams.get("previewFile");
@@ -3707,6 +3730,7 @@
       const previewViewButton = $(`[data-meeting-view="${previewView}"]`);
       if (previewViewButton && !previewViewButton.hidden) previewViewButton.click();
     }
+    if (previewView === "enterprise" && ["meeting", "panorama"].includes(previewAsset)) $(`[data-enterprise-asset="${previewAsset}"]`)?.click();
     if (previewPage === "knowledge") {
       openKnowledgeFolder(previewFolder || (previewEdition === "personal" ? "我的文件" : "企业文件"));
       if (previewKnowledgeFile === "1") openKnowledgePreview(knowledgeCatalog[activeKnowledgeSchema][0]);
