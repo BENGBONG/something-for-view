@@ -186,6 +186,11 @@
     .enterprise-invite-action { display: inline-flex; height: 26px; align-items: center; justify-content: center; padding: 0 7px; border: 0; border-radius: 6px; color: #2e63b6; background: transparent; cursor: pointer; font-size: 9px; font-weight: 600; grid-column: 3; grid-row: 1; }
     .enterprise-invite-action:hover { background: #f0f4fa; }
     .enterprise-invite-action .icon { display: none; }
+    .personal-enterprise-card .enterprise-invite-action { text-decoration: none; }
+    .personal-enterprise-card[hidden] { display: none !important; }
+    .personal-enterprise-card .enterprise-invite-mark { color: #6a54c8; background: #f3f0ff; }
+    .personal-enterprise-card .enterprise-invite-action { color: #624cc1; }
+    .personal-enterprise-card .enterprise-invite-action:hover { background: #f4f1ff; }
     .user-footer { position: absolute; right: 0; bottom: 0; left: 0; padding: 8px 12px; background: #fff; }
     .user-card { display: flex; width: 100%; min-height: 81px; align-items: center; justify-content: flex-start; gap: 8px; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; text-align: left; }
     .user-card:hover { background: var(--blue-5); }
@@ -459,8 +464,37 @@
     .invite-success { display: none; }
     .invite-success.show { display: block; }
     .invite-form.hide { display: none; }
-    .invite-link { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fafafa; font-size: 12px; }
-    .invite-link code { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .invite-member-modal { width: min(520px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: hidden; }
+    .invite-member-modal .modal-body { max-height: calc(100vh - 182px); overflow-y: auto; padding-bottom: 20px; }
+    .invite-form-intro { margin: -1px 0 12px !important; color: #778294 !important; font-size: 11px !important; line-height: 18px !important; }
+    .invite-field-grid { display: grid; gap: 0 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .invite-field-full { grid-column: 1 / -1; }
+    .invite-required { margin-left: 2px; color: #e05252; }
+    .invite-field-error { display: none; margin-top: 5px; color: #c74747; font-size: 10px; line-height: 14px; }
+    .invite-field-error.show { display: block; }
+    .field-input.invalid { border-color: #e18b8b; background: #fffafa; }
+    .invite-status-options { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .invite-status-option { display: grid; min-height: 52px; align-items: center; gap: 3px 8px; padding: 8px 10px; border: 1px solid #e2e6ec; border-radius: 8px; color: #4f5b6d; cursor: pointer; grid-template-columns: 16px minmax(0, 1fr); }
+    .invite-status-option:has(input:checked) { border-color: #aebfeb; color: #315fae; background: #f5f8ff; }
+    .invite-status-option input { width: 14px; height: 14px; margin: 0; accent-color: #2e63b6; }
+    .invite-status-option strong { font-size: 11px; font-weight: 600; }
+    .invite-status-option small { color: #9099a7; font-size: 8px; line-height: 13px; grid-column: 2; }
+    .invite-mail-note { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; padding: 10px 11px; border: 1px solid #e4e9f2; border-radius: 8px; color: #677489; background: #f8faff; font-size: 10px; line-height: 16px; }
+    .invite-mail-note .icon { width: 14px; height: 14px; margin-top: 1px; color: #4976c4; }
+    .invite-success-hero { display: grid; justify-items: center; padding: 2px 0 13px; text-align: center; }
+    .invite-success-mark { display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; border-radius: 50%; color: #fff; background: #3d9b74; font-size: 18px; font-weight: 700; }
+    .invite-success-hero strong { margin-top: 9px; color: #2e3949; font-size: 14px; }
+    .invite-success-hero span { margin-top: 3px; color: #7f8998; font-size: 10px; }
+    .invite-email-preview { padding: 12px 13px; border: 1px solid #e1e6ed; border-radius: 9px; background: #fbfcfe; }
+    .invite-email-preview > small { display: block; color: #8b95a4; font-size: 9px; }
+    .invite-email-preview h4 { margin: 7px 0 5px; color: #303b4d; font-size: 12px; line-height: 18px; }
+    .invite-email-preview p { margin: 0 !important; color: #6d7889 !important; font-size: 10px !important; line-height: 17px !important; }
+    .invite-email-cta { display: inline-flex; height: 28px; align-items: center; margin-top: 10px; padding: 0 10px; border-radius: 6px; color: #fff; background: #2e63b6; font-size: 9px; font-weight: 600; }
+    .invite-account-note { margin-top: 8px; color: #8892a1; font-size: 9px; line-height: 15px; }
+    @media (max-width: 760px) {
+      .invite-field-grid, .invite-status-options { grid-template-columns: 1fr; }
+      .invite-field-full { grid-column: auto; }
+    }
     .os-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .os-btn { padding: 10px 7px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; }
     .os-btn:hover, .os-btn.selected { border-color: rgba(22, 93, 255, 0.35); color: var(--blue); background: var(--blue-5); }
@@ -2024,6 +2058,8 @@
     .edition-personal-only { display: none !important; }
     body[data-edition="personal"] .edition-enterprise-only { display: none !important; }
     body[data-edition="personal"] .edition-personal-only { display: flex !important; }
+    body[data-edition="personal"] .personal-enterprise-card { display: grid !important; }
+    body[data-edition="personal"] .personal-enterprise-card[hidden] { display: none !important; }
     .personal-edition-brand { min-width: 0; flex: 1; align-items: center; gap: 9px; padding: 6px 8px; }
     .personal-edition-brand > span:first-child { display: inline-flex; width: 30px; height: 30px; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 9px; color: #6d45ce; background: #f1ecff; }
     .personal-edition-brand .icon { width: 15px; height: 15px; }
@@ -2518,6 +2554,7 @@
         </section>
       </div>
       <aside class="enterprise-invite-card edition-enterprise-only" id="enterprise-invite-card" aria-label="邀请他人加入企业"><span class="enterprise-invite-mark"><svg class="icon"><use href="#ico-users"/></svg></span><span class="enterprise-invite-copy"><strong>邀请同事加入企业</strong><p>共享知识与协作任务</p></span><button class="enterprise-invite-action" id="enterprise-invite-action" type="button"><svg class="icon"><use href="#ico-users"/></svg>邀请</button><button class="enterprise-invite-close" id="enterprise-invite-close" type="button" aria-label="关闭邀请卡片"><svg class="icon"><use href="#ico-x"/></svg></button></aside>
+      <aside class="enterprise-invite-card personal-enterprise-card edition-personal-only" id="personal-enterprise-card" aria-label="申请企业版"><span class="enterprise-invite-mark"><svg class="icon"><use href="#ico-users"/></svg></span><span class="enterprise-invite-copy"><strong>申请企业版</strong><p>启用企业知识与团队协作</p></span><a class="enterprise-invite-action" href="https://baixiao.brgroup.com/" target="_blank" rel="noopener noreferrer">申请试用</a><button class="enterprise-invite-close" id="personal-enterprise-close" type="button" aria-label="关闭申请企业版卡片"><svg class="icon"><use href="#ico-x"/></svg></button></aside>
       <div class="user-footer"><div class="user-menu" id="user-menu" role="menu" aria-label="个人账号菜单"><div class="account-summary"><span class="account-summary-avatar"><svg class="icon"><use href="#ico-user"/></svg></span><span class="account-summary-copy"><strong>138****6688</strong><small>免费版</small></span><button class="account-upgrade" data-profile-action="upgrade">升级</button></div><div class="account-points-card"><div class="account-checkin">每日签到，连续签到可获得更多积分</div><div class="account-points-body"><div class="account-points-reward"><span><small>今日可领取</small><strong>20 <span>积分</span></strong></span><button data-profile-action="checkin">立即签到</button></div><div class="account-points-total"><span>当前积分</span><strong>2000</strong></div><div class="account-points-actions"><button data-profile-action="points">积分明细</button><button data-profile-action="earn-points">赚取积分</button></div></div></div><div class="account-menu-group"><button class="user-menu-item" data-profile-action="profile"><svg class="icon"><use href="#ico-user"/></svg>个人中心</button><button class="user-menu-item" data-profile-action="website"><svg class="icon"><use href="#ico-globe"/></svg>访问百智官网</button><button class="user-menu-item" data-profile-action="orders"><svg class="icon"><use href="#ico-task"/></svg>我的订单</button><button class="user-menu-item" data-profile-action="agent-workspace"><svg class="icon"><use href="#ico-agent"/></svg>Agent 工作台</button></div><div class="account-menu-group"><button class="user-menu-item" data-profile-action="download-app"><svg class="icon"><use href="#ico-phone"/></svg>下载百智 App</button><button class="user-menu-item" data-profile-action="intro"><svg class="icon"><use href="#ico-book"/></svg>产品介绍</button><button class="user-menu-item" data-profile-action="changelog"><svg class="icon"><use href="#ico-clock"/></svg>更新日志</button><button class="user-menu-item" data-profile-action="guide"><svg class="icon"><use href="#ico-spark"/></svg>新手指南<span class="menu-reward">奖励积分</span></button></div><div class="account-menu-group"><button class="user-menu-item" data-profile-action="switch-edition"><svg class="icon"><use href="#ico-users"/></svg>切换企业版 / 个人版</button><button class="user-menu-item danger" data-profile-action="logout"><svg class="icon"><use href="#ico-collapse"/></svg>退出登录</button></div></div><button class="user-card" id="user-card" aria-expanded="false" aria-controls="user-menu"><span class="user-avatar"><svg class="icon" style="width:15px;height:15px"><use href="#ico-user"/></svg></span><div class="user-copy"><div class="user-name">张伟</div><span class="enterprise-tag" id="user-edition-label">企业版</span></div><svg class="icon" style="color:#8c8c8c"><use href="#ico-chevron"/></svg></button></div>
     </aside>
 
@@ -2708,7 +2745,29 @@
   <section class="modal record-permission-modal" id="record-permission-modal" role="dialog" aria-modal="true" aria-labelledby="permission-title"><div class="modal-head"><span></span><button class="close-btn" data-close aria-label="关闭录音权限说明"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><div class="permission-hero"><span class="permission-shield"><svg class="icon"><use href="#ico-shield"/></svg></span><h3 id="permission-title">录音权限说明</h3><p>为保证会议与沟通内容完整，本次录音默认同时采集麦克风声音和电脑内部声音。</p></div><div class="permission-note"><strong>需要授权两项权限：</strong>麦克风用于实时转写；系统音频用于捕捉会议软件、视频通话等电脑内部声音。原型仅演示授权流程，不会真正访问设备。</div><div class="permission-list"><div class="permission-item" id="permission-microphone"><span class="permission-item-icon"><svg class="icon"><use href="#ico-mic"/></svg></span><span class="permission-item-copy"><strong>麦克风</strong><span>采集您的声音，用于实时转写与翻译</span></span><span class="permission-state">待授权</span></div><div class="permission-item" id="permission-system-audio"><span class="permission-item-icon"><svg class="icon"><use href="#ico-desktop"/></svg></span><span class="permission-item-copy"><strong>系统音频</strong><span>捕捉会议软件、视频通话等电脑内部声音</span></span><span class="permission-state">待授权</span></div></div><div class="permission-options"><label class="permission-checkbox"><input type="checkbox" id="permission-no-remind" />下次不再提醒我</label><span class="permission-privacy">音频仅用于转写、总结、知识入库及 Agent 智能处理</span></div></div><div class="modal-foot"><button class="secondary-btn" id="permission-skip">暂不录音</button><button class="primary-btn permission-authorize" id="permission-authorize">开始授权</button></div></section>
   <section class="modal capability-modal" id="capability-preview-modal" role="dialog" aria-modal="true" aria-labelledby="capability-preview-title"><div class="modal-head"><div class="capability-modal-title"><span class="directory-mark skill-mark blue" id="capability-preview-icon"><svg class="icon"><use href="#ico-skill-notes"/></svg></span><div><h3 id="capability-preview-title">能力预览</h3><p id="capability-preview-summary">查看能力详情与使用方式</p></div></div><button class="close-btn" data-close aria-label="关闭预览"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body" id="capability-preview-body"></div><div class="modal-foot"><button class="secondary-btn" data-close>关闭</button><button class="primary-btn" id="capability-preview-primary">添加</button></div></section>
   <section class="modal connector-config-modal" id="connector-config-modal" role="dialog" aria-modal="true" aria-labelledby="connector-config-title"><div class="modal-head"><div><h3 id="connector-config-title">新增连接器</h3><p class="connector-config-intro">配置由当前用户维护，仅在授权范围内供 Agent 调用。</p></div><button class="close-btn" data-close aria-label="关闭连接器配置"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><div class="connector-config-tabs" role="tablist"><button class="connector-config-tab active" data-connector-config-tab="json" role="tab" aria-selected="true">通过 JSON 配置</button><button class="connector-config-tab" data-connector-config-tab="url" role="tab" aria-selected="false">直接 URL 接入</button></div><label class="field-label" for="connector-config-name">连接器名称</label><input class="field-input" id="connector-config-name" placeholder="例如：销售 CRM" /><label class="field-label" for="connector-config-source">来源或系统</label><input class="field-input" id="connector-config-source" placeholder="例如：企业自建服务" /><div class="connector-config-panel" data-connector-config-panel="json"><label class="field-label" for="connector-config-json">JSON 配置</label><textarea class="connector-config-textarea" id="connector-config-json" spellcheck="false">{&#10;  &quot;mcpServers&quot;: {&#10;    &quot;my-service&quot;: {&#10;      &quot;url&quot;: &quot;https://example.com/mcp&quot;&#10;    }&#10;  }&#10;}</textarea><p class="connector-config-hint">原型仅校验 JSON 格式，不会发起真实连接。</p></div><div class="connector-config-panel" data-connector-config-panel="url" hidden><label class="field-label" for="connector-config-url">服务 URL</label><input class="field-input" id="connector-config-url" placeholder="https://example.com/mcp" /><p class="connector-config-hint">支持标准 HTTP 或流式 HTTP MCP 服务地址。</p></div><div class="connector-config-error" id="connector-config-error">请补充完整配置。</div></div><div class="modal-foot"><button class="secondary-btn" data-close>取消</button><button class="primary-btn" id="connector-config-submit">立即接入</button></div></section>
-  <section class="modal" id="invite-modal"><div class="modal-head"><h3>邀请成员加入百融智能</h3><button class="close-btn" data-close aria-label="关闭"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><div class="invite-progress" id="invite-progress"><div class="invite-step active">1　邀请成员</div><div class="invite-step">2　加入企业</div><div class="invite-step">3　安装桌面端</div><div class="invite-step">4　开始协作</div></div><div class="invite-form" id="invite-form"><p>输入邮箱或手机号，生成邀请链接。</p><label class="field-label" for="invite-input">成员邮箱或手机号</label><input class="field-input" id="invite-input" placeholder="输入邮箱或手机号"/><label class="field-label" for="invite-role">成员角色</label><select class="field-input" id="invite-role"><option>企业成员 · 可参与团队会话</option><option>管理员 · 可管理桌面端与权限</option></select></div><div class="invite-success" id="invite-success"><p><strong>邀请链接已生成</strong></p><div class="invite-flow"><div class="invite-flow-row"><span class="invite-flow-dot">✓</span><div><strong>邀请成员</strong><span id="invite-member-preview">已生成专属邀请链接</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">2</span><div><strong>加入企业空间</strong><span>成员打开链接并登录</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">3</span><div><strong>安装百智桌面端</strong><span>连接团队工作台</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">4</span><div><strong>共享会话与上下文</strong><span>开始团队接力</span></div></div></div><div class="invite-link"><code id="invite-link">https://baizhi.ai/join/bairong</code><button class="secondary-btn" id="copy-invite" style="height:28px;padding:0 9px">复制</button></div></div></div><div class="modal-foot"><button class="secondary-btn" data-close>取消</button><button class="secondary-btn" id="invite-download" style="display:none">下载桌面端</button><button class="primary-btn" id="send-invite">生成邀请链接</button><button class="primary-btn" id="invite-done" style="display:none">完成</button></div></section>
+  <section class="modal invite-member-modal" id="invite-modal" role="dialog" aria-modal="true" aria-labelledby="invite-modal-title">
+    <div class="modal-head"><h3 id="invite-modal-title">邀请成员加入百融智能</h3><button class="close-btn" data-close aria-label="关闭邀请成员弹窗"><svg class="icon"><use href="#ico-x"/></svg></button></div>
+    <div class="modal-body">
+      <div class="invite-progress" id="invite-progress"><div class="invite-step active">1　邀请成员</div><div class="invite-step">2　加入企业</div><div class="invite-step">3　安装桌面端</div><div class="invite-step">4　开始协作</div></div>
+      <form class="invite-form" id="invite-form" novalidate>
+        <p class="invite-form-intro">填写成员信息后，系统将通过管理员添加成员接口创建账号，并向工作邮箱发送企业邀请。</p>
+        <div class="invite-field-grid">
+          <div><label class="field-label" for="invite-name">姓名<span class="invite-required">*</span></label><input class="field-input" id="invite-name" autocomplete="off" placeholder="输入成员姓名"/><span class="invite-field-error" id="invite-name-error">请填写成员姓名</span></div>
+          <div><label class="field-label" for="invite-phone">手机号</label><input class="field-input" id="invite-phone" inputmode="tel" autocomplete="off" placeholder="输入手机号（选填）"/><span class="invite-field-error" id="invite-phone-error">请填写正确的手机号</span></div>
+          <div class="invite-field-full"><label class="field-label" for="invite-email">工作邮箱<span class="invite-required">*</span></label><input class="field-input" id="invite-email" inputmode="email" autocomplete="off" placeholder="name@company.com"/><span class="invite-field-error" id="invite-email-error">请填写正确的工作邮箱</span></div>
+          <div class="invite-field-full"><label class="field-label" for="invite-department">所属部门<span class="invite-required">*</span></label><select class="field-input" id="invite-department"><option value="">选择所属部门</option><option value="内控部">内控部</option><option value="产品中心">产品中心</option><option value="研发中心">研发中心</option><option value="市场中心">市场中心</option><option value="客户成功部">客户成功部</option></select><span class="invite-field-error" id="invite-department-error">请选择所属部门</span></div>
+          <fieldset class="invite-field-full" style="margin:0;padding:0;border:0"><legend class="field-label">账号状态</legend><div class="invite-status-options"><label class="invite-status-option"><input type="radio" name="invite-status" value="normal" checked/><strong>正常</strong><small>成员接受邀请后即可进入企业版</small></label><label class="invite-status-option"><input type="radio" name="invite-status" value="disabled"/><strong>停用</strong><small>先创建成员，需管理员启用后才能登录</small></label></div></fieldset>
+        </div>
+        <div class="invite-mail-note"><svg class="icon"><use href="#ico-send"/></svg><span>邀请邮件将包含邀请人、企业名称和专属加入链接。链接仅用于加入“百融智能”企业版。</span></div>
+      </form>
+      <div class="invite-success" id="invite-success">
+        <div class="invite-success-hero"><span class="invite-success-mark">✓</span><strong>邀请邮件已发送</strong><span id="invite-member-preview">成员可通过邮件加入百融智能企业版</span></div>
+        <div class="invite-email-preview"><small>邮件预览</small><h4 id="invite-email-subject">有人邀请你加入“百融智能”企业版</h4><p><span id="invite-email-name">成员</span>，管理员邀请你加入百融智能企业版。加入后可在授权范围内使用企业会议、企业文件与团队协作能力。</p><span class="invite-email-cta">加入企业版</span><div class="invite-account-note" id="invite-account-note">邀请链接已发送至工作邮箱，有效期为 7 天。</div></div>
+        <div class="invite-flow"><div class="invite-flow-row"><span class="invite-flow-dot">✓</span><div><strong>成员账号已创建</strong><span id="invite-member-created">管理员添加成员接口已处理</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">2</span><div><strong>等待成员加入企业</strong><span>成员打开邮件链接并完成登录</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">3</span><div><strong>安装百智桌面端</strong><span>按需连接团队桌面工作台</span></div></div><div class="invite-flow-row pending"><span class="invite-flow-dot">4</span><div><strong>开始团队协作</strong><span>共享会议、知识与任务上下文</span></div></div></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="secondary-btn" data-close id="invite-cancel">取消</button><button class="primary-btn" id="send-invite">发送邀请</button><button class="primary-btn" id="invite-done" style="display:none">完成</button></div>
+  </section>
   <section class="modal" id="download-modal"><div class="modal-head"><h3>下载百智桌面端</h3><button class="close-btn" data-close aria-label="关闭"><svg class="icon"><use href="#ico-x"/></svg></button></div><div class="modal-body"><p>连接本地文件与团队工作。</p><div class="os-row"><button class="os-btn selected" data-os="macOS">苹果电脑</button><button class="os-btn" data-os="Windows">微软电脑</button><button class="os-btn" data-os="Linux">开源系统</button></div></div><div class="modal-foot"><button class="secondary-btn" data-close>取消</button><button class="primary-btn" id="download-confirm"><svg class="icon"><use href="#ico-download"/></svg>下载苹果电脑版</button></div></section>
   <div class="toast" id="toast"></div>
 
@@ -2741,14 +2800,20 @@
     const resetInvite = () => {
       $("#invite-form").classList.remove("hide");
       $("#invite-success").classList.remove("show");
+      $("#invite-form").reset();
+      $$(".invite-field-error", $("#invite-form")).forEach((error) => error.classList.remove("show"));
+      $$(".field-input", $("#invite-form")).forEach((field) => { field.classList.remove("invalid"); field.removeAttribute("aria-invalid"); });
       $("#send-invite").style.display = "inline-flex";
+      $("#send-invite").disabled = false;
+      $("#send-invite").textContent = "发送邀请";
+      $("#invite-cancel").style.display = "inline-flex";
       $("#invite-done").style.display = "none";
-      $("#invite-download").style.display = "none";
       $("#invite-progress").querySelectorAll(".invite-step").forEach((step, index) => { step.classList.toggle("active", index === 0); step.classList.remove("done"); });
     };
     const openInvite = () => { resetInvite(); openModal("#invite-modal"); };
     $("#enterprise-invite-action").addEventListener("click", openInvite);
     $("#enterprise-invite-close").addEventListener("click", () => { $("#enterprise-invite-card").hidden = true; showToast("邀请卡片已关闭"); });
+    $("#personal-enterprise-close").addEventListener("click", () => { $("#personal-enterprise-card").hidden = true; showToast("申请企业版卡片已关闭"); });
     const openDrawer = (title, body, actions = "", variant = "") => {
       $("#drawer-title").textContent = title;
       $("#drawer-body").innerHTML = body;
@@ -3353,21 +3418,62 @@
     $$(".agent-category").forEach((category) => category.addEventListener("click", () => { $$(".agent-category").forEach((item) => item.classList.remove("active")); category.classList.add("active"); showToast(`已切换到「${category.textContent}」`); }));
     $$("[data-agent]").forEach((card) => card.addEventListener("click", () => selectActiveAgent(card.dataset.agent)));
     $$(".expert-card").forEach((card) => card.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectActiveAgent(card.dataset.agent); } }));
-    $("#copy-invite").addEventListener("click", () => { navigator.clipboard?.writeText($("#invite-link").textContent); showToast("邀请链接已复制"); });
-    $("#send-invite").addEventListener("click", () => {
-      const value = $("#invite-input").value.trim();
-      if (!value) { $("#invite-input").focus(); showToast("请先填写成员邮箱或手机号"); return; }
-      $("#invite-member-preview").textContent = `${value} · 已生成专属邀请链接`;
+    const setInviteFieldError = (fieldId, message = "") => {
+      const field = $(`#${fieldId}`);
+      const error = $(`#${fieldId}-error`);
+      const invalid = Boolean(message);
+      field.classList.toggle("invalid", invalid);
+      field.setAttribute("aria-invalid", String(invalid));
+      if (error) { error.textContent = message || error.textContent; error.classList.toggle("show", invalid); }
+      return !invalid;
+    };
+    ["invite-name", "invite-phone", "invite-email", "invite-department"].forEach((fieldId) => {
+      $(`#${fieldId}`).addEventListener("input", () => setInviteFieldError(fieldId));
+      $(`#${fieldId}`).addEventListener("change", () => setInviteFieldError(fieldId));
+    });
+    const validateInviteMember = () => {
+      const name = $("#invite-name").value.trim();
+      const phone = $("#invite-phone").value.trim();
+      const email = $("#invite-email").value.trim();
+      const department = $("#invite-department").value;
+      const checks = [
+        setInviteFieldError("invite-name", name ? "" : "请填写成员姓名"),
+        setInviteFieldError("invite-phone", !phone || /^1\d{10}$/.test(phone) ? "" : "请填写 11 位手机号"),
+        setInviteFieldError("invite-email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "" : "请填写正确的工作邮箱"),
+        setInviteFieldError("invite-department", department ? "" : "请选择所属部门")
+      ];
+      if (checks.some((valid) => !valid)) { $(".field-input.invalid", $("#invite-form"))?.focus(); return null; }
+      return { name, phone, email, department, status: $('input[name="invite-status"]:checked').value };
+    };
+    const addMemberWithAdminApi = async (member) => {
+      // 生产实现：直接复用企业管理平台“添加成员”接口，由服务端创建成员并发送邀请邮件；原型仅模拟成功返回。
+      window.__lastAdminAddMemberPayload = { name: member.name, mobile: member.phone || null, workEmail: member.email, departmentName: member.department, accountStatus: member.status };
+      await new Promise((resolve) => setTimeout(resolve, 650));
+      return { invitationId: `invite-${Date.now()}`, emailSent: true };
+    };
+    $("#invite-form").addEventListener("submit", (event) => { event.preventDefault(); $("#send-invite").click(); });
+    $("#send-invite").addEventListener("click", async () => {
+      const member = validateInviteMember();
+      if (!member) return;
+      const sendButton = $("#send-invite");
+      sendButton.disabled = true;
+      sendButton.textContent = "正在发送…";
+      const result = await addMemberWithAdminApi(member);
+      if (!result.emailSent) { sendButton.disabled = false; sendButton.textContent = "重新发送"; showToast("邀请邮件发送失败，请重试"); return; }
+      $("#invite-member-preview").textContent = `已发送至 ${member.email}`;
+      $("#invite-email-subject").textContent = `张伟邀请你加入“百融智能”企业版`;
+      $("#invite-email-name").textContent = member.name;
+      $("#invite-member-created").textContent = `${member.name} · ${member.department} · ${member.status === "normal" ? "正常" : "停用"}`;
+      $("#invite-account-note").textContent = member.status === "normal" ? "邀请链接已发送至工作邮箱，有效期为 7 天。" : "账号当前为停用状态；成员接受邀请后，需管理员启用才能登录。";
       $("#invite-form").classList.add("hide");
       $("#invite-success").classList.add("show");
       $("#invite-progress").querySelectorAll(".invite-step").forEach((step, index) => { step.classList.toggle("active", index === 1); step.classList.toggle("done", index === 0); });
-      $("#send-invite").style.display = "none";
+      sendButton.style.display = "none";
+      $("#invite-cancel").style.display = "none";
       $("#invite-done").style.display = "inline-flex";
-      $("#invite-download").style.display = "inline-flex";
-      showToast("邀请链接已生成");
+      showToast(`邀请邮件已发送至 ${member.email}`);
     });
     $("#invite-done").addEventListener("click", closeOverlays);
-    $("#invite-download").addEventListener("click", () => { closeOverlays(); openModal("#download-modal"); });
     $$('[data-os]').forEach((button) => button.addEventListener("click", () => { $$('[data-os]').forEach((item) => item.classList.remove("selected")); button.classList.add("selected"); $("#download-confirm").innerHTML = `<svg class="icon"><use href="#ico-download"/></svg>下载${button.textContent}版`; }));
     $("#download-confirm").addEventListener("click", () => { closeOverlays(); showToast(document.body.dataset.edition === "personal" ? "下载已开始，安装后可同步个人工作台" : "下载已开始，安装后即可加入企业空间"); });
     $("#agent-manage").addEventListener("click", () => showToast("正在打开智能体管理"));
