@@ -2369,17 +2369,28 @@
     .thought-file-row:focus-visible { outline: 2px solid rgba(46, 99, 182, .35); outline-offset: -2px; }
 
     /* 企业会议专属：由后端定时生成和更新的 AI 全景数据资产。 */
-    .ai-panorama-asset { display: grid; width: calc(100% - 36px); min-height: 62px; align-items: center; gap: 12px; margin: 16px 18px 18px; padding: 10px 12px; border: 1px solid #dfe5ed; border-radius: 10px; color: #4a586d; background: #fff; cursor: pointer; text-align: left; grid-template-columns: 34px minmax(220px, 1fr) 74px 82px 126px 64px; }
-    .ai-panorama-asset[hidden] { display: none !important; }
-    .ai-panorama-asset:hover, .ai-panorama-asset:focus-visible { border-color: #bfcee2; background: #f8faff; outline: none; }
+    .ai-panorama-library { margin: 6px 18px 18px; padding-top: 14px; border-top: 1px solid #edf0f4; }
+    .ai-panorama-library[hidden] { display: none !important; }
+    .ai-panorama-library-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+    .ai-panorama-library-head strong, .ai-panorama-library-head small { display: block; }
+    .ai-panorama-library-head strong { color: #303b4d; font-size: 12px; line-height: 18px; }
+    .ai-panorama-library-head small { margin-top: 2px; color: #8b95a4; font-size: 9px; line-height: 14px; }
+    .ai-panorama-library-count { color: #8791a0; font-size: 9px; white-space: nowrap; }
+    .ai-panorama-table-scroll { max-width: 100%; overflow-x: auto; scrollbar-color: #cbd3df transparent; scrollbar-width: thin; }
+    .ai-panorama-table-head, .ai-panorama-row { display: grid; min-width: 720px; align-items: center; gap: 16px; padding: 0 12px; grid-template-columns: minmax(280px, 1fr) 82px 90px 142px 54px; }
+    .ai-panorama-table-head { height: 36px; border-bottom: 1px solid #e9edf2; color: #929baa; background: #fbfcfd; font-size: 9px; }
+    .ai-panorama-row { width: 100%; min-height: 58px; border: 0; border-bottom: 1px solid #f0f2f5; color: #667286; background: #fff; cursor: pointer; font: 9px var(--font); text-align: left; }
+    .ai-panorama-row:hover { background: #f8faff; }
+    .ai-panorama-row:focus-visible { outline: 2px solid rgba(46, 99, 182, .35); outline-offset: -2px; }
+    .ai-panorama-file { display: flex; min-width: 0; align-items: center; gap: 10px; }
     .ai-panorama-mark { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; border-radius: 8px; color: #168452; background: #eaf7f0; }
     .ai-panorama-mark .icon { width: 16px; height: 16px; }
     .ai-panorama-copy strong, .ai-panorama-copy small { display: block; }
-    .ai-panorama-copy strong { color: #2f3a4c; font-size: 11px; line-height: 17px; }
+    .ai-panorama-copy { min-width: 0; }
+    .ai-panorama-copy strong, .ai-panorama-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ai-panorama-copy strong { color: #2f3a4c; font-size: 10px; line-height: 16px; }
     .ai-panorama-copy small { margin-top: 2px; color: #8c96a5; font-size: 8px; line-height: 13px; }
     .ai-panorama-meta { color: #6c788a; font-size: 9px; white-space: nowrap; }
-    .ai-panorama-status { display: inline-flex; width: max-content; align-items: center; gap: 5px; color: #338d6f; font-size: 9px; }
-    .ai-panorama-status::before { width: 6px; height: 6px; border-radius: 50%; background: #39b88b; content: ""; }
     .ai-panorama-action { color: #2b69d5; font-size: 9px; font-weight: 550; text-align: right; }
     .ai-panorama-preview { position: absolute; z-index: 4; inset: 0; display: flex; min-height: 520px; background: #fff; flex-direction: column; }
     .ai-panorama-preview[hidden] { display: none !important; }
@@ -2404,10 +2415,6 @@
     .ai-sheet-tabs { display: flex; height: 38px; align-items: center; gap: 10px; padding: 0 14px; border-top: 1px solid #e3e7ed; background: #f7f8fa; }
     .ai-sheet-tabs strong { height: 30px; padding: 0 12px; border-bottom: 2px solid #3a9a68; color: #30845b; font-size: 9px; line-height: 30px; }
     .ai-sheet-tabs span { color: #8a94a2; font-size: 9px; }
-    @media (max-width: 900px) {
-      .ai-panorama-asset { grid-template-columns: 34px minmax(180px, 1fr) 82px 64px; }
-      .ai-panorama-asset > :nth-child(3), .ai-panorama-asset > :nth-child(5) { display: none; }
-    }
     @media (max-width: 760px) {
       .meeting-table-scroll .home-meeting-table-head { display: grid; }
       .thought-workspace { display: block; }
@@ -2592,8 +2599,12 @@
           <div class="thought-workspace" id="thought-workspace" hidden><aside class="thought-category-rail" aria-label="闪念分类"><strong>闪念分类</strong><button class="thought-category-button active" type="button" data-thought-category="inspiration" aria-current="true"><svg class="icon"><use href="#ico-spark"/></svg><span>灵感</span><em>18</em></button><button class="thought-category-button" type="button" data-thought-category="todo"><svg class="icon"><use href="#ico-task"/></svg><span>待办</span><em>12</em></button><button class="thought-category-button" type="button" data-thought-category="ledger"><svg class="icon"><use href="#ico-book"/></svg><span>记账</span><em>9</em></button><button class="thought-category-button" type="button" data-thought-category="other"><svg class="icon"><use href="#ico-more"/></svg><span>其他</span><em>6</em></button></aside><section class="thought-file-pane" aria-labelledby="thought-category-heading"><header class="thought-file-pane-head"><div><strong id="thought-category-heading">灵感</strong><span id="thought-category-description">记录随时产生的想法、观察和临时语音内容。</span></div></header><div class="thought-file-table-scroll"><div class="thought-file-table-head"><span>文件名</span><span>记录数量</span><span>更新时间</span><span>操作</span></div><div id="thought-file-list"></div></div></section></div>
           <div class="meeting-filter-empty" id="meeting-filter-empty" hidden>没有找到匹配的会议</div>
           <div class="recording-empty-state" id="recording-empty-state" hidden><span class="empty-record-orbit"><svg class="icon"><use href="#ico-mic"/></svg></span><strong>记录第一场会议</strong><p>开始录音后，转写与纪要会出现在这里。</p><div><button id="empty-start-recording"><svg class="icon"><use href="#ico-mic"/></svg>开始录音</button></div></div>
-          <button class="ai-panorama-asset edition-enterprise-only" id="business-dashboard" hidden><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-销售全景表.xlsx</strong><small>AI 全景数据 · 后端定时创建与更新</small></span><span class="ai-panorama-meta">19.2 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-status">已更新</span><span class="ai-panorama-action">预览</span></button>
-          <section class="ai-panorama-preview" id="ai-panorama-preview" hidden aria-label="AI 全景数据预览"><header class="ai-panorama-preview-head"><div class="ai-panorama-preview-title"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span><strong>企业-销售全景表.xlsx</strong><small>19.2 MB · XLSX · 更新于 2026-09-03 01:07</small></span></div><button class="ai-panorama-close" id="ai-panorama-close" type="button" aria-label="关闭 AI 全景数据预览"><svg class="icon"><use href="#ico-x"/></svg></button></header><div class="ai-panorama-toolbar"><button id="ai-panorama-export" type="button">导出</button><span>只读预览 · 数据由后端定时创建并更新</span></div><div class="ai-sheet-scroll"><table class="ai-sheet"><thead><tr><th class="row-number"></th><th>组织归属</th><th>企业名称</th><th>会议地点</th><th>会议标识</th><th>会议归属员工</th><th>会议时间</th><th>会议名称</th></tr></thead><tbody><tr><th class="row-number">1</th><td class="selected">华西南三部</td><td>百融智能</td><td>—</td><td>2a472ac1-b47c-458c</td><td>黄宇威</td><td>2026-09-02 16:01</td><td>电话自动化推进</td></tr><tr><th class="row-number">2</th><td>华北四部</td><td>百融智能</td><td>—</td><td>dcaf62af-d688-4be6</td><td>孟繁绪</td><td>2026-09-02 15:51</td><td>手机银行方案探讨</td></tr><tr><th class="row-number">3</th><td>华东二部</td><td>百融智能</td><td>南京市建邺区</td><td>60518941-f366-4b4f</td><td>张振华</td><td>2026-09-02 15:13</td><td>混合云方案讨论</td></tr><tr><th class="row-number">4</th><td>华西南四部</td><td>百融智能</td><td>—</td><td>0c144dca-0c93-413a</td><td>刘佳</td><td>2026-09-02 15:03</td><td>C 卡建模对齐</td></tr><tr><th class="row-number">5</th><td>华北四部</td><td>百融智能</td><td>—</td><td>1da36b25-2723-42b9</td><td>孟繁绪</td><td>2026-09-02 14:45</td><td>助贷电商接入</td></tr><tr><th class="row-number">6</th><td>华西南一部</td><td>百融智能</td><td>深圳市南山区</td><td>f3fb0c71-90ef-4df6</td><td>李传玲</td><td>2026-09-02 14:03</td><td>AI 外呼与运营</td></tr></tbody></table></div><footer class="ai-sheet-tabs"><strong>销售全景表</strong><span>1354 行</span></footer></section>
+          <section class="ai-panorama-library edition-enterprise-only" id="business-dashboard" hidden aria-labelledby="ai-panorama-library-title"><header class="ai-panorama-library-head"><div><strong id="ai-panorama-library-title">AI 全景数据</strong><small>由后端定时创建与更新，支持只读预览</small></div><span class="ai-panorama-library-count">共 3 个文件</span></header><div class="ai-panorama-table-scroll"><div class="ai-panorama-table-head"><span>文件名</span><span>文件大小</span><span>文件来源</span><span>更新时间</span><span>操作</span></div><div id="ai-panorama-list">
+            <button class="ai-panorama-row" type="button" data-panorama-file="企业-销售全景表.xlsx" data-panorama-size="19.2 MB" data-panorama-updated="2026-09-03 13:37" data-panorama-sheet="销售全景表" data-panorama-rows="1354"><span class="ai-panorama-file"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-销售全景表.xlsx</strong><small>汇总销售会议中的客户、区域与机会信息</small></span></span><span class="ai-panorama-meta">19.2 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-meta">2026-09-03 13:37</span><span class="ai-panorama-action">预览</span></button>
+            <button class="ai-panorama-row" type="button" data-panorama-file="企业-客户机会全景表.xlsx" data-panorama-size="12.8 MB" data-panorama-updated="2026-09-03 12:20" data-panorama-sheet="客户机会" data-panorama-rows="862"><span class="ai-panorama-file"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-客户机会全景表.xlsx</strong><small>沉淀客户需求、商机阶段与后续跟进计划</small></span></span><span class="ai-panorama-meta">12.8 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-meta">2026-09-03 12:20</span><span class="ai-panorama-action">预览</span></button>
+            <button class="ai-panorama-row" type="button" data-panorama-file="企业-项目推进全景表.xlsx" data-panorama-size="8.6 MB" data-panorama-updated="2026-09-03 11:48" data-panorama-sheet="项目推进" data-panorama-rows="526"><span class="ai-panorama-file"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span class="ai-panorama-copy"><strong>企业-项目推进全景表.xlsx</strong><small>跟踪项目里程碑、风险事项与责任人进展</small></span></span><span class="ai-panorama-meta">8.6 MB</span><span class="ai-panorama-meta">AI 生成</span><span class="ai-panorama-meta">2026-09-03 11:48</span><span class="ai-panorama-action">预览</span></button>
+          </div></div></section>
+          <section class="ai-panorama-preview" id="ai-panorama-preview" hidden aria-label="AI 全景数据预览"><header class="ai-panorama-preview-head"><div class="ai-panorama-preview-title"><span class="ai-panorama-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span><strong id="ai-panorama-preview-name">企业-销售全景表.xlsx</strong><small id="ai-panorama-preview-meta">19.2 MB · XLSX · 更新于 2026-09-03 13:37</small></span></div><button class="ai-panorama-close" id="ai-panorama-close" type="button" aria-label="关闭 AI 全景数据预览"><svg class="icon"><use href="#ico-x"/></svg></button></header><div class="ai-panorama-toolbar"><button id="ai-panorama-export" type="button">导出</button><span>只读预览 · 数据由后端定时创建并更新</span></div><div class="ai-sheet-scroll"><table class="ai-sheet"><thead><tr><th class="row-number"></th><th>组织归属</th><th>企业名称</th><th>会议地点</th><th>会议标识</th><th>会议归属员工</th><th>会议时间</th><th>会议名称</th></tr></thead><tbody><tr><th class="row-number">1</th><td class="selected">华西南三部</td><td>百融智能</td><td>—</td><td>2a472ac1-b47c-458c</td><td>黄宇威</td><td>2026-09-02 16:01</td><td>电话自动化推进</td></tr><tr><th class="row-number">2</th><td>华北四部</td><td>百融智能</td><td>—</td><td>dcaf62af-d688-4be6</td><td>孟繁绪</td><td>2026-09-02 15:51</td><td>手机银行方案探讨</td></tr><tr><th class="row-number">3</th><td>华东二部</td><td>百融智能</td><td>南京市建邺区</td><td>60518941-f366-4b4f</td><td>张振华</td><td>2026-09-02 15:13</td><td>混合云方案讨论</td></tr><tr><th class="row-number">4</th><td>华西南四部</td><td>百融智能</td><td>—</td><td>0c144dca-0c93-413a</td><td>刘佳</td><td>2026-09-02 15:03</td><td>C 卡建模对齐</td></tr><tr><th class="row-number">5</th><td>华北四部</td><td>百融智能</td><td>—</td><td>1da36b25-2723-42b9</td><td>孟繁绪</td><td>2026-09-02 14:45</td><td>助贷电商接入</td></tr><tr><th class="row-number">6</th><td>华西南一部</td><td>百融智能</td><td>深圳市南山区</td><td>f3fb0c71-90ef-4df6</td><td>李传玲</td><td>2026-09-02 14:03</td><td>AI 外呼与运营</td></tr></tbody></table></div><footer class="ai-sheet-tabs"><strong id="ai-panorama-sheet-name">销售全景表</strong><span id="ai-panorama-row-count">1354 行</span></footer></section>
           <section class="thought-preview" id="thought-preview" hidden aria-label="闪念文件预览">
             <header class="thought-preview-head"><div class="thought-preview-file"><span class="thought-file-icon">M</span><span><strong id="thought-preview-title">灵感-2026-08.md</strong><small id="thought-preview-meta">8 条 · Markdown · 2026-08-31 21:18</small></span></div><div class="thought-preview-actions"><button id="thought-preview-sort"><svg class="icon"><use href="#ico-clock"/></svg>日期</button><button id="thought-preview-edit"><svg class="icon"><use href="#ico-task"/></svg>编辑</button><button id="thought-preview-close" aria-label="关闭闪念预览"><svg class="icon"><use href="#ico-x"/></svg></button></div></header>
             <div class="thought-preview-layout"><aside class="thought-preview-dates" id="thought-preview-dates"><strong>日期</strong></aside><div class="thought-preview-content"><h3 id="thought-preview-date-title">2026-08-28</h3><div class="thought-entry-list"><div class="thought-entry-head"><span>时间</span><span>标题</span><span>内容</span><span>分类</span></div><div id="thought-entry-list"></div></div></div></div>
@@ -3470,10 +3481,21 @@
     $$('[data-os]').forEach((button) => button.addEventListener("click", () => { $$('[data-os]').forEach((item) => item.classList.remove("selected")); button.classList.add("selected"); $("#download-confirm").innerHTML = `<svg class="icon"><use href="#ico-download"/></svg>下载${button.textContent}版`; }));
     $("#download-confirm").addEventListener("click", () => { closeOverlays(); showToast(document.body.dataset.edition === "personal" ? "下载已开始，安装后可同步个人工作台" : "下载已开始，安装后即可加入企业空间"); });
     $("#agent-manage").addEventListener("click", () => showToast("正在打开智能体管理"));
-    const setPanoramaPreviewOpen = (open) => { $("#ai-panorama-preview").hidden = !open; $("#recording-card").classList.toggle("panorama-open", open); };
-    $("#business-dashboard").addEventListener("click", () => setPanoramaPreviewOpen(true));
+    let activePanoramaFile = "企业-销售全景表.xlsx";
+    const setPanoramaPreviewOpen = (open, fileRow = null) => {
+      if (fileRow) {
+        activePanoramaFile = fileRow.dataset.panoramaFile;
+        $("#ai-panorama-preview-name").textContent = activePanoramaFile;
+        $("#ai-panorama-preview-meta").textContent = `${fileRow.dataset.panoramaSize} · XLSX · 更新于 ${fileRow.dataset.panoramaUpdated}`;
+        $("#ai-panorama-sheet-name").textContent = fileRow.dataset.panoramaSheet;
+        $("#ai-panorama-row-count").textContent = `${fileRow.dataset.panoramaRows} 行`;
+      }
+      $("#ai-panorama-preview").hidden = !open;
+      $("#recording-card").classList.toggle("panorama-open", open);
+    };
+    $$("[data-panorama-file]").forEach((row) => row.addEventListener("click", () => setPanoramaPreviewOpen(true, row)));
     $("#ai-panorama-close").addEventListener("click", () => setPanoramaPreviewOpen(false));
-    $("#ai-panorama-export").addEventListener("click", () => showToast("正在导出企业-销售全景表.xlsx"));
+    $("#ai-panorama-export").addEventListener("click", () => showToast(`正在导出${activePanoramaFile}`));
     document.addEventListener("keydown", (event) => { if (event.key === "Escape") setPanoramaPreviewOpen(false); });
     const xiaozhiRail = $("#xiaozhi-rail");
     const xiaozhiGrid = $("#meeting-agent-grid");
