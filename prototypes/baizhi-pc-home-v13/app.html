@@ -145,13 +145,13 @@
     .recycle-bin-entry { display: flex; width: 100%; min-height: 32px; align-items: center; gap: 7px; padding: 0 9px; border: 0; border-radius: 7px; color: #657083; background: transparent; cursor: pointer; font-size: 11px; text-align: left; }
     .recycle-bin-entry:hover, .recycle-bin-entry.active { color: var(--blue); background: var(--blue-5); }
     .recycle-bin-entry .icon { width: 14px; height: 14px; color: #8994a5; }
-    .knowledge-storage { display: grid; gap: 8px; padding: 9px 10px; border: 1px solid #e8ebf0; border-radius: 8px; background: #fafbfc; }
-    .knowledge-storage-item { display: grid; gap: 5px; }
-    .knowledge-storage-copy { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: #8a94a3; font-size: 8px; }
-    .knowledge-storage-copy strong { color: #596579; font-size: 9px; font-weight: 600; white-space: nowrap; }
-    .knowledge-storage-track { height: 3px; overflow: hidden; border-radius: 3px; background: #e9edf3; }
+    .knowledge-storage { display: flex; min-height: 88px; align-items: flex-end; gap: 38px; margin-top: auto; padding: 17px 22px 20px; border-top: 1px solid #edf0f4; background: #fff; }
+    .knowledge-storage-item { display: grid; width: 270px; max-width: 38%; gap: 7px; }
+    .knowledge-storage-copy { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: #8b94a2; font-size: 9px; }
+    .knowledge-storage-copy strong { color: #384356; font-size: 10px; font-weight: 550; white-space: nowrap; }
+    .knowledge-storage-track { height: 4px; overflow: hidden; border-radius: 4px; background: #edf0f4; }
     .knowledge-storage-track i { display: block; height: 100%; border-radius: inherit; background: #7ba4ed; }
-    .knowledge-storage-meta { color: #a0a8b4; font-size: 7px; line-height: 11px; }
+    .knowledge-storage-meta { color: #a0a8b4; font-size: 8px; line-height: 12px; }
     .knowledge-tree-menu { position: fixed; z-index: 40; display: none; width: 150px; padding: 6px; border: 1px solid #e0e4ea; border-radius: 10px; background: #fff; box-shadow: 0 12px 30px rgba(25,39,59,.14); }
     .knowledge-tree-menu.show { display: grid; }
     .knowledge-tree-menu button { display: flex; min-height: 34px; align-items: center; gap: 8px; padding: 0 9px; border: 0; border-radius: 7px; color: #4d586a; background: transparent; cursor: pointer; font-size: 10px; text-align: left; }
@@ -2195,7 +2195,7 @@
       .thought-entry-head > :nth-child(3), .thought-entry-head > :nth-child(4), .thought-entry-detail, .thought-entry-tag { display: none; }
     }
     /* 知识库文件工作台：目录、内容列表与预览保持在同一工作上下文。 */
-    .knowledge-workspace { width: calc(100% - 40px); max-width: 1440px; min-height: calc(100vh - 100px); margin: 20px auto; overflow: hidden; border: 1px solid #e1e5ea; border-radius: 16px; background: #fff; }
+    .knowledge-workspace { display: flex; width: calc(100% - 40px); max-width: 1440px; min-height: calc(100vh - 100px); margin: 20px auto; overflow: hidden; border: 1px solid #e1e5ea; border-radius: 16px; background: #fff; flex-direction: column; }
     .knowledge-workspace-header { display: flex; min-height: 82px; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 22px; border-bottom: 1px solid #edf0f4; }
     .knowledge-breadcrumb { display: flex; align-items: center; gap: 7px; color: #8993a2; font-size: 10px; }
     .knowledge-breadcrumb button { padding: 0; border: 0; color: #758094; background: transparent; cursor: pointer; font: inherit; }
@@ -2228,7 +2228,7 @@
     .knowledge-view-switch button { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 6px; color: #7d8796; background: transparent; cursor: pointer; }
     .knowledge-view-switch button.active { color: #2f6fe4; background: #fff; box-shadow: 0 1px 3px rgba(30,42,60,.08); }
     .knowledge-view-switch .icon { width: 15px; height: 15px; }
-    .knowledge-content { position: relative; min-height: 520px; }
+    .knowledge-content { position: relative; display: flex; min-height: 520px; flex: 1; flex-direction: column; }
     .knowledge-table-head, .knowledge-file-row { display: grid; align-items: center; gap: 16px; padding: 0 22px; }
     .knowledge-table-head { height: 42px; border-bottom: 1px solid #e4e7eb; color: #778190; background: #fbfcfd; font-size: 9px; }
     .knowledge-file-row { width: 100%; min-height: 62px; border: 0; border-bottom: 1px solid #edf0f3; color: #596477; background: #fff; cursor: pointer; font-size: 10px; text-align: left; }
@@ -2296,7 +2296,8 @@
     .knowledge-workspace.file-open .knowledge-selection-bar,
     .knowledge-workspace.file-open .knowledge-table-head,
     .knowledge-workspace.file-open #knowledge-file-list,
-    .knowledge-workspace.file-open .knowledge-empty { display: none !important; }
+    .knowledge-workspace.file-open .knowledge-empty,
+    .knowledge-workspace.file-open .knowledge-storage { display: none !important; }
     .knowledge-workspace.file-open .knowledge-content { min-height: calc(100vh - 102px); }
     .knowledge-workspace.file-open .knowledge-preview { position: relative; inset: auto; width: 100%; min-height: calc(100vh - 102px); border-left: 0; box-shadow: none; }
     .knowledge-workspace.file-open .knowledge-preview-head { min-height: 70px; padding: 0 22px; }
@@ -2345,6 +2346,8 @@
       .knowledge-workspace { width: calc(100% - 24px); margin: 12px auto; }
       .knowledge-workspace-header, .knowledge-toolbar { align-items: flex-start; flex-direction: column; }
       .knowledge-header-actions, .knowledge-filters, .knowledge-view-tools { width: 100%; overflow-x: auto; }
+      .knowledge-storage { align-items: stretch; flex-direction: column; gap: 14px; }
+      .knowledge-storage-item { width: 100%; max-width: none; }
       .knowledge-table-head { display: none; }
       .knowledge-file-row[data-schema] { grid-template-columns: 24px minmax(0,1fr) 64px; padding: 10px 14px; }
       .knowledge-file-row[data-schema] > :not(:first-child):not(:nth-child(2)):not(:last-child) { display: none; }
@@ -2592,10 +2595,6 @@
             </div></div>
             <div class="knowledge-sidebar-tools">
               <button class="recycle-bin-entry" id="recycle-bin-entry" type="button"><svg class="icon"><use href="#ico-trash"/></svg><span>知识库回收站</span></button>
-              <div class="knowledge-storage" id="knowledge-storage" aria-label="知识库剩余空间">
-                <div class="knowledge-storage-item" data-storage-space="personal"><div class="knowledge-storage-copy"><span>个人空间</span><strong id="personal-storage-remaining">剩余 49.16 GB</strong></div><div class="knowledge-storage-track"><i id="personal-storage-progress" style="width:1.68%"></i></div><div class="knowledge-storage-meta" id="personal-storage-meta">已用 859.38 MB / 50 GB</div></div>
-                <div class="knowledge-storage-item edition-enterprise-only" data-storage-space="enterprise"><div class="knowledge-storage-copy"><span>企业空间</span><strong id="enterprise-storage-remaining">剩余 7.27 TB</strong></div><div class="knowledge-storage-track"><i id="enterprise-storage-progress" style="width:.62%"></i></div><div class="knowledge-storage-meta" id="enterprise-storage-meta">已用 46.54 GB / 7.32 TB</div></div>
-              </div>
             </div>
           </div></section>
           <section class="side-group capability-hub"><button class="side-group-head" id="capability-entry" data-main-target="capabilities" aria-current="false"><span class="side-group-title"><svg class="icon"><use href="#ico-agent"/></svg><span class="side-group-label">AI专家· 技能·连接器</span></span></button></section>
@@ -2722,6 +2721,10 @@
         <div class="knowledge-table-head" id="knowledge-table-head" data-schema="file"></div>
         <div id="knowledge-file-list"></div>
         <div class="knowledge-empty" id="knowledge-empty" hidden>当前目录没有匹配的内容</div>
+        <div class="knowledge-storage" id="knowledge-storage" aria-label="知识库空间使用情况">
+          <div class="knowledge-storage-item" data-storage-space="personal"><div class="knowledge-storage-copy"><span>个人空间已使用</span><strong id="personal-storage-remaining">859.38 MB / 50 GB</strong></div><div class="knowledge-storage-track"><i id="personal-storage-progress" style="width:1.68%"></i></div><div class="knowledge-storage-meta" id="personal-storage-meta">剩余 49.16 GB</div></div>
+          <div class="knowledge-storage-item edition-enterprise-only" data-storage-space="enterprise"><div class="knowledge-storage-copy"><span>企业空间已使用</span><strong id="enterprise-storage-remaining">46.54 GB / 7.32 TB</strong></div><div class="knowledge-storage-track"><i id="enterprise-storage-progress" style="width:.62%"></i></div><div class="knowledge-storage-meta" id="enterprise-storage-meta">剩余 7.27 TB</div></div>
+        </div>
         <aside class="knowledge-preview" id="knowledge-preview" hidden aria-label="文件预览">
           <header class="knowledge-preview-head"><div class="knowledge-preview-title"><span class="knowledge-file-mark" id="knowledge-preview-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span><strong id="knowledge-preview-title">文件预览</strong><small id="knowledge-preview-meta">文件详情</small></span></div><button id="knowledge-preview-close" aria-label="关闭文件预览"><svg class="icon"><use href="#ico-x"/></svg></button></header>
           <div class="knowledge-preview-body" id="knowledge-preview-body"></div>
@@ -3099,11 +3102,11 @@
     const renderStorageSummary = () => {
       const personal = BaizhiRecycleState.getStorageSummary({ totalBytes: 50 * 1024 ** 3, usedBytes: 859.38 * 1024 ** 2 });
       const enterprise = BaizhiRecycleState.getStorageSummary({ totalBytes: 7.32 * 1024 ** 4, usedBytes: 46.54 * 1024 ** 3 });
-      $("#personal-storage-remaining").textContent = `剩余 ${(personal.remainingBytes / 1024 ** 3).toFixed(2)} GB`;
-      $("#personal-storage-meta").textContent = "已用 859.38 MB / 50 GB";
+      $("#personal-storage-remaining").textContent = "859.38 MB / 50 GB";
+      $("#personal-storage-meta").textContent = `剩余 ${(personal.remainingBytes / 1024 ** 3).toFixed(2)} GB`;
       $("#personal-storage-progress").style.width = `${personal.usedPercent.toFixed(2)}%`;
-      $("#enterprise-storage-remaining").textContent = `剩余 ${(enterprise.remainingBytes / 1024 ** 4).toFixed(2)} TB`;
-      $("#enterprise-storage-meta").textContent = "已用 46.54 GB / 7.32 TB";
+      $("#enterprise-storage-remaining").textContent = "46.54 GB / 7.32 TB";
+      $("#enterprise-storage-meta").textContent = `剩余 ${(enterprise.remainingBytes / 1024 ** 4).toFixed(2)} TB`;
       $("#enterprise-storage-progress").style.width = `${Math.max(enterprise.usedPercent, .8).toFixed(2)}%`;
     };
     renderStorageSummary();
