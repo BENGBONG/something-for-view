@@ -988,6 +988,9 @@
     .meeting-source-filter { position: relative; display: flex; height: 34px; align-items: center; border: 1px solid #e1e5eb; border-radius: 9px; background: #fff; }
     .meeting-source-filter select { height: 100%; padding: 0 29px 0 11px; outline: 0; border: 0; color: #5c6879; background: transparent; appearance: none; font: 11px var(--font); cursor: pointer; }
     .meeting-source-filter .icon { position: absolute; right: 9px; width: 11px; height: 11px; pointer-events: none; }
+    .recording-recycle-entry { display: inline-flex; height: 34px; flex: 0 0 auto; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #e1e5eb; border-radius: 9px; color: #657083; background: #fff; cursor: pointer; font: 11px var(--font); white-space: nowrap; }
+    .recording-recycle-entry:hover, .recording-recycle-entry.active { color: var(--blue); border-color: #ccd9ec; background: #f7faff; }
+    .recording-recycle-entry .icon { width: 13px; height: 13px; color: #8994a5; }
     .meeting-dashboard-link, .meeting-more { display: inline-flex; height: 34px; align-items: center; justify-content: center; border-radius: 9px; background: #fff; cursor: pointer; font-size: 11px; }
     .meeting-dashboard-link { padding: 0 12px; border: 1px solid #dbe5f6; color: #2869df; background: #f7faff; }
     .meeting-dashboard-link:hover { border-color: #c5d7f4; background: #f0f6ff; }
@@ -2588,7 +2591,7 @@
               </div></div>
             </div></div>
             <div class="knowledge-sidebar-tools">
-              <button class="recycle-bin-entry" id="recycle-bin-entry" type="button"><svg class="icon"><use href="#ico-trash"/></svg><span>回收站</span></button>
+              <button class="recycle-bin-entry" id="recycle-bin-entry" type="button"><svg class="icon"><use href="#ico-trash"/></svg><span>知识库回收站</span></button>
               <div class="knowledge-storage" id="knowledge-storage" aria-label="知识库剩余空间">
                 <div class="knowledge-storage-item" data-storage-space="personal"><div class="knowledge-storage-copy"><span>个人空间</span><strong id="personal-storage-remaining">剩余 49.16 GB</strong></div><div class="knowledge-storage-track"><i id="personal-storage-progress" style="width:1.68%"></i></div><div class="knowledge-storage-meta" id="personal-storage-meta">已用 859.38 MB / 50 GB</div></div>
                 <div class="knowledge-storage-item edition-enterprise-only" data-storage-space="enterprise"><div class="knowledge-storage-copy"><span>企业空间</span><strong id="enterprise-storage-remaining">剩余 7.27 TB</strong></div><div class="knowledge-storage-track"><i id="enterprise-storage-progress" style="width:.62%"></i></div><div class="knowledge-storage-meta" id="enterprise-storage-meta">已用 46.54 GB / 7.32 TB</div></div>
@@ -2638,6 +2641,7 @@
               <label class="meeting-search"><svg class="icon"><use href="#ico-search"/></svg><input id="meeting-search" type="search" placeholder="搜索会议" aria-label="搜索会议" /></label>
               <label class="meeting-source-filter meeting-origin-filter"><span class="sr-only">筛选来源</span><select id="meeting-source-filter" aria-label="筛选内容来源"><option value="all">全部来源</option><option value="网页录音">网页录音</option><option value="录音卡">录音卡</option><option value="移动端同步">移动端同步</option><option value="企业共享">企业共享</option></select><svg class="icon"><use href="#ico-chevron"/></svg></label>
               <label class="meeting-source-filter meeting-date-filter"><span class="sr-only">筛选录音时间</span><svg class="icon date-icon"><use href="#ico-clock"/></svg><select id="meeting-date-filter" aria-label="筛选录音时间"><option value="all">全部时间</option><option value="today">今天</option><option value="7">近 7 天</option><option value="30">近 30 天</option></select><svg class="icon"><use href="#ico-chevron"/></svg></label>
+              <button class="recording-recycle-entry" id="recording-recycle-entry" type="button"><svg class="icon"><use href="#ico-trash"/></svg><span>录音回收站</span></button>
             </div>
             <div class="home-meeting-toolbar" id="thought-toolbar" hidden><label class="meeting-search"><svg class="icon"><use href="#ico-search"/></svg><input id="thought-file-search" type="search" placeholder="搜索月度文件" aria-label="搜索闪念月度文件" /></label><label class="meeting-source-filter meeting-date-filter"><span class="sr-only">筛选归档月份</span><svg class="icon date-icon"><use href="#ico-clock"/></svg><select id="thought-month-select" aria-label="筛选归档月份"><option value="all">全部月份</option><option value="2026-09">2026 年 9 月</option><option value="2026-08">2026 年 8 月</option><option value="2026-07">2026 年 7 月</option></select><svg class="icon"><use href="#ico-chevron"/></svg></label></div>
           </div>
@@ -2727,7 +2731,7 @@
     </section>
 
     <section class="recycle-workspace" data-main-view="recycle-bin" hidden aria-label="回收站">
-      <header class="recycle-header"><div class="recycle-heading"><span class="recycle-heading-mark"><svg class="icon"><use href="#ico-trash"/></svg></span><div><h1>回收站</h1><p>移入回收站的内容可在 30 天内恢复，30 天后将被永久删除。</p></div></div><button class="recycle-back" id="recycle-back" type="button"><svg class="icon"><use href="#ico-chevron"/></svg>返回知识库</button></header>
+      <header class="recycle-header"><div class="recycle-heading"><span class="recycle-heading-mark"><svg class="icon"><use href="#ico-trash"/></svg></span><div><h1 id="recycle-title">知识库回收站</h1><p id="recycle-description">移入知识库回收站的文件可在 30 天内恢复，30 天后将被永久删除。</p></div></div><button class="recycle-back" id="recycle-back" type="button"><svg class="icon"><use href="#ico-chevron"/></svg><span id="recycle-back-label">返回知识库</span></button></header>
       <nav class="recycle-tabs" aria-label="回收站空间"><button class="recycle-tab active" type="button" data-recycle-space="personal" aria-current="page">个人空间</button><button class="recycle-tab edition-enterprise-only" type="button" data-recycle-space="enterprise">企业空间</button></nav>
       <div class="recycle-table-head"><span>文件名</span><span>类型</span><span>原位置</span><span>文件大小</span><span>删除时间</span><span>剩余天数</span><span>操作</span></div>
       <div id="recycle-list"></div>
@@ -2941,7 +2945,8 @@
     const mainViewTitles = { home: "企业AI工作台", knowledge: "知识库", "recycle-bin": "回收站", capabilities: "AI专家· 技能·连接器", recording: "语音录制", "note-detail": "语音内容" };
     const setActiveSidebar = (target) => {
       $$(".side-sub-item, .nav-item, .side-group-head").forEach((row) => { row.classList.remove("active"); row.removeAttribute("aria-current"); });
-      const activeItem = ["home", "note-detail"].includes(target) ? $("#home-entry") : target === "recording" ? $("#start-recording") : target === "recycle-bin" ? $("#recycle-bin-entry") : target === "knowledge" ? null : $("#capability-entry");
+      [$("#recycle-bin-entry"), $("#recording-recycle-entry")].forEach((row) => { row.classList.remove("active"); row.removeAttribute("aria-current"); });
+      const activeItem = ["home", "note-detail"].includes(target) ? $("#home-entry") : target === "recording" ? $("#start-recording") : target === "recycle-bin" ? (activeRecycleRepository === "recording" ? $("#recording-recycle-entry") : $("#recycle-bin-entry")) : target === "knowledge" ? null : $("#capability-entry");
       if (activeItem) { activeItem.classList.add("active"); activeItem.setAttribute("aria-current", "page"); }
     };
     const showMainView = (target, options = {}) => {
@@ -3086,6 +3091,7 @@
     const assetStore = BaizhiRecycleState.createAssetStore();
     const meetingRowsById = new Map();
     let activeRecycleSpace = "personal";
+    let activeRecycleRepository = "knowledge";
     let pendingDelete = null;
     let pendingPermanentDeleteId = null;
     const enterpriseKnowledgeFolders = new Set(["企业文件", "百智产品迭代", "百智PC版", "百智智能体", "客户项目", "重点客户", "交付文档", "市场资料"]);
@@ -3110,7 +3116,7 @@
         button.classList.toggle("active", active);
         if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
       });
-      const items = assetStore.getRecycleItems({ edition, space: activeRecycleSpace });
+      const items = assetStore.getRecycleItems({ edition, space: activeRecycleSpace, repository: activeRecycleRepository });
       $("#recycle-list").innerHTML = items.map((item) => `<div class="recycle-row" data-recycle-id="${knowledgeEscape(item.recycleId)}"><span class="recycle-file"><span class="recycle-file-mark"><svg class="icon"><use href="#${item.type === "meeting" ? "ico-mic" : "ico-file"}"/></svg></span><strong>${knowledgeEscape(item.name)}</strong></span><span>${item.type === "meeting" ? "录音文件" : knowledgeEscape(item.item.type || "知识文件")}</span><span>${knowledgeEscape(item.originalLocation)}</span><span>${knowledgeEscape(item.size)}</span><span>${knowledgeEscape(formatDeletedAt(item.deletedAt))}</span><span class="recycle-expiry">${item.expiresInDays} 天</span><span class="recycle-actions"><button type="button" data-recycle-action="restore">恢复</button><button type="button" data-recycle-action="permanent">彻底删除</button></span></div>`).join("");
       $("#recycle-empty").hidden = items.length > 0;
     };
@@ -3267,8 +3273,19 @@
       if (!indices.length) return;
       openDeleteConfirm({ title: `确认删除 ${indices.length} 个文件？`, description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { indices.forEach((index) => moveKnowledgeToRecycle(knowledgeCatalog.file[index], index)); renderKnowledgeFiles(); renderRecycleBin(); showToast(`已将 ${indices.length} 个文件移入回收站`); } });
     }));
-    $("#recycle-bin-entry").addEventListener("click", () => { renderRecycleBin(); showMainView("recycle-bin", { silent: true }); });
-    $("#recycle-back").addEventListener("click", () => openKnowledgeFolder(activeKnowledgeFolder));
+    const openRecycleBin = (repository) => {
+      activeRecycleRepository = repository === "recording" ? "recording" : "knowledge";
+      const recordingRepository = activeRecycleRepository === "recording";
+      $("#recycle-title").textContent = recordingRepository ? "录音回收站" : "知识库回收站";
+      $("#recycle-description").textContent = recordingRepository ? "删除的录音及其转写、AI 总结可在 30 天内恢复，30 天后将被永久删除。" : "移入知识库回收站的文件可在 30 天内恢复，30 天后将被永久删除。";
+      $("#recycle-back-label").textContent = recordingRepository ? "返回录音列表" : "返回知识库";
+      renderRecycleBin();
+      showMainView("recycle-bin", { silent: true });
+      $("#page-crumb").textContent = recordingRepository ? "录音回收站" : "知识库回收站";
+    };
+    $("#recycle-bin-entry").addEventListener("click", () => openRecycleBin("knowledge"));
+    $("#recording-recycle-entry").addEventListener("click", () => openRecycleBin("recording"));
+    $("#recycle-back").addEventListener("click", () => { if (activeRecycleRepository === "recording") showMainView("home", { silent: true }); else openKnowledgeFolder(activeKnowledgeFolder); });
     $$('[data-recycle-space]').forEach((button) => button.addEventListener("click", () => { activeRecycleSpace = button.dataset.recycleSpace; renderRecycleBin(); }));
     $("#recycle-list").addEventListener("click", (event) => {
       const action = event.target.closest("[data-recycle-action]");
@@ -3291,7 +3308,7 @@
       showToast(`已恢复到「${record.originalLocation}」`);
     });
     $("#delete-confirm-submit").addEventListener("click", () => { const action = pendingDelete; pendingDelete = null; closeOverlays(); if (action) action(); });
-    $("#permanent-delete-submit").addEventListener("click", () => { const recycleId = pendingPermanentDeleteId; const record = assetStore.getRecycleItems({ edition: "enterprise" }).find((item) => item.recycleId === recycleId); pendingPermanentDeleteId = null; closeOverlays(); if (recycleId && assetStore.permanentlyDelete(recycleId)) { if (record?.type === "meeting") meetingRowsById.delete(record.item.id); renderRecycleBin(); showToast("已彻底删除，无法恢复"); } });
+    $("#permanent-delete-submit").addEventListener("click", () => { const recycleId = pendingPermanentDeleteId; const record = assetStore.getRecycleItems({ edition: "enterprise", repository: activeRecycleRepository }).find((item) => item.recycleId === recycleId); pendingPermanentDeleteId = null; closeOverlays(); if (recycleId && assetStore.permanentlyDelete(recycleId)) { if (record?.type === "meeting") meetingRowsById.delete(record.item.id); renderRecycleBin(); showToast("已彻底删除，无法恢复"); } });
     $$("[data-knowledge-file]").forEach((item) => item.addEventListener("click", () => { $$(".knowledge-file-leaf").forEach((row) => row.classList.toggle("active", row === item)); openKnowledgeFolder("归档"); item.classList.add("active"); const file = knowledgeCatalog.file.find((entry) => entry.name.includes(item.dataset.knowledgeFile.replace(/\.[^.]+$/, ""))) || knowledgeCatalog.file[0]; openKnowledgePreview(file); }));
     document.addEventListener("click", (event) => { if (!event.target.closest("#knowledge-tree-menu") && !event.target.closest("[data-folder-menu]")) closeKnowledgeTreeMenu(); });
     $("#home-entry").addEventListener("click", () => showMainView("home"));

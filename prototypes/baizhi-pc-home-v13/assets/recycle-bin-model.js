@@ -7,12 +7,14 @@
   const normalizeSpace = (space) => space === "enterprise" ? "enterprise" : "personal";
 
   function createAssetStore(initial = {}) {
+    const legacyRecycle = clone(initial.recycle || []);
     const state = {
       knowledge: clone(initial.knowledge || []),
       meetings: clone(initial.meetings || []),
-      recycle: clone(initial.recycle || [])
+      knowledgeRecycle: clone(initial.knowledgeRecycle || legacyRecycle.filter((item) => item.type !== "meeting")),
+      recordingRecycle: clone(initial.recordingRecycle || legacyRecycle.filter((item) => item.type === "meeting"))
     };
-    let sequence = state.recycle.length;
+    let sequence = state.knowledgeRecycle.length + state.recordingRecycle.length;
 
     const moveToRecycle = (collectionName, id, type) => {
       const collection = state[collectionName];
@@ -30,8 +32,16 @@
         name: item.name,
         size: item.size || "-"
       };
-      state.recycle.unshift(recycled);
+      state[type === "meeting" ? "recordingRecycle" : "knowledgeRecycle"].unshift(recycled);
       return clone(recycled);
+    };
+
+    const findRecycleRecord = (recycleId) => {
+      for (const repository of ["knowledgeRecycle", "recordingRecycle"]) {
+        const index = state[repository].findIndex((item) => item.recycleId === recycleId);
+        if (index >= 0) return { repository, index };
+      }
+      return null;
     };
 
     return {
@@ -40,16 +50,16 @@
       deleteKnowledge(id) { return moveToRecycle("knowledge", id, "knowledge"); },
       deleteMeeting(id) { return moveToRecycle("meetings", id, "meeting"); },
       restore(recycleId) {
-        const index = state.recycle.findIndex((item) => item.recycleId === recycleId);
-        if (index < 0) return null;
-        const [recycled] = state.recycle.splice(index, 1);
+        const match = findRecycleRecord(recycleId);
+        if (!match) return null;
+        const [recycled] = state[match.repository].splice(match.index, 1);
         state[recycled.type === "meeting" ? "meetings" : "knowledge"].push(clone(recycled.item));
         return clone(recycled);
       },
       permanentlyDelete(recycleId) {
-        const index = state.recycle.findIndex((item) => item.recycleId === recycleId);
-        if (index < 0) return false;
-        state.recycle.splice(index, 1);
+        const match = findRecycleRecord(recycleId);
+        if (!match) return false;
+        state[match.repository].splice(match.index, 1);
         return true;
       },
       getKnowledge() { return clone(state.knowledge); },
@@ -57,7 +67,8 @@
       getRecycleItems(options = {}) {
         const edition = options.edition === "personal" ? "personal" : "enterprise";
         const requestedSpace = options.space || (edition === "personal" ? "personal" : null);
-        return clone(state.recycle.filter((item) => {
+        const repository = options.repository === "recording" ? state.recordingRecycle : options.repository === "knowledge" ? state.knowledgeRecycle : [...state.knowledgeRecycle, ...state.recordingRecycle];
+        return clone(repository.filter((item) => {
           if (edition === "personal" && item.space !== "personal") return false;
           return !requestedSpace || item.space === requestedSpace;
         }));
