@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 const agentPath = process.env.AGENT_HTML || path.resolve('prototypes/baizhi-pc-home-v13/agent.html');
+const homePath = process.env.PROTOTYPE_HTML || path.resolve('prototypes/baizhi-pc-home-v13/app.html');
 const toUrl = (file, query) => {
   const url = /^https?:\/\//.test(file) ? file : `file://${encodeURI(path.resolve(file))}`;
   return `${url}${url.includes('?') ? '&' : '?'}${query}`;
@@ -57,6 +58,20 @@ const toUrl = (file, query) => {
   await page.screenshot({ path: 'output/playwright/agent-workspace-focused.png', fullPage: true });
   await page.locator('#agent-new-task').click();
   if (await page.locator('#new-task-view').isHidden()) throw new Error('新任务按钮未恢复新任务态');
+
+  await page.goto(toUrl(homePath, 'edition=enterprise'));
+  await page.locator('#capability-entry').click();
+  await page.locator('[data-main-view="capabilities"]:not([hidden])').waitFor();
+  const popupPromise = page.waitForEvent('popup');
+  await page.locator('[data-main-view="capabilities"] [data-agent="市场分析助手"]').click();
+  const popup = await popupPromise;
+  await popup.waitForURL(/agent\.html/, { timeout: 5000 });
+  await popup.waitForLoadState('domcontentloaded');
+  if (await popup.getByText('开发交接说明', { exact: true }).count()) throw new Error('专家入口仍展示开发交接占位页');
+  if (!popup.url().includes('agent.html')) throw new Error(`专家入口未打开 Agent 页面: ${popup.url()}`);
+  if (!popup.url().includes('edition=enterprise')) throw new Error('专家入口未继承企业版本');
+  if ((await popup.locator('#agent-name').textContent()).trim() !== '市场分析助手') throw new Error('专家入口传参错误');
+  await popup.close();
   if (errors.length) throw new Error(`Agent 页面脚本错误: ${errors.join(' | ')}`);
 
   console.log('Agent 页面验证通过：专家参数、版本隔离、任务执行、工具详情、历史切换和文件预览');

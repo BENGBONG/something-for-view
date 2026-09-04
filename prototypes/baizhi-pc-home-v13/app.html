@@ -3070,14 +3070,17 @@
     };
     const agentDescriptions = { "通用智能体": "处理开放任务", "报告撰写助手": "生成交付报告", "市场分析助手": "分析市场与竞争", "经营洞察助手": "发现经营机会" };
     const selectActiveAgent = (name) => {
-      const agentTab = window.open("", "_blank");
-      if (agentTab) {
-        agentTab.opener = null;
-        agentTab.document.title = `${name} · Agent 对话`;
-        agentTab.document.body.innerHTML = `<main style="min-height:100vh;display:grid;place-items:center;margin:0;background:#f7f8fa;color:#202633;font-family:MiSans,'PingFang SC',sans-serif"><section style="width:min(560px,calc(100% - 48px));padding:36px;border:1px solid #e1e5ea;border-radius:16px;background:#fff;box-shadow:0 14px 36px rgba(35,52,78,.08)"><span style="display:inline-flex;padding:5px 9px;border-radius:6px;color:#2e63b6;background:#eef4fd;font-size:12px;font-weight:600">开发交接说明</span><h1 style="margin:20px 0 8px;font-size:26px">${name} · Agent 对话页</h1><p style="margin:0;color:#657187;font-size:14px;line-height:1.8">将按已有的逻辑打开新页签进入 agent</p><div style="margin-top:22px;padding-top:18px;border-top:1px solid #edf0f4;color:#929aa7;font-size:12px">本原型不重复实现既有 Agent 对话交互。</div></section></main>`;
-        agentTab.document.close();
+      const edition = document.body.dataset.edition === "personal" ? "personal" : "enterprise";
+      const agentUrl = new URL("agent.html", window.location.href);
+      agentUrl.searchParams.set("agent", name);
+      agentUrl.searchParams.set("edition", edition);
+      const agentTab = window.open("about:blank", "_blank");
+      if (!agentTab) {
+        showToast("浏览器阻止了新页签，请允许打开后重试");
+        return;
       }
-      showToast("将按已有的逻辑打开新页签进入 agent");
+      agentTab.opener = null;
+      agentTab.location.replace(agentUrl.href);
     };
     const knowledgeEscape = (value) => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
     const knowledgeSchemas = {
