@@ -72,16 +72,11 @@ window.ArtifactUI = (() => {
   }
   function row(item, index) {
     const folder = item.preview === 'folder';
-    return `<div class="knowledge-file-row" role="button" tabindex="0" data-schema="file" data-knowledge-index="${index}"><span>${item.system ? '' : `<input class="knowledge-check" type="checkbox" aria-label="选择${esc(item.name)}">`}</span><span class="knowledge-file-name"><span class="knowledge-file-mark"><svg class="icon"><use href="#${folder ? 'ico-folder' : 'ico-file'}"/></svg></span><strong>${esc(item.name)}</strong></span><span>${esc(item.type)}</span><span>${esc(item.size)}</span><span>${folder ? '—' : knowledgeStateHTML(item.state)}${item.state === '解析失败' ? '<button class="artifact-retry" data-artifact-retry>重试解析</button>' : ''}</span><span class="artifact-creator"><span>${esc(item.creator || '—')}</span><small title="${esc(item.organization)}">${esc(item.organization || '—')}</small></span><span>${folder ? '—' : esc(item.updated)}</span><span class="artifact-actions">${item.system ? '' : `${item.artifact ? '<button data-artifact-source>来源说明</button>' : ''}<button data-knowledge-row-action="delete">删除</button>`}</span></div>`;
-  }
-  function source(item) {
-    const fields = [['文件',item.name],['来源 Agent',item.agent],['来源 App',item.app],['任务运行',item.run],['数据快照',item.snapshot],['数据修订',item.revision],['数据范围',item.range],['导出配置',item.exportConfig],['文件版本',`v${item.version || 1}${item.editedBy ? ` · ${item.editedBy} 编辑` : ''}`]];
-    q('#artifact-source-content').innerHTML = `<dl>${fields.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl><p>这是该次任务结果的独立文件副本。后续 Apps 数据更新不会覆盖此文件；文件编辑不会回写 Apps 或修改运行快照。</p>`;
-    q('#artifact-source').showModal();
+    return `<div class="knowledge-file-row" role="button" tabindex="0" data-schema="file" data-knowledge-index="${index}"><span>${item.system || folder ? '' : `<input class="knowledge-check" type="checkbox" aria-label="选择${esc(item.name)}">`}</span><span class="knowledge-file-name"><span class="knowledge-file-mark"><svg class="icon"><use href="#${folder ? 'ico-folder' : 'ico-file'}"/></svg></span><strong>${esc(item.name)}</strong></span><span>${esc(item.type)}</span><span>${esc(item.size)}</span><span>${folder ? '—' : knowledgeStateHTML(item.state)}${item.state === '解析失败' ? '<button class="artifact-retry" data-artifact-retry>重试解析</button>' : ''}</span><span class="artifact-creator"><span>${esc(item.creator || '—')}</span><small title="${esc(item.organization)}">${esc(item.organization || '—')}</small></span><span>${folder ? '—' : esc(item.updated)}</span><span class="artifact-actions">${KnowledgeFileActions.actions(item)}</span></div>`;
   }
   function matches(item) {
     if (item.artifact || item.system) { if (item.folder !== activeKnowledgeFolder) return false; }
-    else if (isArtifact()) return false;
+    else if (isArtifact() || (item.folder && item.folder !== activeKnowledgeFolder)) return false;
     const department = q('#artifact-department').value;
     return scope() !== 'enterprise' || department === 'all' || (item.system ? knowledgeCatalog.file.some(x => x.artifact && x.space === scope() && (!item.agent || x.agent === item.agent) && x.organization === department) : (item.organization || model.departments[0]) === department);
   }
@@ -120,8 +115,7 @@ window.ArtifactUI = (() => {
     q('.knowledge-filters').insertAdjacentHTML('afterbegin', `<label id="artifact-department-wrap" class="knowledge-filter-label">部门<select id="artifact-department"><option value="all">全部部门</option>${model.departments.map(d => `<option>${esc(d)}</option>`).join('')}</select></label>`);
     q('#artifact-department').addEventListener('change', renderKnowledgeFiles);
     q('#knowledge-preview-close').insertAdjacentHTML('beforebegin','<div id="artifact-editor-actions" class="artifact-editor-actions"></div>');
-    document.body.insertAdjacentHTML('beforeend', '<dialog id="artifact-source" class="artifact-dialog" aria-labelledby="artifact-source-title"><h2 id="artifact-source-title">来源说明</h2><div id="artifact-source-content"></div><footer><button id="artifact-source-close">关闭</button></footer></dialog><dialog id="artifact-leave" class="artifact-dialog" aria-labelledby="artifact-leave-title"><h2 id="artifact-leave-title">离开编辑前是否保存？</h2><p>当前文件仍处于编辑状态，尚未保存或退出。保存仅更新此知识库文件，不回写 Apps。</p><p id="artifact-leave-error" class="artifact-error" role="alert"></p><footer><button id="artifact-continue">继续编辑</button><button id="artifact-discard">不保存离开</button><button id="artifact-save-leave" class="primary">保存并离开</button></footer></dialog>');
-    q('#artifact-source-close').onclick = () => q('#artifact-source').close();
+    document.body.insertAdjacentHTML('beforeend', '<dialog id="artifact-leave" class="artifact-dialog" aria-labelledby="artifact-leave-title"><h2 id="artifact-leave-title">离开编辑前是否保存？</h2><p>当前文件仍处于编辑状态，尚未保存或退出。保存仅更新此知识库文件，不回写 Apps。</p><p id="artifact-leave-error" class="artifact-error" role="alert"></p><footer><button id="artifact-continue">继续编辑</button><button id="artifact-discard">不保存离开</button><button id="artifact-save-leave" class="primary">保存并离开</button></footer></dialog>');
     q('#artifact-continue').onclick = cancelLeave;
     q('#artifact-discard').onclick = () => finishLeave(false);
     q('#artifact-save-leave').onclick = () => finishLeave(true);
@@ -144,5 +138,5 @@ window.ArtifactUI = (() => {
     window.addEventListener('storage', event => { if (event.key === model.key) { sync(); if (!editing && !q('.knowledge-workspace').hidden) renderKnowledgeFiles(); } });
     sync();
   }
-  return { init, guard, closePreview, preview, row, matches, configureFolder, source, isArtifact, scope, dialogOpen: () => !!q('.artifact-dialog[open]'), labels: ['', '文件名','类型','大小','文件状态','创建人','更新时间','操作'] };
+  return { init, guard, closePreview, preview, row, matches, configureFolder, sync, isArtifact, scope, dialogOpen: () => !!q('.artifact-dialog[open]'), labels: ['', '文件名','类型','大小','文件状态','创建人','更新时间','操作'] };
 })();

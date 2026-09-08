@@ -2480,9 +2480,10 @@
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
   </style>
-  <link rel="stylesheet" href="assets/agent-artifacts.css?v=20260908-preview" />
+  <link rel="stylesheet" href="assets/agent-artifacts.css?v=20260908-actions" />
   <script src="assets/agent-artifacts-model.js?v=1"></script>
-  <script src="assets/agent-artifacts-ui.js?v=1"></script>
+  <script src="assets/agent-artifacts-ui.js?v=20260908-actions"></script>
+  <script src="assets/knowledge-file-actions.js?v=20260908-actions"></script>
 </head>
 <body>
   <section class="edition-gate" id="edition-gate" aria-labelledby="edition-gate-title">
@@ -2719,7 +2720,7 @@
         <div class="knowledge-filters"><label class="knowledge-filter-label">来源<select id="knowledge-source-filter"><option value="all">全部来源</option></select></label><label class="knowledge-filter-label" id="knowledge-type-filter-wrap">类型<select id="knowledge-type-filter"><option value="all">全部类型</option></select></label><label class="knowledge-filter-label">更新时间<input id="knowledge-date-filter" type="date" aria-label="筛选更新时间" /></label></div>
         <div class="knowledge-view-tools"><label class="knowledge-search"><svg class="icon"><use href="#ico-search"/></svg><input id="knowledge-search-input" type="search" placeholder="搜索文件" /></label><span class="knowledge-view-switch"><button class="active" id="knowledge-list-view" aria-label="列表视图"><svg class="icon"><use href="#ico-list"/></svg></button><button id="knowledge-grid-view" aria-label="网格视图"><svg class="icon"><use href="#ico-grid"/></svg></button></span></div>
       </div>
-      <div class="knowledge-selection-bar" id="knowledge-selection-bar"><span>已选择 <strong id="knowledge-selected-count">0</strong> 项</span><button data-knowledge-bulk="move">移动到</button><button data-knowledge-bulk="download">下载</button><button data-knowledge-bulk="delete">删除</button></div>
+      <div class="knowledge-selection-bar" id="knowledge-selection-bar"><span>已选择 <strong id="knowledge-selected-count">0</strong> 项</span></div>
       <div class="knowledge-content">
         <div class="knowledge-table-head" id="knowledge-table-head" data-schema="file"></div>
         <div id="knowledge-file-list"></div>
@@ -2731,7 +2732,7 @@
         <aside class="knowledge-preview" id="knowledge-preview" hidden aria-label="文件预览">
           <header class="knowledge-preview-head"><div class="knowledge-preview-title"><span class="knowledge-file-mark" id="knowledge-preview-mark"><svg class="icon"><use href="#ico-file"/></svg></span><span><strong id="knowledge-preview-title">文件预览</strong><small id="knowledge-preview-meta">文件详情</small></span></div><button id="knowledge-preview-close" aria-label="关闭文件预览"><svg class="icon"><use href="#ico-x"/></svg></button></header>
           <div class="knowledge-preview-body" id="knowledge-preview-body"></div>
-          <div class="knowledge-preview-actions"><div class="knowledge-preview-pagination" aria-label="文档浏览控制"><button type="button" id="knowledge-preview-prev" aria-label="上一页"><svg class="icon"><use href="#ico-chevron"/></svg></button><span class="knowledge-preview-page">1 / 12</span><button type="button" id="knowledge-preview-next" aria-label="下一页"><svg class="icon"><use href="#ico-chevron"/></svg></button><span class="knowledge-preview-zoom">100%</span></div><button id="knowledge-preview-download">下载</button><button class="primary" id="knowledge-preview-use">引用到小智</button></div>
+          <div class="knowledge-preview-actions"><div class="knowledge-preview-pagination" aria-label="文档浏览控制"><button type="button" id="knowledge-preview-prev" aria-label="上一页"><svg class="icon"><use href="#ico-chevron"/></svg></button><span class="knowledge-preview-page">1 / 12</span><button type="button" id="knowledge-preview-next" aria-label="下一页"><svg class="icon"><use href="#ico-chevron"/></svg></button><span class="knowledge-preview-zoom">100%</span></div><button class="primary" id="knowledge-preview-use">引用到小智</button></div>
         </aside>
       </div>
     </section>
@@ -3138,7 +3139,7 @@
       openModal("#delete-confirm-modal");
     };
     const moveKnowledgeToRecycle = (item, originalIndex) => {
-      if (!item || item.system) return;
+      if (!KnowledgeFileActions.allowed(item).includes('delete')) return;
       const storedItem = { ...item, folder: item.folder || activeKnowledgeFolder, space: item.space || knowledgeSpaceForFolder(activeKnowledgeFolder), originalIndex, originalLocation: item.artifact ? `${item.space === "personal" ? "我的文件" : "企业文件"}/Agent 产物/${item.agent}` : activeKnowledgeFolder };
       assetStore.upsertKnowledge(storedItem);
       assetStore.deleteKnowledge(storedItem.id);
@@ -3159,9 +3160,7 @@
       $("#knowledge-type-filter").innerHTML = `<option value="all">全部${typeLabel}</option>${schema.types.map((item) => `<option value="${knowledgeEscape(item)}">${knowledgeEscape(item)}</option>`).join("")}`;
     };
     const updateKnowledgeSelection = () => {
-      const count = $$("#knowledge-file-list .knowledge-check:checked").length;
-      $("#knowledge-selected-count").textContent = String(count);
-      $("#knowledge-selection-bar").classList.toggle("show", count > 0);
+      KnowledgeFileActions.selection();
     };
     const renderKnowledgeFiles = () => {
       $("#knowledge-table-head").dataset.schema = activeKnowledgeSchema;
@@ -3258,13 +3257,9 @@
       if (event.target.closest(".knowledge-check")) { event.stopPropagation(); updateKnowledgeSelection(); return; }
       const item = knowledgeCatalog[activeKnowledgeSchema][Number(row.dataset.knowledgeIndex)];
       if (!item) return;
-      if (event.target.closest("[data-artifact-source]")) { ArtifactUI.source(item); return; }
       if (event.target.closest("[data-artifact-retry]")) { item.state = "已入库"; renderKnowledgeFiles(); showToast("已重新入库"); return; }
-      if (event.target.closest('[data-knowledge-row-action="delete"]')) {
-        if (item.system) { showToast("系统目录不支持删除"); return; }
-        openDeleteConfirm({ title: "确认删除文件？", description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { moveKnowledgeToRecycle(item, Number(row.dataset.knowledgeIndex)); renderKnowledgeFiles(); renderRecycleBin(); showToast("已移入回收站，可在 30 天内恢复"); } });
-        return;
-      }
+      const action = event.target.closest('[data-knowledge-row-action]');
+      if (action) { KnowledgeFileActions.execute(action.dataset.knowledgeRowAction, [item]); return; }
       openKnowledgePreview(item);
     });
     $("#knowledge-table-head").addEventListener("change", (event) => { if (event.target.id !== "knowledge-check-all") return; $$("#knowledge-file-list .knowledge-check").forEach((checkbox) => { checkbox.checked = event.target.checked; }); updateKnowledgeSelection(); });
@@ -3272,7 +3267,6 @@
     $("#knowledge-preview-close").addEventListener("click", ArtifactUI.closePreview);
     $("#knowledge-preview-prev").addEventListener("click", () => showToast("已是文档第一页"));
     $("#knowledge-preview-next").addEventListener("click", () => showToast("原型演示：切换到下一页"));
-    $("#knowledge-preview-download").addEventListener("click", () => showToast("原型演示：文件下载已开始"));
     $("#knowledge-preview-use").addEventListener("click", () => showToast("已将当前文件引用到小智"));
     $("#knowledge-upload").addEventListener("click", () => showToast(`正在向「${activeKnowledgeFolder}」上传文件`));
     $("#knowledge-ai-ppt").addEventListener("click", () => showToast(`正在基于「${activeKnowledgeFolder}」选择 AI 智绘 PPT 模板`));
@@ -3283,12 +3277,6 @@
     $("#knowledge-root-link").addEventListener("click", () => openKnowledgeFolder(document.body.dataset.edition === "personal" ? "我的文件" : "企业文件"));
     $$('[data-folder-menu]').forEach((button) => button.addEventListener("click", (event) => { event.stopPropagation(); const menu = $("#knowledge-tree-menu"); const fileMenu = button.previousElementSibling?.classList.contains("knowledge-file-leaf"); menu.dataset.folder = button.dataset.folderMenu; $("[data-folder-action=child]", menu).hidden = fileMenu; $("[data-folder-action=sibling]", menu).hidden = fileMenu; menu.style.left = `${Math.min(event.clientX + 8, window.innerWidth - 166)}px`; menu.style.top = `${Math.min(event.clientY + 8, window.innerHeight - 170)}px`; menu.classList.add("show"); }));
     $("#knowledge-tree-menu").addEventListener("click", (event) => { const action = event.target.closest("[data-folder-action]"); if (!action) return; const labels = { child: "新建下级目录", sibling: "新建同级目录", rename: "重命名", delete: "删除" }; showToast(`${labels[action.dataset.folderAction]}「${$("#knowledge-tree-menu").dataset.folder}」`); closeKnowledgeTreeMenu(); });
-    $$("[data-knowledge-bulk]").forEach((button) => button.addEventListener("click", () => {
-      if (button.dataset.knowledgeBulk !== "delete") { showToast(`已选择批量${{ move: "移动", download: "下载" }[button.dataset.knowledgeBulk]}`); return; }
-      const indices = $$("#knowledge-file-list .knowledge-check:checked").map((checkbox) => Number(checkbox.closest("[data-knowledge-index]").dataset.knowledgeIndex)).sort((a, b) => b - a);
-      if (!indices.length) return;
-      openDeleteConfirm({ title: `确认删除 ${indices.length} 个文件？`, description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { indices.forEach((index) => moveKnowledgeToRecycle(knowledgeCatalog.file[index], index)); renderKnowledgeFiles(); renderRecycleBin(); showToast(`已将 ${indices.length} 个文件移入回收站`); } });
-    }));
     const openRecycleBin = (repository) => {
       if (ArtifactUI.guard(() => openRecycleBin(repository))) return;
       activeRecycleRepository = repository === "recording" ? "recording" : "knowledge";
@@ -3326,7 +3314,7 @@
     });
     $("#delete-confirm-submit").addEventListener("click", () => { const action = pendingDelete; pendingDelete = null; closeOverlays(); if (action) action(); });
     $("#permanent-delete-submit").addEventListener("click", () => { const recycleId = pendingPermanentDeleteId; const record = assetStore.getRecycleItems({ edition: "enterprise", repository: activeRecycleRepository }).find((item) => item.recycleId === recycleId); pendingPermanentDeleteId = null; closeOverlays(); if (recycleId && assetStore.permanentlyDelete(recycleId)) { if (record?.type === "meeting") meetingRowsById.delete(record.item.id); renderRecycleBin(); showToast("已彻底删除，无法恢复"); } });
-    $$("[data-knowledge-file]").forEach((item) => item.addEventListener("click", () => { $$(".knowledge-file-leaf").forEach((row) => row.classList.toggle("active", row === item)); openKnowledgeFolder("归档"); item.classList.add("active"); const file = knowledgeCatalog.file.find((entry) => entry.name.includes(item.dataset.knowledgeFile.replace(/\.[^.]+$/, ""))) || knowledgeCatalog.file[0]; openKnowledgePreview(file); }));
+    $$("[data-knowledge-file]").forEach((item) => item.addEventListener("click", () => { $$(".knowledge-file-leaf").forEach((row) => row.classList.toggle("active", row === item)); openKnowledgeFolder("归档"); item.classList.add("active"); const file = knowledgeCatalog.file.find((entry) => entry.folder === activeKnowledgeFolder && entry.name.includes(item.dataset.knowledgeFile.replace(/\.[^.]+$/, ""))) || knowledgeCatalog.file.find(entry => entry.folder === activeKnowledgeFolder && entry.preview !== "folder"); openKnowledgePreview(file); }));
     document.addEventListener("click", (event) => { if (!event.target.closest("#knowledge-tree-menu") && !event.target.closest("[data-folder-menu]")) closeKnowledgeTreeMenu(); });
     $("#home-entry").addEventListener("click", () => showMainView("home"));
     $$("[data-side-toggle]").forEach((button) => button.addEventListener("click", () => { const list = $("#" + button.dataset.sideToggle); const expanded = button.getAttribute("aria-expanded") !== "true"; button.setAttribute("aria-expanded", String(expanded)); list.classList.toggle("hide", !expanded); }));
@@ -3912,6 +3900,7 @@
     };
     $$('[data-edition-choice]').forEach((button) => button.addEventListener("click", () => setEdition(button.dataset.editionChoice)));
     ArtifactUI.init();
+    KnowledgeFileActions.init();
     const previewParams = new URLSearchParams(window.location.search);
     const previewEdition = previewParams.get("edition");
     const previewView = previewParams.get("view");

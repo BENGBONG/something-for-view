@@ -1,5 +1,6 @@
 .artifact-view .knowledge-breadcrumb,.artifact-view #knowledge-storage,.artifact-view #knowledge-header-actions{display:none!important}
 .artifact-view .knowledge-preview-actions{display:none!important}
+.file-trash-button{display:inline-flex;align-items:center;justify-content:center;min-width:28px;min-height:28px;padding:4px!important}.file-trash-button .icon{width:16px;height:16px}.file-trash-button:hover{color:#c44949!important;background:#fff1f0!important}.file-trash-button:focus-visible{outline:2px solid #6379df;outline-offset:2px}.artifact-actions{align-items:center}.artifact-actions button{white-space:nowrap}
 .artifact-view #knowledge-folder-meta{max-width:960px;line-height:1.8;margin-top:12px;font-size:13px;color:#82878e}
 .artifact-view .knowledge-workspace-header{align-items:flex-start}
 .artifact-view .knowledge-toolbar{flex-wrap:wrap;gap:12px}.artifact-view .knowledge-filter-label{white-space:nowrap}.artifact-view .knowledge-filters{flex-wrap:wrap}.artifact-view .knowledge-filter-label select{max-width:155px}
