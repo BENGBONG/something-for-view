@@ -1,4 +1,5 @@
 .artifact-view .knowledge-breadcrumb,.artifact-view #knowledge-storage,.artifact-view #knowledge-header-actions{display:none!important}
+.artifact-view .knowledge-preview-actions{display:none!important}
 .artifact-view #knowledge-folder-meta{max-width:960px;line-height:1.8;margin-top:12px;font-size:13px;color:#82878e}
 .artifact-view .knowledge-workspace-header{align-items:flex-start}
 .artifact-view .knowledge-toolbar{flex-wrap:wrap;gap:12px}.artifact-view .knowledge-filter-label{white-space:nowrap}.artifact-view .knowledge-filters{flex-wrap:wrap}.artifact-view .knowledge-filter-label select{max-width:155px}
