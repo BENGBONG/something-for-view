@@ -178,6 +178,9 @@
       .suggestion { min-height: 44px; }
     }
   </style>
+  <link rel="stylesheet" href="assets/agent-artifacts.css?v=1" />
+  <script src="assets/agent-artifacts-model.js?v=1"></script>
+  <script src="assets/agent-artifacts-results.js?v=1"></script>
 </head>
 <body data-edition="enterprise">
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -232,6 +235,7 @@
 
   <script>
     const agentProfiles = {
+      "销售简报 Agent": { role: "销售数据分析专家", description: AgentArtifacts.description, portrait: "assets/experts/business-insight-expert.png", prompts: ["生成本周华东销售简报", "汇总各区域销售目标达成情况", "分析本月销售风险"] },
       "报告撰写助手": { role: "内容交付专家", description: "结合会议、知识文件与补充材料，组织信息结构并生成可继续编辑的交付报告。", portrait: "assets/experts/report-writing-expert.png", prompts: ["根据最近一次产品复盘生成报告", "把现有资料整理成项目周报", "生成一份客户汇报提纲"] },
       "市场分析助手": { role: "市场研究专家", description: "整合已有资料与公开信息，梳理市场、竞争和客户反馈，形成清晰、可核验的分析。", portrait: "assets/experts/market-analysis-expert.png", prompts: ["寻找华东地区的潜在零售客户", "分析三个主要竞品的差异", "整理本季度行业机会"] },
       "经营洞察助手": { role: "经营分析专家", description: "从企业会议与业务资料中识别趋势、风险、关键机会和下一步行动建议。", portrait: "assets/experts/business-insight-expert.png", prompts: ["分析本季度经营风险", "汇总近期会议中的重点机会", "生成管理层经营摘要"] },
@@ -270,12 +274,12 @@
       $("#task-history").innerHTML = taskGroups.map((group) => `<section><div class="task-group-label">${group.label}</div>${group.tasks.map((task) => `<button class="task-row ${task.status === "running" ? "running" : ""} ${activeTaskId === task.id ? "active" : ""}" type="button" data-task-id="${task.id}"><i></i><span>${escapeHTML(task.title)}</span></button>`).join("")}</section>`).join("");
     };
     const renderToolCall = (label, detail, state = "已完成") => `<div class="tool-call"><button class="tool-call-button" type="button" data-tool-call aria-expanded="false"><strong>${label}</strong><span>${detail}</span><em>${state}　⌄</em></button><div class="tool-call-detail" data-tool-detail hidden>已记录输入条件、执行时间和来源范围。点击工具行可以收起详情。</div></div>`;
-    const renderConversation = (task) => `<article class="message message-user"><div>${escapeHTML(task.prompt)}</div></article><article class="message message-agent"><h3>${task.progress < 100 ? "正在执行客户线索研究" : "任务已完成"}</h3><div class="task-progress"><div class="progress-step done"><i></i>明确目标市场与筛选条件</div>${renderToolCall("搜索网页", "华东地区零售企业、数字化升级与扩店计划")}${renderToolCall(edition === "personal" ? "读取我的知识库" : "读取企业知识库", "零售行业客户画像与历史商机")}${renderToolCall("数据核验", "企业动态、业务范围与联系人证据链", task.progress < 100 ? "执行中" : "已完成")}<div class="progress-step ${task.progress === 100 ? "done" : ""}"><i></i>${task.progress === 100 ? "生成最终交付文件" : "正在核验企业与联系人信息"}</div></div><p>${escapeHTML(task.summary)}</p><div class="source-links"><button class="source-link" type="button" data-source-id="retail-report">零售行业数字化报告</button><button class="source-link" type="button" data-source-id="company-news">企业新闻与招聘动态</button></div><div class="output-files"><button class="output-file" type="button" data-file-id="lead-list"><span class="file-mark">X</span><span><strong>${files["lead-list"].name}</strong><small>${files["lead-list"].meta}</small></span></button><button class="output-file" type="button" data-file-id="verification-note"><span class="file-mark">M</span><span><strong>${files["verification-note"].name}</strong><small>${files["verification-note"].meta}</small></span></button></div></article>`;
+    const renderConversation = (task) => ArtifactResults.sales(task) ? ArtifactResults.conversation(task) : `<article class="message message-user"><div>${escapeHTML(task.prompt)}</div></article><article class="message message-agent"><h3>${task.progress < 100 ? "正在执行客户线索研究" : "任务已完成"}</h3><div class="task-progress"><div class="progress-step done"><i></i>明确目标市场与筛选条件</div>${renderToolCall("搜索网页", "华东地区零售企业、数字化升级与扩店计划")}${renderToolCall(edition === "personal" ? "读取我的知识库" : "读取企业知识库", "零售行业客户画像与历史商机")}${renderToolCall("数据核验", "企业动态、业务范围与联系人证据链", task.progress < 100 ? "执行中" : "已完成")}<div class="progress-step ${task.progress === 100 ? "done" : ""}"><i></i>${task.progress === 100 ? "生成最终交付文件" : "正在核验企业与联系人信息"}</div></div><p>${escapeHTML(task.summary)}</p><div class="source-links"><button class="source-link" type="button" data-source-id="retail-report">零售行业数字化报告</button><button class="source-link" type="button" data-source-id="company-news">企业新闻与招聘动态</button></div><div class="output-files"><button class="output-file" type="button" data-file-id="lead-list"><span class="file-mark">X</span><span><strong>${files["lead-list"].name}</strong><small>${files["lead-list"].meta}</small></span></button><button class="output-file" type="button" data-file-id="verification-note"><span class="file-mark">M</span><span><strong>${files["verification-note"].name}</strong><small>${files["verification-note"].meta}</small></span></button></div></article>`;
 
     const renderFileList = (task) => {
       $("#file-preview").hidden = true;
       $("#task-file-list").hidden = false;
-      $("#task-file-list").innerHTML = `<section class="panel-section"><div class="panel-section-title">执行进度 <span>${task.progress}%</span></div><div class="progress-track"><i style="width:${task.progress}%"></i></div><div class="panel-progress-copy"><span>${task.progress < 100 ? "正在核验企业联系人" : "任务已完成"}</span><span>${task.progress < 100 ? "3 / 4" : "4 / 4"}</span></div></section><section class="panel-section"><div class="panel-section-title">生成文件 <span>2</span></div>${Object.entries(files).map(([id, file]) => `<button class="panel-file" type="button" data-file-id="${id}"><span class="file-mark">${file.type === "XLSX" ? "X" : "M"}</span><span><strong>${file.name}</strong><small>${file.meta}</small></span></button>`).join("")}</section><section class="panel-section"><div class="panel-section-title">引用来源 <span>6</span></div><button class="panel-source" type="button" data-source-id="retail-report">零售行业数字化报告 <span>网页</span></button><button class="panel-source" type="button" data-source-id="company-news">企业新闻与招聘动态 <span>网页</span></button><button class="panel-source" type="button" data-source-id="knowledge">${edition === "personal" ? "我的知识文件" : "企业零售客户画像"} <span>知识库</span></button></section>`;
+      $("#task-file-list").innerHTML = `<section class="panel-section"><div class="panel-section-title">执行进度 <span>${task.progress}%</span></div><div class="progress-track"><i style="width:${task.progress}%"></i></div><div class="panel-progress-copy"><span>${task.progress < 100 ? "正在核验企业联系人" : "任务已完成"}</span><span>${task.progress < 100 ? "3 / 4" : "4 / 4"}</span></div></section><section class="panel-section"><div class="panel-section-title">生成文件 <span>${Object.keys(files).length}</span></div>${Object.entries(files).map(([id, file]) => `<button class="panel-file" type="button" data-file-id="${id}"><span class="file-mark">${file.type === "XLSX" ? "X" : "M"}</span><span><strong>${file.name}</strong><small>${file.meta}</small></span></button>`).join("")}</section><section class="panel-section"><div class="panel-section-title">引用来源 <span>6</span></div><button class="panel-source" type="button" data-source-id="retail-report">零售行业数字化报告 <span>网页</span></button><button class="panel-source" type="button" data-source-id="company-news">企业新闻与招聘动态 <span>网页</span></button><button class="panel-source" type="button" data-source-id="knowledge">${edition === "personal" ? "我的知识文件" : "企业零售客户画像"} <span>知识库</span></button></section>`;
     };
 
     const setFilePanelOpen = (open) => {
@@ -291,10 +295,12 @@
       preview.className = "file-preview";
       preview.hidden = false;
       preview.innerHTML = fileId === "lead-list" ? `<div class="file-preview-head"><button class="preview-back" id="file-preview-back" type="button">← 返回文件列表</button></div><h2>华东零售客户线索.xlsx</h2><p>根据公开信息与已授权知识资料生成，更新时间 2026-09-04 14:18。</p><div class="preview-table-wrap"><table class="preview-table"><thead><tr><th>企业名称</th><th>区域</th><th>机会信号</th><th>优先级</th></tr></thead><tbody><tr><td>东辰商业</td><td>上海</td><td>门店数字化招标</td><td>高</td></tr><tr><td>华悦零售</td><td>浙江</td><td>新开 12 家门店</td><td>高</td></tr><tr><td>苏城百货</td><td>江苏</td><td>招聘数据产品负责人</td><td>中</td></tr><tr><td>海岸生活</td><td>福建</td><td>会员系统升级</td><td>中</td></tr></tbody></table></div>` : `<div class="file-preview-head"><button class="preview-back" id="file-preview-back" type="button">← 返回文件列表</button></div><h2>线索核验说明.md</h2><p><strong>核验范围</strong></p><p>企业官网、公开新闻、招聘信息与已授权知识文件。每条线索至少保留一个可追溯来源。</p><p><strong>使用建议</strong></p><p>优先联系已出现扩店、招投标或数字化岗位招聘信号的企业。</p>`;
+      ArtifactResults.augmentPreview(fileId);
       preview.querySelector("#file-preview-back").addEventListener("click", () => renderFileList(findTask(activeTaskId)));
     };
     const renderTask = (taskId) => {
       const task = findTask(taskId);
+      ArtifactResults.configureTask(task);
       activeTaskId = task.id;
       $("#new-task-view").hidden = true;
       $("#conversation-view").hidden = false;
@@ -365,6 +371,7 @@
     });
     $("#task-file-panel-close").addEventListener("click", () => setFilePanelOpen(false));
     $("#task-file-panel-toggle").addEventListener("click", () => setFilePanelOpen($("#task-file-panel").getAttribute("aria-hidden") === "true"));
+    ArtifactResults.init();
     $("#agent-back").addEventListener("click", () => { if (window.history.length <= 1 && window.opener) window.close(); else window.location.href = `index.html?edition=${edition}&page=capabilities`; });
   </script>
 </body>

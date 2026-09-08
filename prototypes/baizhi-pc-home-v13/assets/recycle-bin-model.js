@@ -25,7 +25,7 @@
         recycleId: `recycle-${Date.now()}-${sequence += 1}`,
         type,
         space: normalizeSpace(item.space),
-        originalLocation: item.folder || (type === "meeting" ? "我的会议" : "我的文件"),
+        originalLocation: item.originalLocation || item.folder || (type === "meeting" ? "我的会议" : "我的文件"),
         deletedAt: new Date().toISOString(),
         expiresInDays: 30,
         item: clone(item),
@@ -46,6 +46,7 @@
 
     return {
       addKnowledge(item) { state.knowledge.push(clone(item)); return clone(item); },
+      upsertKnowledge(item) { const index = state.knowledge.findIndex(entry => entry.id === item.id); if (index < 0) state.knowledge.push(clone(item)); else state.knowledge[index] = clone(item); return clone(item); },
       addMeeting(item) { state.meetings.push(clone(item)); return clone(item); },
       deleteKnowledge(id) { return moveToRecycle("knowledge", id, "knowledge"); },
       deleteMeeting(id) { return moveToRecycle("meetings", id, "meeting"); },

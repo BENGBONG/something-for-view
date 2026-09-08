@@ -2480,6 +2480,9 @@
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
   </style>
+  <link rel="stylesheet" href="assets/agent-artifacts.css?v=1" />
+  <script src="assets/agent-artifacts-model.js?v=1"></script>
+  <script src="assets/agent-artifacts-ui.js?v=1"></script>
 </head>
 <body>
   <section class="edition-gate" id="edition-gate" aria-labelledby="edition-gate-title">
@@ -2564,7 +2567,7 @@
       <div class="sidebar-body">
         <nav class="nav sidebar-quick-nav" aria-label="快捷入口"><button class="nav-item active" id="home-entry" aria-current="page"><span class="nav-left"><span class="nav-icon"><svg class="icon"><use href="#ico-home"/></svg></span><span class="nav-label">首页</span></span></button><button class="nav-item recording-nav-item" id="start-recording"><span class="nav-left"><span class="nav-icon"><svg class="icon"><use href="#ico-mic"/></svg></span><span class="nav-label">开始录音</span></span></button></nav>
         <div class="side-groups">
-          <section class="side-group knowledge-group"><button class="side-group-head" data-side-toggle="knowledge-side-list" aria-expanded="true"><span class="side-group-title"><svg class="icon"><use href="#ico-book"/></svg><span class="side-group-label">知识库</span></span><svg class="icon chevron"><use href="#ico-chevron"/></svg></button><div class="side-group-list knowledge-list" id="knowledge-side-list">
+          <section class="side-group knowledge-group"><div class="side-group-head"><span class="side-group-title"><svg class="icon"><use href="#ico-book"/></svg><span class="side-group-label">知识库</span></span></div><div class="side-group-list knowledge-list" id="knowledge-side-list">
             <div class="knowledge-tree-node edition-enterprise-only"><button class="tree-folder-toggle" data-tree-toggle="enterprise-file-tree" data-knowledge-folder="企业文件" aria-expanded="false"><svg class="icon tree-chevron"><use href="#ico-chevron"/></svg><svg class="icon tree-folder-icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">企业文件</span><span class="tree-count">24</span></button><button class="tree-folder-more" data-folder-menu="企业文件" aria-label="企业文件操作"><svg class="icon"><use href="#ico-more"/></svg></button><div class="knowledge-tree-children hide" id="enterprise-file-tree">
               <div class="knowledge-tree-node"><button class="tree-folder-toggle" data-tree-toggle="product-iteration-tree" data-knowledge-folder="百智产品迭代" aria-expanded="false"><svg class="icon tree-chevron"><use href="#ico-chevron"/></svg><svg class="icon tree-folder-icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">百智产品迭代</span><span class="tree-count">8</span></button><button class="tree-folder-more" data-folder-menu="百智产品迭代" aria-label="百智产品迭代操作"><svg class="icon"><use href="#ico-more"/></svg></button><div class="knowledge-tree-children hide" id="product-iteration-tree"><button class="side-sub-item knowledge-leaf" data-side-entry="百智PC版" data-knowledge-folder="百智PC版"><svg class="icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">百智PC版</span><span class="tree-count">4</span></button><button class="side-sub-item knowledge-leaf" data-side-entry="百智智能体" data-knowledge-folder="百智智能体"><svg class="icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">百智智能体</span><span class="tree-count">4</span></button></div></div>
               <div class="knowledge-tree-node"><button class="tree-folder-toggle" data-tree-toggle="customer-project-tree" aria-expanded="false"><svg class="icon tree-chevron"><use href="#ico-chevron"/></svg><svg class="icon tree-folder-icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">客户项目</span><span class="tree-count">11</span></button><div class="knowledge-tree-children hide" id="customer-project-tree"><button class="side-sub-item knowledge-leaf" data-side-entry="重点客户"><svg class="icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">重点客户</span><span class="tree-count">6</span></button><button class="side-sub-item knowledge-leaf" data-side-entry="交付文档"><svg class="icon"><use href="#ico-folder"/></svg><span class="tree-folder-name">交付文档</span><span class="tree-count">5</span></button></div></div>
@@ -2912,7 +2915,7 @@
       $("#permission-authorize").classList.remove("busy");
       $("#permission-authorize").textContent = "开始授权";
     };
-    const startRecording = () => { closeOverlays(); if (skipRecordPermission && typeof beginRecording === "function") { beginRecording(); return; } resetRecordPermission(); openModal("#record-permission-modal"); window.dispatchEvent(new CustomEvent("baizhi:start-recording")); };
+    const startRecording = () => { if (ArtifactUI.guard(startRecording)) return; closeOverlays(); if (skipRecordPermission && typeof beginRecording === "function") { beginRecording(); return; } resetRecordPermission(); openModal("#record-permission-modal"); window.dispatchEvent(new CustomEvent("baizhi:start-recording")); };
     const openHardwareGuide = () => openDrawer("百智录音卡", '<h4>随身记录，自动同步</h4><div class="drawer-section"><strong>适合场景</strong><p>客户沟通　·　门店巡访　·　跨部门会议</p></div>', '<button class="secondary-btn" data-toast="已提交硬件录音卡咨询">联系产品顾问</button><button class="primary-btn" data-toast="硬件录音卡介绍已打开">查看产品</button>', "quick");
     $("#start-recording").addEventListener("click", startRecording);
     $("#module-start-recording").addEventListener("click", startRecording);
@@ -2935,7 +2938,7 @@
     $("#drawer-close").addEventListener("click", closeOverlays);
     $$('[data-close]').forEach((button) => button.addEventListener("click", closeOverlays));
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") { closeOverlays(); if ($(".knowledge-workspace")?.classList.contains("file-open")) { $("#knowledge-preview").hidden = true; $(".knowledge-workspace").classList.remove("file-open"); } if (typeof closeToolMenu === "function") closeToolMenu(); if (typeof closeSpaceMenu === "function") closeSpaceMenu(); if (typeof closeUserMenu === "function") closeUserMenu(); if (typeof setRecordingAssistantOpen === "function") setRecordingAssistantOpen(false); if (typeof setXiaozhiExpanded === "function") setXiaozhiExpanded(false); }
+      if (event.key === "Escape") { if (ArtifactUI.dialogOpen()) return; if (ArtifactUI.guard(ArtifactUI.closePreview)) { event.preventDefault(); return; } closeOverlays(); if ($(".knowledge-workspace")?.classList.contains("file-open")) { $("#knowledge-preview").hidden = true; $(".knowledge-workspace").classList.remove("file-open"); } if (typeof closeToolMenu === "function") closeToolMenu(); if (typeof closeSpaceMenu === "function") closeSpaceMenu(); if (typeof closeUserMenu === "function") closeUserMenu(); if (typeof setRecordingAssistantOpen === "function") setRecordingAssistantOpen(false); if (typeof setXiaozhiExpanded === "function") setXiaozhiExpanded(false); }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); $("#composer").focus(); }
     });
     const closeSpaceMenu = () => { $("#space-menu").classList.remove("show"); $("#space-switcher").setAttribute("aria-expanded", "false"); };
@@ -2953,6 +2956,7 @@
       if (activeItem) { activeItem.classList.add("active"); activeItem.setAttribute("aria-current", "page"); }
     };
     const showMainView = (target, options = {}) => {
+      if (ArtifactUI.guard(() => showMainView(target, options))) return;
       const next = $(`[data-main-view="${target}"]`);
       if (!next) return;
       $$('[data-main-view]').forEach((view) => { const active = view === next; view.hidden = !active; view.setAttribute("aria-hidden", String(!active)); });
@@ -3070,6 +3074,7 @@
     };
     const agentDescriptions = { "通用智能体": "处理开放任务", "报告撰写助手": "生成交付报告", "市场分析助手": "分析市场与竞争", "经营洞察助手": "发现经营机会" };
     const selectActiveAgent = (name) => {
+      if (ArtifactUI.guard(() => selectActiveAgent(name))) return;
       const edition = document.body.dataset.edition === "personal" ? "personal" : "enterprise";
       const agentUrl = new URL("agent.html", window.location.href);
       agentUrl.searchParams.set("agent", name);
@@ -3101,7 +3106,7 @@
     let pendingDelete = null;
     let pendingPermanentDeleteId = null;
     const enterpriseKnowledgeFolders = new Set(["企业文件", "百智产品迭代", "百智PC版", "百智智能体", "客户项目", "重点客户", "交付文档", "市场资料"]);
-    const knowledgeSpaceForFolder = (folder) => enterpriseKnowledgeFolders.has(folder) ? "enterprise" : "personal";
+    const knowledgeSpaceForFolder = (folder) => folder.startsWith("artifacts:enterprise") || enterpriseKnowledgeFolders.has(folder) ? "enterprise" : "personal";
     const renderStorageSummary = () => {
       const personal = BaizhiRecycleState.getStorageSummary({ totalBytes: 50 * 1024 ** 3, usedBytes: 859.38 * 1024 ** 2 });
       const enterprise = BaizhiRecycleState.getStorageSummary({ totalBytes: 7.32 * 1024 ** 4, usedBytes: 46.54 * 1024 ** 3 });
@@ -3133,21 +3138,18 @@
       openModal("#delete-confirm-modal");
     };
     const moveKnowledgeToRecycle = (item, originalIndex) => {
-      const storedItem = { ...item, folder: activeKnowledgeFolder, space: knowledgeSpaceForFolder(activeKnowledgeFolder), originalIndex };
-      if (!assetStore.getKnowledge().some((entry) => entry.id === storedItem.id)) assetStore.addKnowledge(storedItem);
+      if (!item || item.system) return;
+      const storedItem = { ...item, folder: item.folder || activeKnowledgeFolder, space: item.space || knowledgeSpaceForFolder(activeKnowledgeFolder), originalIndex, originalLocation: item.artifact ? `${item.space === "personal" ? "我的文件" : "企业文件"}/Agent 产物/${item.agent}` : activeKnowledgeFolder };
+      assetStore.upsertKnowledge(storedItem);
       assetStore.deleteKnowledge(storedItem.id);
       knowledgeCatalog.file.splice(originalIndex, 1);
     };
     let activeKnowledgeFolder = "我的文件";
     let activeKnowledgeSchema = "file";
     const knowledgeSchemaForFolder = () => "file";
-    const knowledgeFileNameHTML = (item) => `<span class="knowledge-file-name"><span class="knowledge-file-mark ${knowledgeEscape(item.mark || "")}"><svg class="icon"><use href="#${knowledgeEscape(item.icon || "ico-file")}"/></svg></span><span><strong>${knowledgeEscape(item.name)}</strong><small>${knowledgeEscape(item.meta || "")}</small></span></span>`;
+    const knowledgeFileNameHTML = (item) => `<span class="knowledge-file-name"><span class="knowledge-file-mark ${knowledgeEscape(item.mark || "")}"><svg class="icon"><use href="#${knowledgeEscape(item.icon || "ico-file")}"/></svg></span><span><strong>${knowledgeEscape(item.name)}</strong>${item.system ? "" : `<small>${knowledgeEscape(item.meta || "")}</small>`}</span></span>`;
     const knowledgeStateHTML = (state) => `<span class="knowledge-state${state.includes("待") ? " pending" : ""}"><i></i>${knowledgeEscape(state)}</span>`;
-    const knowledgeRowHTML = (item, index) => {
-      const commonStart = `<div class="knowledge-file-row" role="button" tabindex="0" data-schema="${activeKnowledgeSchema}" data-knowledge-index="${index}"><span><input class="knowledge-check" type="checkbox" aria-label="选择${knowledgeEscape(item.name)}" /></span>${knowledgeFileNameHTML(item)}`;
-      const action = `<span class="knowledge-row-action"><button type="button" data-knowledge-row-action="preview" aria-label="预览${knowledgeEscape(item.name)}"><svg class="icon"><use href="#ico-file"/></svg></button><button type="button" data-knowledge-row-action="delete" aria-label="删除${knowledgeEscape(item.name)}"><svg class="icon"><use href="#ico-trash"/></svg></button></span></div>`;
-      return `${commonStart}<span>${knowledgeEscape(item.size)}</span><span>${knowledgeEscape(item.count)}</span><span>${knowledgeEscape(item.type)}</span><span>${knowledgeEscape(item.source)}</span>${knowledgeStateHTML(item.state)}<span>${knowledgeEscape(item.updated)}</span>${action}`;
-    };
+    const knowledgeRowHTML = (item, index) => ArtifactUI.row(item, index);
     const updateKnowledgeFilters = () => {
       const schema = knowledgeSchemas[activeKnowledgeSchema];
       $("#knowledge-source-filter").innerHTML = `<option value="all">全部来源</option>${schema.sources.map((item) => `<option value="${knowledgeEscape(item)}">${knowledgeEscape(item)}</option>`).join("")}`;
@@ -3162,22 +3164,22 @@
       $("#knowledge-selection-bar").classList.toggle("show", count > 0);
     };
     const renderKnowledgeFiles = () => {
-      const schema = knowledgeSchemas[activeKnowledgeSchema];
       $("#knowledge-table-head").dataset.schema = activeKnowledgeSchema;
-      $("#knowledge-table-head").innerHTML = schema.labels.map((label, index) => index === 0 ? `<span><input class="knowledge-check" id="knowledge-check-all" type="checkbox" aria-label="全选" /></span>` : `<span>${knowledgeEscape(label)}</span>`).join("");
+      $("#knowledge-table-head").innerHTML = ArtifactUI.labels.map((label, index) => index === 0 ? `<span><input class="knowledge-check" id="knowledge-check-all" type="checkbox" aria-label="全选" /></span>` : `<span>${knowledgeEscape(label)}</span>`).join("");
       const keyword = $("#knowledge-search-input").value.trim().toLowerCase();
       const source = $("#knowledge-source-filter").value;
       const type = $("#knowledge-type-filter").value;
       const date = $("#knowledge-date-filter").value;
       const sourceKey = "source";
       const typeKey = "type";
-      const items = knowledgeCatalog[activeKnowledgeSchema].filter((item) => (!keyword || `${item.name} ${item.meta}`.toLowerCase().includes(keyword)) && (source === "all" || item[sourceKey] === source) && (type === "all" || item[typeKey] === type) && (!date || item.updated.startsWith(date)));
+      const items = knowledgeCatalog[activeKnowledgeSchema].filter((item) => ArtifactUI.matches(item) && (!keyword || `${item.name} ${item.meta}`.toLowerCase().includes(keyword)) && (source === "all" || item[sourceKey] === source) && (type === "all" || item[typeKey] === type) && (!date || item.updated.startsWith(date)));
       $("#knowledge-file-list").innerHTML = items.map((item) => knowledgeRowHTML(item, knowledgeCatalog[activeKnowledgeSchema].indexOf(item))).join("");
       $("#knowledge-empty").hidden = items.length > 0;
       updateKnowledgeSelection();
     };
     const openKnowledgePreview = (item) => {
-      if (item.preview === "folder") { openKnowledgeFolder(item.name); return; }
+      if (!item || ArtifactUI.guard(() => openKnowledgePreview(item))) return;
+      if (item.preview === "folder") { openKnowledgeFolder(item.folderKey || item.name); return; }
       const matchingFileLeaf = $$('[data-knowledge-file]').find((leaf) => leaf.dataset.knowledgeFile === item.name);
       $$(".knowledge-file-leaf").forEach((leaf) => leaf.classList.toggle("active", leaf === matchingFileLeaf));
       if (matchingFileLeaf) {
@@ -3198,8 +3200,11 @@
       $("#knowledge-preview-body").innerHTML = item.preview === "audio" ? `<div class="knowledge-preview-audio"><span><svg class="icon"><use href="#ico-play"/></svg></span><h3>${knowledgeEscape(item.name)}</h3><p>${knowledgeEscape(item.duration || "语音内容")} · ${knowledgeEscape(item.source)}</p></div>` : `<article class="knowledge-preview-paper"><h2>${knowledgeEscape(item.name.replace(/\.[^.]+$/, ""))}</h2><p>该文档用于沉淀项目背景、设计决策与后续开发说明，支持在当前知识目录内持续更新和引用。</p><h3>核心内容</h3><p>当前方案围绕首页的信息架构、知识沉淀路径与智能体续接方式展开。文件内容在知识库列表页内直接打开，保留左侧目录上下文，用户无需跳转到新的页面。</p><ol><li>首页承担会议、闪念与知识资产的统一入口。</li><li>目录结构支持多级自定义，并保留来源和更新时间。</li><li>文件可直接打开阅读，也可以引用给小智或 Agent 继续处理。</li><li>关闭阅读器后，返回原目录及筛选状态。</li></ol><h3>文件与智能任务的关系</h3><p>知识文件既可以独立阅读，也可以作为任务上下文被引用。进入智能体后，系统继续沿用当前文件权限，不额外复制内容。</p><h3>使用说明</h3><p>阅读器直接占用原列表工作区；左侧目录树始终可见，点击其他目录会退出当前文件并展示对应列表。</p></article>`;
       $("#knowledge-preview").hidden = false;
       $(".knowledge-workspace").classList.add("file-open");
+      ArtifactUI.preview(item);
     };
     const openKnowledgeFolder = (name, trigger = null) => {
+      if (ArtifactUI.guard(() => openKnowledgeFolder(name, trigger))) return;
+      if (name.startsWith("artifacts:enterprise") && document.body.dataset.edition === "personal") name = "我的文件";
       activeKnowledgeFolder = name;
       activeKnowledgeSchema = knowledgeSchemaForFolder(name);
       $("#knowledge-folder-title").textContent = name;
@@ -3216,10 +3221,12 @@
       $("#knowledge-preview").hidden = true;
       $(".knowledge-workspace").classList.remove("file-open");
       updateKnowledgeFilters();
+      ArtifactUI.configureFolder();
       renderKnowledgeFiles();
       showMainView("knowledge", { silent: true });
       $(".knowledge-group .side-group-head").classList.add("active");
       $$(".tree-folder-toggle, .knowledge-leaf").forEach((item) => item.classList.toggle("active", item === trigger));
+      $$("[data-artifact-folder]").forEach(item => item.classList.toggle("active", item.dataset.artifactFolder === activeKnowledgeFolder));
     };
     const closeKnowledgeTreeMenu = () => $("#knowledge-tree-menu").classList.remove("show");
     $("#product-iteration-tree").insertAdjacentHTML("beforeend", '<button class="knowledge-file-leaf" data-knowledge-file="百智 PC 首页信息架构说明.pdf"><svg class="icon"><use href="#ico-file"/></svg><span class="tree-folder-name">首页信息架构说明.pdf</span></button>');
@@ -3251,7 +3258,10 @@
       if (event.target.closest(".knowledge-check")) { event.stopPropagation(); updateKnowledgeSelection(); return; }
       const item = knowledgeCatalog[activeKnowledgeSchema][Number(row.dataset.knowledgeIndex)];
       if (!item) return;
+      if (event.target.closest("[data-artifact-source]")) { ArtifactUI.source(item); return; }
+      if (event.target.closest("[data-artifact-retry]")) { item.state = "已入库"; renderKnowledgeFiles(); showToast("已重新入库"); return; }
       if (event.target.closest('[data-knowledge-row-action="delete"]')) {
+        if (item.system) { showToast("系统目录不支持删除"); return; }
         openDeleteConfirm({ title: "确认删除文件？", description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { moveKnowledgeToRecycle(item, Number(row.dataset.knowledgeIndex)); renderKnowledgeFiles(); renderRecycleBin(); showToast("已移入回收站，可在 30 天内恢复"); } });
         return;
       }
@@ -3259,7 +3269,7 @@
     });
     $("#knowledge-table-head").addEventListener("change", (event) => { if (event.target.id !== "knowledge-check-all") return; $$("#knowledge-file-list .knowledge-check").forEach((checkbox) => { checkbox.checked = event.target.checked; }); updateKnowledgeSelection(); });
     [$("#knowledge-search-input"), $("#knowledge-source-filter"), $("#knowledge-type-filter"), $("#knowledge-date-filter")].forEach((control) => control.addEventListener(control.tagName === "INPUT" ? "input" : "change", renderKnowledgeFiles));
-    $("#knowledge-preview-close").addEventListener("click", () => { $("#knowledge-preview").hidden = true; $(".knowledge-workspace").classList.remove("file-open"); });
+    $("#knowledge-preview-close").addEventListener("click", ArtifactUI.closePreview);
     $("#knowledge-preview-prev").addEventListener("click", () => showToast("已是文档第一页"));
     $("#knowledge-preview-next").addEventListener("click", () => showToast("原型演示：切换到下一页"));
     $("#knowledge-preview-download").addEventListener("click", () => showToast("原型演示：文件下载已开始"));
@@ -3280,6 +3290,7 @@
       openDeleteConfirm({ title: `确认删除 ${indices.length} 个文件？`, description: "删除后文件将移入回收站，30 天内可恢复，超期将永久删除。", onConfirm: () => { indices.forEach((index) => moveKnowledgeToRecycle(knowledgeCatalog.file[index], index)); renderKnowledgeFiles(); renderRecycleBin(); showToast(`已将 ${indices.length} 个文件移入回收站`); } });
     }));
     const openRecycleBin = (repository) => {
+      if (ArtifactUI.guard(() => openRecycleBin(repository))) return;
       activeRecycleRepository = repository === "recording" ? "recording" : "knowledge";
       const recordingRepository = activeRecycleRepository === "recording";
       $("#recycle-title").textContent = recordingRepository ? "录音回收站" : "知识库回收站";
@@ -3733,7 +3744,7 @@
       event.preventDefault();
       row.click();
     });
-    const openNoteDetail = (title = "三季度产品复盘会议", meta = "今天 09:42 · 47 分钟 · 网页录音") => { $("#note-detail-title").textContent = title; $("#note-detail-meta").textContent = `${meta} · 已整理`; showMainView("note-detail", { silent: true }); };
+    const openNoteDetail = (title = "三季度产品复盘会议", meta = "今天 09:42 · 47 分钟 · 网页录音") => { if (ArtifactUI.guard(() => openNoteDetail(title, meta))) return; $("#note-detail-title").textContent = title; $("#note-detail-meta").textContent = `${meta} · 已整理`; showMainView("note-detail", { silent: true }); };
     $("#view-panorama").addEventListener("click", (event) => { if (!event.target.closest("[data-meeting-action]")) openNoteDetail(); });
     $$('[data-meeting]').forEach((row) => row.addEventListener("click", (event) => { if (!event.target.closest("[data-meeting-action]")) openNoteDetail(row.dataset.meeting, row.dataset.meta); }));
     $("#note-detail-back").addEventListener("click", () => showMainView("home", { silent: true }));
@@ -3885,6 +3896,7 @@
     $("#composer").addEventListener("input", () => { $("#send-button").disabled = !$("#composer").value.trim(); });
     $("#composer").addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); sendTask(); } });
     const setEdition = (edition) => {
+      if (ArtifactUI.guard(() => setEdition(edition))) return;
       const personal = edition === "personal";
       document.body.dataset.edition = personal ? "personal" : "enterprise";
       Array.from($("#meeting-source-filter").options).forEach((option) => { if (option.value === "企业共享") { option.hidden = personal; option.disabled = personal; } });
@@ -3899,6 +3911,7 @@
       showToast(personal ? "已进入个人版" : "已进入企业版");
     };
     $$('[data-edition-choice]').forEach((button) => button.addEventListener("click", () => setEdition(button.dataset.editionChoice)));
+    ArtifactUI.init();
     const previewParams = new URLSearchParams(window.location.search);
     const previewEdition = previewParams.get("edition");
     const previewView = previewParams.get("view");
@@ -3916,7 +3929,7 @@
     if (previewView === "enterprise" && ["meeting", "panorama"].includes(previewAsset)) $(`[data-enterprise-asset="${previewAsset}"]`)?.click();
     if (previewPage === "knowledge") {
       openKnowledgeFolder(previewFolder || (previewEdition === "personal" ? "我的文件" : "企业文件"));
-      if (previewKnowledgeFile === "1") openKnowledgePreview(knowledgeCatalog[activeKnowledgeSchema][0]);
+      if (previewKnowledgeFile === "1") openKnowledgePreview(knowledgeCatalog[activeKnowledgeSchema].find(item => ArtifactUI.matches(item) && item.preview !== "folder"));
     }
     if (["all", "scheduled", "shared"].includes(previewHistoryTab)) $(`[data-history-tab="${previewHistoryTab}"]`)?.click();
     if (previewSpaceMenu === "1" && previewEdition !== "personal") { $("#space-menu").classList.add("show"); $("#space-switcher").setAttribute("aria-expanded", "true"); }
