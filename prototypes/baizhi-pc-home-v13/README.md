@@ -42,5 +42,7 @@
 
 使用 localStorage `baizhi-apps-data-v2` 保存样例，sessionStorage `apps-demo-user` 保存演示身份。未连接真实 Agent Platform、Apps、WPS、身份系统或知识库后端。前端样例含多用户数据只为评审，生产环境必须服务端授权过滤。未模拟真实事务、实时推送或跨页数据库一致性。
 
-当前主设计为项目工作区的《应用数据 PRD v3.2》，已同步任务详情跳转、返回、权限与接口职责；需求文档仍在工作区，未上传本仓库。验证记录见 [应用数据验证](apps-data-validation.md)。
+当前主设计为项目工作区的《应用数据 PRD v3.4》，包含产品视角的接口清单及全链路时序图；需求文档仍在工作区，未上传本仓库。验证记录见 [应用数据验证](apps-data-validation.md)。
+
+本轮任务页采用 Figma 百智 PC 规范，应用更新以约 78px 高的紧凑卡片展示。点击卡片右侧入口，在 AI Agent 工作台中查看本次变更或最新数据，并可切换应用、数据表及进入知识库。工作台保留工具调用、文件列表、修订文件页签，当前应用更新样例不生成文件。详见 [任务页设计说明](apps-task-workspace-design.md) 和 [视觉核对记录](design-qa.md)。
 早期 Agent 产物说明已归档至 [v1.1 说明](archive/agent-artifacts-v1.1.md)，不可作为当前规则。

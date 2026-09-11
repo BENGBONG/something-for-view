@@ -179,11 +179,12 @@
     }
   </style>
   <link rel="stylesheet" href="assets/agent-artifacts.css?v=1" />
+  <link rel="stylesheet" href="assets/apps-task-workspace.css?v=20260911-compact" />
   <script src="assets/agent-artifacts-model.js?v=1"></script>
   <script src="assets/apps-data-model.js?v=20260911-task"></script>
-  <script src="assets/apps-data-results.js?v=20260911-task"></script>
+  <script src="assets/apps-data-results.js?v=20260911-compact"></script>
 </head>
-<body data-edition="enterprise">
+<body class="baizhi-task" data-edition="enterprise">
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
     <symbol id="ico-chevron" viewBox="0 0 16 17"><path d="m4 6.25 4 4 4-4"/></symbol>
     <symbol id="ico-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -224,7 +225,7 @@
 
       <form class="agent-composer-wrap" id="agent-composer-form">
         <textarea class="agent-input" id="agent-input" rows="2" aria-label="告诉 Agent 你的任务" placeholder="告诉 Agent 你想完成什么…"></textarea>
-        <div class="composer-footer"><div class="composer-tools"><button class="composer-tool" type="button"><svg class="icon"><use href="#ico-plus"/></svg>添加附件</button><button class="composer-tool" type="button"><svg class="icon"><use href="#ico-book"/></svg><span id="knowledge-source-label">引用企业知识库</span></button><button class="composer-tool" type="button"><svg class="icon"><use href="#ico-globe"/></svg>全域网站</button></div><button class="agent-send" id="agent-send" type="submit" disabled aria-label="发送任务"><svg class="icon"><use href="#ico-send"/></svg></button></div>
+        <div class="composer-footer"><div class="composer-tools"><button class="composer-tool" type="button"><svg class="icon"><use href="#ico-plus"/></svg>添加附件</button><button class="composer-tool" type="button"><img class="figma-icon" src="assets/figma-task/book.svg" alt=""/><span id="knowledge-source-label">引用企业知识库</span></button><button class="composer-tool" type="button"><svg class="icon"><use href="#ico-globe"/></svg>全域网站</button></div><button class="agent-send" id="agent-send" type="submit" disabled aria-label="发送任务"><img class="figma-icon" src="assets/figma-task/send.svg" alt=""/></button></div>
       </form>
       <p class="ai-disclaimer">内容由 AI 生成，仅供参考，请仔细甄别</p>
     </main>
