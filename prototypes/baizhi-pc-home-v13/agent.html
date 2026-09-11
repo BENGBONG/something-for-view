@@ -180,7 +180,7 @@
   </style>
   <link rel="stylesheet" href="assets/agent-artifacts.css?v=1" />
   <script src="assets/agent-artifacts-model.js?v=1"></script>
-  <script src="assets/agent-artifacts-results.js?v=1"></script>
+  <script src="assets/apps-data-results.js?v=20260910"></script>
 </head>
 <body data-edition="enterprise">
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -277,6 +277,7 @@
     const renderConversation = (task) => ArtifactResults.sales(task) ? ArtifactResults.conversation(task) : `<article class="message message-user"><div>${escapeHTML(task.prompt)}</div></article><article class="message message-agent"><h3>${task.progress < 100 ? "正在执行客户线索研究" : "任务已完成"}</h3><div class="task-progress"><div class="progress-step done"><i></i>明确目标市场与筛选条件</div>${renderToolCall("搜索网页", "华东地区零售企业、数字化升级与扩店计划")}${renderToolCall(edition === "personal" ? "读取我的知识库" : "读取企业知识库", "零售行业客户画像与历史商机")}${renderToolCall("数据核验", "企业动态、业务范围与联系人证据链", task.progress < 100 ? "执行中" : "已完成")}<div class="progress-step ${task.progress === 100 ? "done" : ""}"><i></i>${task.progress === 100 ? "生成最终交付文件" : "正在核验企业与联系人信息"}</div></div><p>${escapeHTML(task.summary)}</p><div class="source-links"><button class="source-link" type="button" data-source-id="retail-report">零售行业数字化报告</button><button class="source-link" type="button" data-source-id="company-news">企业新闻与招聘动态</button></div><div class="output-files"><button class="output-file" type="button" data-file-id="lead-list"><span class="file-mark">X</span><span><strong>${files["lead-list"].name}</strong><small>${files["lead-list"].meta}</small></span></button><button class="output-file" type="button" data-file-id="verification-note"><span class="file-mark">M</span><span><strong>${files["verification-note"].name}</strong><small>${files["verification-note"].meta}</small></span></button></div></article>`;
 
     const renderFileList = (task) => {
+      if (ArtifactResults.renderPanel(task)) return;
       $("#file-preview").hidden = true;
       $("#task-file-list").hidden = false;
       $("#task-file-list").innerHTML = `<section class="panel-section"><div class="panel-section-title">执行进度 <span>${task.progress}%</span></div><div class="progress-track"><i style="width:${task.progress}%"></i></div><div class="panel-progress-copy"><span>${task.progress < 100 ? "正在核验企业联系人" : "任务已完成"}</span><span>${task.progress < 100 ? "3 / 4" : "4 / 4"}</span></div></section><section class="panel-section"><div class="panel-section-title">生成文件 <span>${Object.keys(files).length}</span></div>${Object.entries(files).map(([id, file]) => `<button class="panel-file" type="button" data-file-id="${id}"><span class="file-mark">${file.type === "XLSX" ? "X" : "M"}</span><span><strong>${file.name}</strong><small>${file.meta}</small></span></button>`).join("")}</section><section class="panel-section"><div class="panel-section-title">引用来源 <span>6</span></div><button class="panel-source" type="button" data-source-id="retail-report">零售行业数字化报告 <span>网页</span></button><button class="panel-source" type="button" data-source-id="company-news">企业新闻与招聘动态 <span>网页</span></button><button class="panel-source" type="button" data-source-id="knowledge">${edition === "personal" ? "我的知识文件" : "企业零售客户画像"} <span>知识库</span></button></section>`;
