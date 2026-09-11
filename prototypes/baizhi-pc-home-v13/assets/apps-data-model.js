@@ -92,6 +92,8 @@ window.AppsDataModel = (() => {
     finish(run);persist();return clone(run);
   }
   function reset(){seed();persist();}
+  // Prototype task ACL: only the initiator has a task-detail grant. App access alone is not a task grant.
+  function taskFor(user,id){const task=db.runs.find(r=>r.id===id&&r.actor===user);return task?clone(task):null;}
   function reload(){try{const data=JSON.parse(localStorage.getItem(key));if(data?.rows)db=data;}catch{}}
-  return {users,apps,list,rows,history,canManage,allowed,run,reset,reload,key,revision:()=>db.revision,visible:user=>[...(db.visible[user]||[])]};
+  return {users,apps,list,rows,history,canManage,allowed,taskFor,run,reset,reload,key,revision:()=>db.revision,visible:user=>[...(db.visible[user]||[])]};
 })();

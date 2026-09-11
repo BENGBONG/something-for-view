@@ -2483,8 +2483,8 @@
   <link rel="stylesheet" href="assets/agent-artifacts.css?v=20260908-actions" />
   <link rel="stylesheet" href="assets/apps-data.css?v=20260910" />
   <script>window.APP_DATA_MODE = true;</script>
-  <script src="assets/apps-data-model.js?v=20260910"></script>
-  <script src="assets/apps-data-ui.js?v=20260911-no-creator"></script>
+  <script src="assets/apps-data-model.js?v=20260911-task"></script>
+  <script src="assets/apps-data-ui.js?v=20260911-task"></script>
   <script src="assets/agent-artifacts-model.js?v=1"></script>
   <script src="assets/agent-artifacts-ui.js?v=20260911-apps"></script>
   <script src="assets/knowledge-file-actions.js?v=20260908-actions"></script>
@@ -3927,8 +3927,11 @@
       if (previewKnowledgeFile === "1") openKnowledgePreview(knowledgeCatalog[activeKnowledgeSchema].find(item => ArtifactUI.matches(item) && item.preview !== "folder"));
     }
     if (previewPage === "apps") {
-      AppsDataUI.navigate(previewParams.get('app'));
-      if (previewParams.get('run') && previewParams.get('app')) AppsDataUI.openRun(previewParams.get('run'));
+      AppsDataUI.navigate(previewParams.get('app'),previewParams.get('scope')==='all'?'all':null);
+      if (previewParams.get('run') && previewParams.get('app')) {
+        if(previewParams.get('from')==='task') AppsDataUI.restoreHistory(previewParams.get('run'));
+        else AppsDataUI.openRun(previewParams.get('run'));
+      }
     }
     if (["all", "scheduled", "shared"].includes(previewHistoryTab)) $(`[data-history-tab="${previewHistoryTab}"]`)?.click();
     if (previewSpaceMenu === "1" && previewEdition !== "personal") { $("#space-menu").classList.add("show"); $("#space-switcher").setAttribute("aria-expanded", "true"); }

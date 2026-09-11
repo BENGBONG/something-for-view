@@ -74,12 +74,11 @@ window.AppsDataUI = (() => {
     }).join('')}`;d.showModal();
   }
   function task(run) {
-    if(!run)return;lastRun=run;
-    const groups=[...new Set(run.changes.filter(c=>c.owner===state.user||M.canManage(state.user,M.apps.find(a=>a.id===c.app),personal())).map(c=>c.app))];
-    q('#apps-task-dialog').innerHTML=`<div class="apps-detail-heading"><h2>任务执行结果</h2><button class="apps-btn" data-app-close>关闭</button></div><p>${esc(run.title)}<br>${esc(run.agent)} · ${esc(M.users[run.actor].name)} · ${esc(run.time)}<br>${esc(run.id)}</p><span class="apps-pill ${run.status==='失败'?'warn':''}">${run.status==='成功'?'执行成功':'执行失败'}</span><p>${run.status==='失败'?'部分数据已提交并保留历史；本次失败不会为用户新增应用入口。':groups.length?'已更新应用数据，成功写入的应用自动加入「我的应用数据」。':'仅完成读取，没有数据变更，不新增应用入口。'}</p>${groups.map(id=>{
-      const a=M.apps.find(x=>x.id===id),scope=M.allowed(state.user,a,'mine',personal())?'mine':'all',access=M.allowed(state.user,a,scope,personal());
-      return `<div class="apps-run-card"><strong>${esc(a.name)}</strong><p>${counts(run.changes.filter(c=>c.app===id&&(scope==='all'||c.owner===state.user)))}</p>${access?`<button class="apps-link" data-app-result="${id}" data-scope="${scope}">查看最新数据</button>　<button class="apps-link" data-app-result="${id}" data-scope="${scope}" data-run="${run.id}">查看本次变更</button>`:'<span class="apps-caption">尚未满足首次成功条件，可在任务中查看本次提交摘要。</span>'}</div>`;
-    }).join('')}<p>「最新数据」可能包含后续运行更新；「本次变更」仅显示这次任务。</p>`;q('#apps-task-dialog').showModal();
+    if(!run)return;
+    if(!M.taskFor(state.user,run.id)){showToast('暂无该任务的查看权限，仍可查看当前应用的数据变更');return;}
+    sessionStorage.setItem('apps-history-return',JSON.stringify({state,run:run.id}));
+    const query=new URLSearchParams({edition:personal()?'personal':'enterprise',agent:run.agent,run:run.id,app:state.app||'',scope:state.scope,from:'apps-history'});
+    window.top.location.href='agent.html?'+query;
   }
   function demo() {
     q('#apps-demo-dialog').innerHTML=`<h2>演示设置</h2><p>仅用于原型评审。切换身份不会修改真实账号，执行场景不会调用真实 Agent。</p><label>当前身份<select id="apps-demo-user">${opts(Object.entries(M.users).map(([id,u])=>[id,`${u.name} · ${u.role}`]),state.user)}</select></label><label>模拟任务<select id="apps-demo-scenario"><option value="update">商机复盘 Agent → 更新销售洞察</option><option value="multi">销售洞察 Agent → 同时更新销售洞察、客户商机</option><option value="first">交付跟踪 Agent → 成功写入项目交付</option><option value="read">只读成功 → 不新增应用</option><option value="failed">项目交付写入后失败 → 不新增应用</option></select></label><p>新成员许安初始没有应用数据。陈琳创建了销售洞察和客户商机；李敏是本企业管理员。</p><footer><button class="apps-btn" data-app-close>取消</button><button class="apps-btn" data-app-identity>切换身份</button><button class="apps-btn primary" data-app-simulate>模拟执行</button></footer>`;q('#apps-demo-dialog').showModal();
@@ -94,7 +93,7 @@ window.AppsDataUI = (() => {
     q('.main').insertAdjacentHTML('beforeend','<section class="apps-workspace" data-main-view="apps" hidden></section>');root=q('.apps-workspace');
     q('#knowledge-side-list').insertAdjacentHTML('beforeend','<div class="apps-nav"><button id="apps-entry" class="side-sub-item apps-side-entry"><svg class="icon"><use href="#ico-folder"/></svg>应用数据</button><div id="apps-nav-children" class="apps-nav-children"></div></div>');
     q('.knowledge-sidebar-tools').before(q('.apps-nav'));
-    document.body.insertAdjacentHTML('beforeend','<dialog id="apps-history-dialog" class="apps-dialog apps-drawer" aria-label="本次数据变更"></dialog><dialog id="apps-demo-dialog" class="apps-dialog" aria-label="演示设置"></dialog><dialog id="apps-task-dialog" class="apps-dialog" aria-label="任务执行结果"></dialog>');
+    document.body.insertAdjacentHTML('beforeend','<dialog id="apps-history-dialog" class="apps-dialog apps-drawer" aria-label="本次数据变更"></dialog><dialog id="apps-demo-dialog" class="apps-dialog" aria-label="演示设置"></dialog>');
     q('#apps-entry').onclick=()=>navigate();
     document.addEventListener('click',event=>{
       const b=event.target.closest('button');if(!b)return;const d=b.dataset;
@@ -121,5 +120,15 @@ window.AppsDataUI = (() => {
     nav();
   }
   function openRun(id) { if(!state.app)return;state.tab='history';resetFilters();render();detail(id); }
-  return {init,navigate,openRun,state:()=>({...state})};
+  function restoreHistory(id) {
+    try {
+      const saved=JSON.parse(sessionStorage.getItem('apps-history-return'));
+      if(saved?.run===id&&saved.state.app===state.app&&saved.state.user===state.user) {
+        const next=saved.state;
+        if(M.allowed(state.user,app(),next.scope,personal())){state={...next,tab:'history'};render();detail(id);return;}
+      }
+    } catch {}
+    openRun(id);
+  }
+  return {init,navigate,openRun,restoreHistory,state:()=>({...state})};
 })();

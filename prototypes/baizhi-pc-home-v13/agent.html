@@ -180,7 +180,8 @@
   </style>
   <link rel="stylesheet" href="assets/agent-artifacts.css?v=1" />
   <script src="assets/agent-artifacts-model.js?v=1"></script>
-  <script src="assets/apps-data-results.js?v=20260910"></script>
+  <script src="assets/apps-data-model.js?v=20260911-task"></script>
+  <script src="assets/apps-data-results.js?v=20260911-task"></script>
 </head>
 <body data-edition="enterprise">
   <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -373,7 +374,7 @@
     $("#task-file-panel-close").addEventListener("click", () => setFilePanelOpen(false));
     $("#task-file-panel-toggle").addEventListener("click", () => setFilePanelOpen($("#task-file-panel").getAttribute("aria-hidden") === "true"));
     ArtifactResults.init();
-    $("#agent-back").addEventListener("click", () => { if (window.history.length <= 1 && window.opener) window.close(); else window.location.href = `index.html?edition=${edition}&page=capabilities`; });
+    $("#agent-back").addEventListener("click", () => { if (ArtifactResults.back()) return; if (window.history.length <= 1 && window.opener) window.close(); else window.location.href = `index.html?edition=${edition}&page=capabilities`; });
   </script>
 </body>
 </html>
