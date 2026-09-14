@@ -24,11 +24,11 @@ window.ArtifactResults = (() => {
     const r=task.appRun,gs=groups(r),failed=r.status==='失败';
     return '<article class="message message-user"><div>'+e(task.prompt)+'</div></article>'+
       '<details class="result-process"><summary>任务执行过程</summary><ol>'+gs.map(g=>'<li>更新「'+e(g.app.name)+'」：'+e(tableNames(g))+'。'+summary(g.changes)+'，已提交。</li>').join('')+'</ol></details>'+
-      '<section class="result-block"><h3>应用数据更新 <small>共 '+gs.length+' 个应用</small></h3><p class="result-copy">'+(failed?'任务未全部完成，以下数据已提交并保留。':'已将本次分析结果更新至应用，可在知识库持续查看。')+'</p>'+
+      '<section class="result-block"><h3>应用数据更新 <small>共 '+gs.length+' 个应用</small></h3>'+(gs.length?'<p class="result-copy">'+(failed?'任务未全部完成，以下数据已提交并保留。':'已将本次分析结果更新至应用，可在知识库持续查看。')+'</p>':'')+
       gs.map(g=>'<article class="app-result-card"><span class="app-result-mark"><img src="assets/figma-task/folder.svg" alt=""/></span><div class="app-result-name"><div class="app-result-title"><strong title="'+e(g.app.name)+'">'+e(g.app.name)+'</strong><span class="result-status">已更新</span></div><p>'+summary(g.changes)+'</p></div><div class="app-result-actions"><button class="result-link" data-result-app="'+g.app.id+'" data-result-mode="changes">查看本次变更</button><button class="result-link" data-result-app="'+g.app.id+'" data-result-mode="latest">查看最新数据</button></div></article>').join('')+
       (!gs.length?'<div class="result-summary"><p>本次未产生应用数据更新。</p></div>':'')+'</section>'+
-      '<section class="result-block"><h3>任务完成总结</h3><div class="result-summary"><p>'+(failed?'任务执行失败，但已提交的数据不会自动撤销。':r.id==='run-0908-review'?'已更新重点商机的报价金额与下次跟进日期，移除失效客户，并调整本周销售汇总。':'已完成本次应用数据整理，具体更新内容可在右侧工作台查看。')+'</p><div class="result-summary-metrics"><span><strong>'+gs.length+'</strong>更新应用</span><span><strong>'+new Set(r.changes.map(c=>c.app+'/'+c.table)).size+'</strong>涉及数据表</span><span><strong>'+r.changes.length+'</strong>数据变更次数</span></div></div></section>'+
-      '<p class="task-complete-note">'+(failed?'任务执行失败 · 已提交的数据仍保留':'任务已完成 · 可继续补充要求')+'</p>';
+      '<section class="result-block"><h3>任务完成总结</h3><div class="result-summary"><p>'+(!gs.length?(failed?'任务执行失败，本次没有已提交的应用数据更新。':'本次任务已完成，应用数据没有发生变化。'):failed?'任务执行失败，但已提交的数据不会自动撤销。':r.id==='run-0908-review'?'已更新重点商机的报价金额与下次跟进日期，移除失效客户，并调整本周销售汇总。':'已完成本次应用数据整理，具体更新内容可在右侧工作台查看。')+'</p><div class="result-summary-metrics"><span><strong>'+gs.length+'</strong>更新应用</span><span><strong>'+new Set(r.changes.map(c=>c.app+'/'+c.table)).size+'</strong>涉及数据表</span><span><strong>'+r.changes.length+'</strong>数据变更次数</span></div></div></section>'+
+      '<p class="task-complete-note">'+(failed?(gs.length?'任务执行失败 · 已提交的数据仍保留':'任务执行失败 · 未更新应用数据'):'任务已完成 · 可继续补充要求')+'</p>';
   }
   function renderWorkspace() {
     const r=currentTask.appRun,gs=groups(r),g=gs.find(x=>x.app.id===selectedApp)||gs[0];
