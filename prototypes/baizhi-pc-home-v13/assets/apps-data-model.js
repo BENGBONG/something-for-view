@@ -17,22 +17,26 @@ window.AppsDataModel = (() => {
     ]},
     {id:'leads',name:'客户商机',description:'归集客户线索与跟进动作，供多个销售 Agent 共用。',creator:'chen',tables:[
       {id:'leads',name:'客户线索',fields:[['企业名称','文本'],['线索来源','文本'],['优先级','文本'],['已联系','布尔']]},
-      {id:'actions',name:'跟进计划',fields:[['客户名称','文本'],['下一步行动','文本'],['计划日期','日期']]}
+      {id:'actions',name:'跟进计划',fields:[['客户名称','文本'],['下一步行动','文本'],['计划日期','日期'],['预约时间','日期时间'],['关联标识','UUID'],['补充信息','JSON']]}
     ]},
     {id:'delivery',name:'项目交付',description:'跟踪交付项目、里程碑与待解决问题。',creator:'li',tables:[
       {id:'projects',name:'项目清单',fields:[['项目名称','文本'],['进度','文本'],['计划验收','日期']]},
       {id:'risks',name:'风险记录',fields:[['项目名称','文本'],['风险描述','文本'],['级别','文本']]}
     ]}
   ];
+  // Explicit demo definitions, not a positional first-field-required rule.
+  const requiredNames=new Set(['客户名称','商机名称','统计周期','企业名称','项目名称']);
+  apps.forEach(a=>a.tables.forEach(t=>t.fields=t.fields.map(f=>[...f,{required:requiredNames.has(f[0])}])));
   let db;
   const stamp = n => `2026-09-${String(6 + Math.floor(n/20)).padStart(2,'0')} ${String(9 + Math.floor(n%20/4)).padStart(2,'0')}:${String((n*7)%60).padStart(2,'0')}`;
   function apply(run,app,table,owner,op,id,values) {
+    if(values)values=apps.find(a=>a.id===app).tables.find(t=>t.id===table).fields.map((_,i)=>values[i]??null);
     const rows = db.rows[app][table], index = rows.findIndex(x=>x.id===id);
     const before = index < 0 ? null : clone(rows[index].values);
     if (op !== '新增' && index < 0) return;
     if (op === '修改' && JSON.stringify(before)===JSON.stringify(values)) return;
     if (op === '新增') rows.push({id,owner,values:clone(values),updated:run.time});
-    if (op === '修改') rows[index]={...rows[index],values:clone(values),updated:run.time};
+    if (op === '修改') rows[index]={...rows[index],values:clone(values),updated:run.time,version:`${run.id}:${run.changes.length}`};
     if (op === '删除') rows.splice(index,1);
     run.changes.push({app,table,owner,op,id,before,after:op==='删除'?null:clone(values),time:run.time,sequence:run.changes.length+1});
   }
@@ -66,13 +70,19 @@ window.AppsDataModel = (() => {
   function persist() { try { localStorage.setItem(key,JSON.stringify(db)); } catch {} }
   try { db=JSON.parse(localStorage.getItem(key)); } catch {}
   if(!db || !db.rows || !db.visible || !db.counter && db.counter!==0){seed();persist();}
+  if(!db.basicGridFixtures){
+    const data=db.rows.leads.actions;
+    data.forEach(r=>{while(r.values.length<6)r.values.push(null);});
+    if(!data.some(r=>r.owner==='zhang'))data.push({id:'zhang-plan-demo',owner:'zhang',created:'2026-09-18 09:00:00',updated:'2026-09-18 09:00:00',values:['东辰商业','安排方案演示','2026-09-25','2026-09-25T10:30','8d7f1234-1234-4234-8234-123456789abc',{渠道:'电话',参与人数:3}]});
+    db.basicGridFixtures=true;persist();
+  }
   const canManage=(user,app,personal=false)=>!!app && (app.creator===user || (!personal&&user==='li'));
   const allowed=(user,app,scope,personal=false)=>scope==='all'?canManage(user,app,personal):(db.visible[user]||[]).includes(app?.id);
   function list(user,mode,personal=false) { return apps.filter(a=>allowed(user,a,mode==='managed'?'all':'mine',personal)); }
   function rows(user,appId,table,scope,personal=false) {
     const app=apps.find(a=>a.id===appId);
     if(!allowed(user,app,scope,personal))return [];
-    return clone(db.rows[appId][table]||[]).filter(r=>scope==='all'||r.owner===user);
+    return clone(db.rows[appId][table]||[]).filter(r=>scope==='all'||r.owner===user).map(r=>({...r,created:r.created||db.runs.flatMap(run=>run.changes).find(c=>c.app===appId&&c.table===table&&c.id===r.id&&c.op==='新增')?.time||null}));
   }
   function history(user,appId,scope,personal=false) {
     if(!allowed(user,apps.find(a=>a.id===appId),scope,personal))return [];
@@ -95,5 +105,52 @@ window.AppsDataModel = (() => {
   // Prototype task ACL: only the initiator has a task-detail grant. App access alone is not a task grant.
   function taskFor(user,id){const task=db.runs.find(r=>r.id===id&&r.actor===user);return task?clone(task):null;}
   function reload(){try{const data=JSON.parse(localStorage.getItem(key));if(data?.rows)db=data;}catch{}}
-  return {users,apps,list,rows,history,canManage,allowed,taskFor,run,reset,reload,key,revision:()=>db.revision,visible:user=>[...(db.visible[user]||[])]};
+  // UI fixtures only: weekly summary demonstrates a table with no manual write operations.
+  const operations=(appId,table)=>table==='weekly'?[]:['create','update','delete'];
+  function permissions(user,appId,table,row,scope,personal=false){
+    const access=allowed(user,apps.find(a=>a.id===appId),scope,personal),ops=operations(appId,table);
+    return {create:access&&ops.includes('create'),update:access&&row?.owner===user&&ops.includes('update'),delete:access&&row?.owner===user&&ops.includes('delete')};
+  }
+  function mutate(context,operation,{id,values,version}={}){
+    reload();
+    const {user,appId,table,scope,personal}=context;
+    const definition=apps.find(a=>a.id===appId)?.tables.find(t=>t.id===table);
+    const data=db.rows[appId]?.[table],current=data?.find(r=>r.id===id);
+    if(!definition||!data)throw new Error('这张表已不存在，请重新打开应用。');
+    if(operation!=='create'&&!current)throw new Error('这条记录已被删除，请刷新列表。');
+    if(!permissions(user,appId,table,current,scope,personal)[operation])throw new Error('当前没有操作权限，未保存任何修改。');
+    if(operation!=='create'&&String(current.version||current.updated)!==String(version))throw new Error('这条记录已被更新。请保留草稿，刷新记录后重新编辑。');
+    if(operation!=='delete'&&(!Array.isArray(values)||values.length!==definition.fields.length))throw new Error('表结构已变化，请重新打开编辑。');
+    if(operation!=='delete'&&window.AppsFieldValues)values=values.map((value,i)=>window.AppsFieldValues.parse(definition.fields[i],definition.fields[i][1]==='JSON'&&value!==null?JSON.stringify(value):value));
+    const before=clone(db),time=new Date().toLocaleString('sv-SE',{timeZone:'Asia/Shanghai'});
+    let record;
+    db.revision++;
+    if(operation==='create') {record={id:'manual-'+crypto.randomUUID(),owner:user,createdBy:user,created:time,values:clone(values),updated:time,updatedBy:user,version:db.revision};data.unshift(record);}
+    if(operation==='update'){record={...current,values:clone(values),updated:time,updatedBy:user,version:db.revision};data.splice(data.indexOf(current),1,record);}
+    if(operation==='delete')data.splice(data.indexOf(current),1);
+    // Metadata only; manual changes do not become Agent runs or schema-history entries.
+    (db.manualActivity||=[]).unshift({app:appId,table,owner:record?.owner||current.owner,actor:user,time,operation});
+    try{localStorage.setItem(key,JSON.stringify(db));}catch{db=before;throw new Error('本地保存失败，草稿已保留，请重试。');}
+    return clone(record||{id,deleted:true});
+  }
+  function latestActivity(user,appId,scope,personal=false){
+    if(!allowed(user,apps.find(a=>a.id===appId),scope,personal))return null;
+    return [...history(user,appId,scope,personal),...(db.manualActivity||[]).filter(r=>r.app===appId&&(scope==='all'||r.owner===user))].sort((a,b)=>b.time.localeCompare(a.time))[0]||null;
+  }
+  function deleteMany(context,targets){
+    reload();const {user,appId,table,scope,personal}=context;
+    if(!targets.length)throw Error('请先选择记录');
+    const data=db.rows[appId]?.[table];
+    targets.forEach(t=>{const r=data?.find(r=>r.id===t.id);
+      if(!r)throw Error('有记录已被删除，请刷新后重新选择');
+      if(!permissions(user,appId,table,r,scope,personal).delete)throw Error('有记录已无删除权限，本次未删除任何记录');
+      if(String(r.version||r.updated)!==String(t.version))throw Error('有记录已被更新，请刷新后重新选择');
+    });
+    const before=clone(db),ids=new Set(targets.map(t=>t.id)),time=new Date().toLocaleString('sv-SE',{timeZone:'Asia/Shanghai'});
+    db.rows[appId][table]=data.filter(r=>!ids.has(r.id));db.revision++;
+    (db.manualActivity||=[]).unshift({app:appId,table,owner:user,actor:user,time,operation:'delete',count:ids.size});
+    try{localStorage.setItem(key,JSON.stringify(db));}catch{db=before;throw Error('本地保存失败，本次未删除任何记录');}
+    return ids.size;
+  }
+  return {users,apps,list,rows,history,canManage,allowed,taskFor,run,reset,reload,key,operations,permissions,mutate,deleteMany,latestActivity,revision:()=>db.revision,visible:user=>[...(db.visible[user]||[])]};
 })();

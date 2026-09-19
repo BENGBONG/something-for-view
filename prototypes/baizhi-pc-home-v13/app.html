@@ -2481,10 +2481,15 @@
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
   </style>
   <link rel="stylesheet" href="assets/agent-artifacts.css?v=20260908-actions" />
-  <link rel="stylesheet" href="assets/apps-data.css?v=20260914-sheet-nav" />
+  <link rel="stylesheet" href="assets/apps-data.css?v=20260918-grid" />
   <script>window.APP_DATA_MODE = true;</script>
-  <script src="assets/apps-data-model.js?v=20260911-task"></script>
-  <script src="assets/apps-data-ui.js?v=20260914-sheet-nav"></script>
+  <script src="assets/apps-field-values.js?v=20260918-grid"></script>
+  <script src="assets/apps-data-model.js?v=20260918-grid"></script>
+  <script src="assets/apps-data-editor.js?v=20260918-grid"></script>
+  <script src="assets/apps-schema-model.js?v=20260917-schema"></script>
+  <script src="assets/published-apps.js?v=20260917-schema"></script>
+  <script src="assets/apps-grid-tools.js?v=20260918-grid"></script>
+  <script src="assets/apps-data-ui.js?v=20260918-history-simple"></script>
   <script src="assets/agent-artifacts-model.js?v=1"></script>
   <script src="assets/agent-artifacts-ui.js?v=20260911-apps"></script>
   <script src="assets/knowledge-file-actions.js?v=20260908-actions"></script>
@@ -2789,7 +2794,12 @@
     </section>
 
     <section class="directory-view capability-compact" data-main-view="capabilities" hidden aria-label="AI专家、技能与连接器">
-      <nav class="capability-primary-tabs" aria-label="能力类型"><button class="capability-primary-tab active" data-capability-tab="experts">专家</button><button class="capability-primary-tab" data-capability-tab="skills">技能</button><button class="capability-primary-tab" data-capability-tab="connectors">连接器</button></nav>
+      <nav class="capability-primary-tabs" aria-label="能力类型"><button class="capability-primary-tab active" data-capability-tab="experts">专家</button><button class="capability-primary-tab" data-capability-tab="skills">技能</button><button class="capability-primary-tab" data-capability-tab="connectors">连接器</button><button class="capability-primary-tab" data-capability-tab="applications">应用</button></nav>
+      <section data-capability-panel="applications" hidden>
+        <div class="directory-controls"><p class="apps-caption">已发布的应用，点击后在新标签页打开。</p><label class="directory-search"><svg class="icon"><use href="#ico-search"/></svg><input id="published-app-search" type="search" placeholder="搜索应用名称或简介" aria-label="搜索已发布应用" /></label></div>
+        <div class="published-app-grid" id="published-app-grid"></div><div class="apps-empty" id="published-app-empty" hidden>暂无匹配的已发布应用</div>
+        <p class="apps-caption">原型示例：以下链接打开本地演示页面，尚未接入 Agent Platform 的真实发布地址。</p>
+      </section>
 
       <section data-capability-panel="experts">
         <div class="expert-toolbar"><div class="directory-categories" aria-label="专家分类"><button class="directory-category active" data-expert-category="all">全部</button><button class="directory-category" data-expert-category="白领办公">白领办公</button><button class="directory-category" data-expert-category="销售管理">销售管理</button><button class="directory-category" data-expert-category="投研分析">投研分析</button></div><label class="directory-search"><svg class="icon"><use href="#ico-search"/></svg><input id="expert-search" type="search" placeholder="搜索专家名称或能力" aria-label="搜索专家" /></label></div>
@@ -2961,6 +2971,7 @@
       if (activeItem) { activeItem.classList.add("active"); activeItem.setAttribute("aria-current", "page"); }
     };
     const showMainView = (target, options = {}) => {
+      if (window.AppsDataEditor?.guard(() => showMainView(target, options))) return;
       if (ArtifactUI.guard(() => showMainView(target, options))) return;
       const next = $(`[data-main-view="${target}"]`);
       if (!next) return;
@@ -3907,6 +3918,7 @@
     ArtifactUI.init();
     KnowledgeFileActions.init();
     AppsDataUI.init();
+    PublishedApps.init();
     const previewParams = new URLSearchParams(window.location.search);
     const previewEdition = previewParams.get("edition");
     const previewView = previewParams.get("view");
@@ -3917,6 +3929,7 @@
     const previewHistoryTab = previewParams.get("history");
     const previewSpaceMenu = previewParams.get("spaceMenu");
     if (["enterprise", "personal"].includes(previewEdition)) setEdition(previewEdition);
+    if (previewPage === 'capabilities') { showMainView('capabilities', {silent:true}); showCapabilityPanel(['experts','skills','connectors','applications'].includes(previewParams.get('tab'))?previewParams.get('tab'):'experts'); }
     if (["my", "thought", "enterprise"].includes(previewView)) {
       const previewViewButton = $(`[data-meeting-view="${previewView}"]`);
       if (previewViewButton && !previewViewButton.hidden) previewViewButton.click();
