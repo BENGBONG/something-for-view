@@ -18,7 +18,7 @@ window.AppsDataEditor = (() => {
   }
   function cells(row,table,format){
     const editable=permissions(row).update;
-    return row.values.map((v,j)=>{const editing=active(row.id)&&draft.field===j;return `<td class="${editable?'apps-editable-cell':''} ${editing?'apps-cell-editing':''}" ${editable?`data-edit-cell="${esc(row.id)}" data-cell-index="${j}" tabindex="0" title="双击编辑 · Enter 保存 · Esc 取消" aria-label="${esc(row.values[0])} · ${esc(table.fields[j][0])}"`:''}>${editing?control(table.fields[j],j,draft.values[j]):format(v)}</td>`;}).join('');
+    return row.values.map((v,j)=>{const editing=active(row.id)&&draft.field===j;return `<td class="${editable?'apps-editable-cell':'apps-readonly-cell'} ${editing?'apps-cell-editing':''}" ${editable?`data-edit-cell="${esc(row.id)}" data-cell-index="${j}" tabindex="0" title="双击编辑 · Enter 保存 · Esc 取消" aria-label="${esc(row.values[0])} · ${esc(table.fields[j][0])}"`:`aria-readonly="true" title="只读：${row.owner!==context().user?'只能修改本人记录':'此表未开放人工修改'}"`}>${editing?control(table.fields[j],j,draft.values[j]):format(v)}</td>`;}).join('');
   }
   function actions(row){
     const p=permissions(row);

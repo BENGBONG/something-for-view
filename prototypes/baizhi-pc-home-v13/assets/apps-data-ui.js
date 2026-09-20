@@ -41,6 +41,40 @@ window.AppsDataUI = (() => {
     const pages=Math.max(1,Math.ceil(total/7));state.page=Math.min(state.page,pages);
     return `<div class="apps-footer"><span>共 ${total} ${state.tab==='history'?'次结构变更':'条数据'} · 每页 7 条</span><div><button class="apps-btn" data-app-page="-1" ${state.page===1?'disabled':''}>上一页</button><span>${state.page} / ${pages}</span><button class="apps-btn" data-app-page="1" ${state.page===pages?'disabled':''}>下一页</button></div></div>`;
   }
+  function tableRows(a,table) {
+    const all=M.rows(state.user,a.id,table.id,state.scope,personal());
+    const base=all.filter(r=>(!state.owner||r.owner===state.owner)&&(!state.department||M.users[r.owner]?.department===state.department)&&(!state.search||r.values.some(v=>AppsFieldValues.raw(v).toLowerCase().includes(state.search.toLowerCase()))));
+    return {all,rows:G.query(base,table)};
+  }
+  function downloadTable() {
+    if(E.guard(downloadTable))return;
+    M.reload();
+    const a=app(),table=a?.tables.find(t=>t.id===state.table);
+    if(!table||state.tab!=='data'||!M.allowed(state.user,a,state.scope,personal())){showToast('当前没有下载此表的权限');return;}
+    try {
+      const {rows}=tableRows(a,table);
+      AppsTableExport.download(a,table,rows,M.users,G.metadata());
+      showToast(`已下载「${table.name}」 · ${rows.length} 条记录（全部匹配结果）`);
+    } catch {showToast('表格下载失败，请重试');}
+  }
+  function taskEntry() {
+    document.querySelectorAll('.apps-task-entry').forEach(n=>n.remove());
+    const tasks=availableApps().flatMap(a=>M.history(state.user,a.id,initialScope(a),personal())).filter(r=>M.taskFor(state.user,r.id));
+    const latest=tasks.sort((a,b)=>b.time.localeCompare(a.time))[0];
+    if(!latest)return;
+    const button=document.createElement('button');button.type='button';button.className='history-row apps-task-entry';
+    button.dataset.historyType='normal';button.dataset.appTaskRun=latest.id;button.title=latest.title;
+    button.innerHTML=`<svg class="icon"><use href="#ico-chat"/></svg><span class="history-text">${esc(latest.title)}</span><span class="history-time">应用</span>`;
+    const filter=q('[data-history-tab].active')?.dataset.historyTab;button.hidden=!!filter&&filter!=='all';
+    q('#history-task-list').prepend(button);
+  }
+  function openTaskResult(id) {
+    const run=M.taskFor(state.user,id);
+    if(!run){showToast('暂无该任务的查看权限');return;}
+    sessionStorage.setItem('apps-demo-user',state.user);
+    const params=new URLSearchParams({edition:personal()?'personal':'enterprise',run:id,app:run.changes[0]?.app||'',from:'history'});
+    window.top.location.href='agent.html?'+params;
+  }
   function renderDetail() {
     const a=app();if(!M.allowed(state.user,a,state.scope,personal())){state.app=null;renderList();return;}
     const table=a.tables.find(t=>t.id===state.table)||a.tables[0];state.table=table.id;
@@ -48,14 +82,12 @@ window.AppsDataUI = (() => {
     const ownerIds=[...new Set(state.tab==='history'?[]:M.rows(state.user,a.id,table.id,state.scope,personal()).map(r=>r.owner))];
     const ownerFilter=state.scope==='all'&&state.tab==='data'?`<select aria-label="${state.tab==='history'?'触发人':'数据所属人'}" data-app-filter="owner">${opts([['',state.tab==='history'?'全部触发人':'全部所属人'],...ownerIds.map(id=>[id,M.users[id].name])],state.owner)}</select>`:'';
     if(state.tab==='data'){
-      const all=M.rows(state.user,a.id,table.id,state.scope,personal());
-      const base=all.filter(r=>(!state.owner||r.owner===state.owner)&&(!state.department||M.users[r.owner].department===state.department)&&(!state.search||r.values.some(v=>AppsFieldValues.raw(v).toLowerCase().includes(state.search.toLowerCase()))));
-      const rows=G.query(base,table),footer=G.footer(rows.length),slice=rows.slice((state.page-1)*7,state.page*7);
+      const {all,rows}=tableRows(a,table),footer=G.footer(rows.length),slice=rows.slice((state.page-1)*7,state.page*7);
       const tools=G.toolbar(table,rows,slice);
       const widths=table.fields.map(f=>f[1]==='JSON'?240:f[1]==='UUID'?240:f[1]==='日期时间'?180:/痛点|建议|行动|描述/.test(f[0])?180:/区域|等级|优先级|已联系/.test(f[0])?104:f[1]==='日期'?128:140);
       const tableNav=G.rail(a.tables,table.id,id=>M.rows(state.user,a.id,id,state.scope,personal()).length);
       const writable=M.operations(a.id,table.id).length>0,meta=G.metadata();
-      body=`<div class="apps-data-layout ${G.collapsed()?'rail-collapsed':''}">${tableNav}<section class="apps-sheet-content" aria-label="${esc(table.name)}"><div class="apps-sheet-heading"><div><strong>${esc(table.name)}</strong><span class="apps-caption">${writable?'仅可维护本人记录':'只读 · 此表由 Agent 更新'}</span></div>${M.permissions(state.user,a.id,table.id,null,state.scope,personal()).create?'<button class="apps-btn primary" data-edit-create>＋ 新增记录</button>':''}</div><div class="apps-toolbar"><div class="apps-filter-group">${ownerFilter}${state.scope==='all'?`<select data-app-filter="department" aria-label="部门">${opts([['','全部部门'],...[...new Set(all.map(r=>M.users[r.owner].department))].map(d=>[d,d])],state.department)}</select>`:`<span class="apps-caption">${writable?'Enter / 失焦保存 · Esc 取消':'当前表不支持手动修改'}</span>`}</div><input type="search" aria-label="搜索表格数据" data-app-filter="search" placeholder="搜索表格内容" value="${esc(state.search)}"></div>${tools}${E.banner()}<div class="apps-table-scroll apps-grid-scroll"><table class="apps-table apps-data-grid" style="width:${40+44+widths.reduce((n,w)=>n+w,0)+170+158+106+(meta?370:0)}px"><colgroup><col style="width:40px"><col style="width:44px">${widths.map(w=>`<col style="width:${w}px">`).join('')}<col style="width:170px"><col style="width:158px">${meta?'<col style="width:210px"><col style="width:160px">':''}<col style="width:106px"></colgroup><thead><tr>${G.selectHead()}<th scope="col">#</th>${table.fields.map(f=>`<th scope="col">${esc(f[0])}${f[2]?.required?'<span class="apps-required" title="必填">*</span>':''}<small>${esc(f[1])}</small></th>`).join('')}<th scope="col">数据所属人</th><th scope="col">更新时间</th>${meta?'<th scope="col">记录 ID<small>只读</small></th><th scope="col">创建时间<small>只读</small></th>':''}<th scope="col" class="apps-row-operation">操作</th></tr></thead><tbody>${slice.map((r,i)=>`<tr>${G.checkbox(r)}<td>${(state.page-1)*7+i+1}</td>${E.cells(r,table,value)}<td>${person(r.owner)}</td><td class="apps-time-cell">${esc(r.updated)}</td>${meta?`<td class="apps-record-id">${esc(r.id)}</td><td>${esc(r.created||'未记录')}</td>`:''}${E.actions(r)}</tr>`).join('')}</tbody></table>${!rows.length?empty('当前范围暂无记录','请调整筛选条件，或在有权限的表中新增记录。'):''}</div>${footer}</section></div>`;
+      body=`<div class="apps-data-layout ${G.collapsed()?'rail-collapsed':''}">${tableNav}<section class="apps-sheet-content" aria-label="${esc(table.name)}"><div class="apps-sheet-heading"><div><strong>${esc(table.name)}</strong><span class="apps-caption">${writable?'仅可维护本人记录':'只读 · 此表由 Agent 更新'}</span></div><div class="apps-sheet-actions"><button class="apps-btn apps-download-btn" data-app-download title="下载当前权限范围和筛选条件下的全部记录，不限当前页"><svg class="icon" aria-hidden="true"><use href="#ico-download"/></svg>下载表格</button>${M.permissions(state.user,a.id,table.id,null,state.scope,personal()).create?'<button class="apps-btn primary" data-edit-create>＋ 新增记录</button>':''}</div></div><div class="apps-toolbar"><div class="apps-filter-group">${ownerFilter}${state.scope==='all'?`<select data-app-filter="department" aria-label="部门">${opts([['','全部部门'],...[...new Set(all.map(r=>M.users[r.owner].department))].map(d=>[d,d])],state.department)}</select>`:`<span class="apps-caption">${writable?'Enter / 失焦保存 · Esc 取消':'当前表不支持手动修改'}</span>`}</div><input type="search" aria-label="搜索表格数据" data-app-filter="search" placeholder="搜索表格内容" value="${esc(state.search)}"></div>${tools}${E.banner()}<div class="apps-table-scroll apps-grid-scroll"><table class="apps-table apps-data-grid" style="width:${40+44+widths.reduce((n,w)=>n+w,0)+170+158+106+(meta?370:0)}px"><colgroup><col style="width:40px"><col style="width:44px">${widths.map(w=>`<col style="width:${w}px">`).join('')}<col style="width:170px"><col style="width:158px">${meta?'<col style="width:210px"><col style="width:160px">':''}<col style="width:106px"></colgroup><thead><tr>${G.selectHead()}<th scope="col">#</th>${table.fields.map(f=>`<th scope="col">${esc(f[0])}${f[2]?.required?'<span class="apps-required" title="必填">*</span>':''}<small>${esc(f[1])}</small></th>`).join('')}<th scope="col">数据所属人</th><th scope="col">更新时间</th>${meta?'<th scope="col">记录 ID<small>只读</small></th><th scope="col">创建时间<small>只读</small></th>':''}<th scope="col" class="apps-row-operation">操作</th></tr></thead><tbody>${slice.map((r,i)=>`<tr>${G.checkbox(r)}<td class="apps-readonly-cell" aria-readonly="true" title="只读：行序号">${(state.page-1)*7+i+1}</td>${E.cells(r,table,value)}<td class="apps-readonly-cell" aria-readonly="true" title="只读：数据所属人不可修改">${person(r.owner)}</td><td class="apps-time-cell apps-readonly-cell" aria-readonly="true" title="只读：更新时间由系统维护">${esc(r.updated)}</td>${meta?`<td class="apps-record-id apps-readonly-cell" aria-readonly="true" title="只读：记录 ID">${esc(r.id)}</td><td class="apps-readonly-cell" aria-readonly="true" title="只读：创建时间由系统维护">${esc(r.created||'未记录')}</td>`:''}${E.actions(r)}</tr>`).join('')}</tbody></table>${!rows.length?empty('当前范围暂无记录','请调整筛选条件，或在有权限的表中新增记录。'):''}</div>${footer}</section></div>`;
     }else{
       historySnapshot=getHistory();const footer=pageFooter(historySnapshot.length),slice=historySnapshot.slice((state.page-1)*7,state.page*7);
       body=`<p class="apps-caption">仅记录已生效的表与字段定义变化，不记录单元格内容变化。</p><div class="apps-panel"><div class="apps-table-scroll"><table class="apps-table"><thead><tr><th>变更时间</th><th>结构版本</th><th>变更来源</th><th>操作人</th><th>结构变更摘要</th><th>操作</th></tr></thead><tbody>${slice.map(r=>`<tr><td>${esc(r.time)}</td><td>${esc(r.version)}</td><td>${esc(r.source)}${r.agent?`<small class="apps-caption" style="display:block">${esc(r.agent)}</small>`:''}</td><td>${esc(r.actor)}</td><td>${r.changes.map(c=>`<div>${esc(c.type)} · ${esc(c.tableName)}${c.target!==c.tableName?' / '+esc(c.target):''}</div>`).join('')}</td><td><button class="apps-link" data-app-history="${r.id}">查看结构变更</button></td></tr>`).join('')}</tbody></table>${!slice.length?empty('暂无结构变更记录','数据内容更新不会产生结构变更历史。'):''}</div>${footer}</div>`;
@@ -88,7 +120,7 @@ window.AppsDataUI = (() => {
   }
   function identity() {
     state.user=q('#apps-demo-user').value;state.mode='mine';state.app=null;resetFilters();
-    sessionStorage.setItem('apps-demo-user',state.user);
+    sessionStorage.setItem('apps-demo-user',state.user);taskEntry();
   }
   function init() {
     state.user=new URLSearchParams(location.search).get('demoUser')||sessionStorage.getItem('apps-demo-user')||'zhang';if(!M.users[state.user])state.user='zhang';
@@ -104,6 +136,8 @@ window.AppsDataUI = (() => {
     document.addEventListener('click',event=>{
       const b=event.target.closest('button');if(!b)return;const d=b.dataset;
       if('appOpen'in d)navigate(d.appOpen);
+      else if('appDownload'in d)downloadTable();
+      else if('appTaskRun'in d)openTaskResult(d.appTaskRun);
       else if('appBack'in d)navigate();
       else if('appMode'in d){state.mode=d.appMode;state.search='';render();}
       else if('appScope'in d){state.scope=d.appScope;resetFilters();render();}
@@ -123,7 +157,7 @@ window.AppsDataUI = (() => {
     root.addEventListener('change',event=>{const name=event.target.dataset.appFilter;if(name){G.clearSelection();const requested=event.target.value;if(E.guard(()=>{state[name]=requested;state.page=1;render();})){event.target.value=state[name];return;}const previous=state[name];state[name]=event.target.value;if(state.from&&state.to&&state.from>state.to){state[name]=previous;event.target.value=previous;showToast('开始日期不能晚于结束日期');return;}state.page=1;render();}});
     root.addEventListener('input',event=>{if(event.target.dataset.appFilter!=='search')return;G.clearSelection();const requested=event.target.value;if(E.guard(()=>{state.search=requested;state.page=1;render();})){event.target.value=state.search;return;}const cursor=event.target.selectionStart;state.search=event.target.value;state.page=1;render();const next=q('[data-app-filter="search"]');next?.focus();next?.setSelectionRange(cursor,cursor);});
     window.addEventListener('storage',e=>{if(e.key!==M.key)return;M.reload();if(!root.hidden&&fingerprint()!==loadedFingerprint)q('#apps-new-data').hidden=false;});
-    nav();
+    nav();taskEntry();
   }
   function openRun(id) { if(!state.app)return;state.tab='history';resetFilters();render();detail(id); }
   function restoreHistory(id) {

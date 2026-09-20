@@ -49,7 +49,17 @@
 .apps-row-actions .neutral { color:#66758b; }
 .apps-trash,.apps-icon-close { display:grid; place-items:center; background:transparent; border:0; color:#8b96a6; padding:4px; border-radius:5px; cursor:pointer; }
 .apps-trash svg { width:18px; height:18px; }.apps-trash:hover { color:#d64343; background:#fff0f0; }
-.apps-row-readonly { color:#a3acb8; font-size:11px; }
+.apps-row-readonly { color:#64748b; font-size:11px; }
+.apps-data-grid td.apps-readonly-cell { background:#e8ecf2; color:#536176; cursor:default; }
+.apps-data-grid tbody tr:hover td.apps-readonly-cell { background:#e8ecf2; }
+.apps-readonly-legend { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; color:#637087; font-size:11px; }
+.apps-readonly-legend::before { content:""; width:11px; height:11px; border:1px solid #cbd3df; border-radius:2px; background:#e8ecf2; }
+.apps-sheet-actions { display:flex; gap:8px; }
+.apps-download-btn { display:inline-flex; align-items:center; gap:6px; }
+.apps-download-btn svg { width:14px; height:14px; }
+.history-row.apps-task-entry { width:100%; border:0; background:transparent; text-align:left; font:inherit; cursor:pointer; }
+.history-row.apps-task-entry:hover { background:#edf3ff; color:#165dff; }
+.history-row.apps-task-entry:focus-visible { outline:2px solid #165dff; outline-offset:-2px; }
 .apps-data-grid td.apps-editable-cell { cursor:cell; }
 .apps-data-grid td.apps-editable-cell:hover { background:#f5f8ff; }
 .apps-data-grid td.apps-editable-cell:focus-visible { outline:2px solid #165dff; outline-offset:-2px; }
