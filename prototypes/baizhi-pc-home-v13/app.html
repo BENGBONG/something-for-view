@@ -2512,7 +2512,7 @@
           <span class="edition-choice-icon"><svg class="icon"><use href="#ico-user"/></svg></span>
           <h2>个人版</h2>
           <p>管理自己的会议、闪念与文件，使用个人 AI 工作台。</p>
-          <ul><li>我的会议与我的闪念</li><li>个人文件与知识引用</li><li>AI 专家、技能与连接器</li></ul>
+          <ul><li>我的会议与我的闪念</li><li>个人文件与知识引用</li><li>技能、连接器与应用</li></ul>
           <span class="edition-choice-action">进入个人版</span>
         </button>
       </div>
@@ -2610,7 +2610,7 @@
               <button class="recycle-bin-entry" id="recycle-bin-entry" type="button"><svg class="icon"><use href="#ico-trash"/></svg><span>知识库回收站</span></button>
             </div>
           </div></section>
-          <section class="side-group capability-hub"><button class="side-group-head" id="capability-entry" data-main-target="capabilities" aria-current="false"><span class="side-group-title"><svg class="icon"><use href="#ico-agent"/></svg><span class="side-group-label">AI专家· 技能·连接器</span></span></button></section>
+          <section class="side-group capability-hub"><button class="side-group-head" id="capability-entry" data-main-target="capabilities" aria-current="false"><span class="side-group-title"><svg class="icon"><use href="#ico-agent"/></svg><span class="side-group-label">Ai 专家·技能·连接器·应用</span></span></button></section>
         </div>
         <section class="history-section" aria-labelledby="history-task-title">
           <div class="history-title" id="history-task-title">历史任务</div>
@@ -2793,15 +2793,14 @@
       </div>
     </section>
 
-    <section class="directory-view capability-compact" data-main-view="capabilities" hidden aria-label="AI专家、技能与连接器">
-      <nav class="capability-primary-tabs" aria-label="能力类型"><button class="capability-primary-tab active" data-capability-tab="experts">专家</button><button class="capability-primary-tab" data-capability-tab="skills">技能</button><button class="capability-primary-tab" data-capability-tab="connectors">连接器</button><button class="capability-primary-tab" data-capability-tab="applications">应用</button></nav>
+    <section class="directory-view capability-compact" data-main-view="capabilities" hidden aria-label="Ai 专家·技能·连接器·应用">
+      <nav class="capability-primary-tabs" aria-label="能力类型"><button class="capability-primary-tab active edition-enterprise-only" data-capability-tab="experts">专家</button><button class="capability-primary-tab" data-capability-tab="skills">技能</button><button class="capability-primary-tab" data-capability-tab="connectors">连接器</button><button class="capability-primary-tab" data-capability-tab="applications">应用</button></nav>
       <section data-capability-panel="applications" hidden>
         <div class="directory-controls"><p class="apps-caption">已发布的应用，点击后在新标签页打开。</p><label class="directory-search"><svg class="icon"><use href="#ico-search"/></svg><input id="published-app-search" type="search" placeholder="搜索应用名称或简介" aria-label="搜索已发布应用" /></label></div>
         <div class="published-app-grid" id="published-app-grid"></div><div class="apps-empty" id="published-app-empty" hidden>暂无匹配的已发布应用</div>
-        <p class="apps-caption">原型示例：以下链接打开本地演示页面，尚未接入 Agent Platform 的真实发布地址。</p>
       </section>
 
-      <section data-capability-panel="experts">
+      <section data-capability-panel="experts" class="edition-enterprise-only">
         <div class="expert-toolbar"><div class="directory-categories" aria-label="专家分类"><button class="directory-category active" data-expert-category="all">全部</button><button class="directory-category" data-expert-category="白领办公">白领办公</button><button class="directory-category" data-expert-category="销售管理">销售管理</button><button class="directory-category" data-expert-category="投研分析">投研分析</button></div><label class="directory-search"><svg class="icon"><use href="#ico-search"/></svg><input id="expert-search" type="search" placeholder="搜索专家名称或能力" aria-label="搜索专家" /></label></div>
         <div class="directory-grid" id="expert-grid">
           <article class="directory-card expert-card report" role="button" tabindex="0" data-expert-item data-agent="报告撰写助手" data-category="白领办公"><span class="expert-type">SINGLE AGENT</span><h3>报告撰写助手</h3><span class="expert-role">内容交付专家</span><p>基于会议、知识库与补充资料，组织结构并生成可继续编辑的交付报告。</p><img class="expert-portrait" src="assets/experts/report-writing-expert.png" alt="报告撰写助手职业形象" /></article>
@@ -2963,7 +2962,7 @@
     $("#user-card").addEventListener("click", (event) => { event.stopPropagation(); closeSpaceMenu(); const open = !$("#user-menu").classList.contains("show"); $("#user-menu").classList.toggle("show", open); $("#user-card").setAttribute("aria-expanded", String(open)); });
     $("#user-menu").addEventListener("click", (event) => { event.stopPropagation(); const item = event.target.closest("[data-profile-action]"); if (!item) return; const action = item.dataset.profileAction; if (action === "profile") openDrawer("个人中心", '<h4>张伟</h4><div class="drawer-section"><strong>个人资料</strong><p>维护头像、姓名与个人工作信息。</p></div><div class="drawer-section"><strong>我的设备</strong><p>查看已登录的网页端、移动端与桌面端。</p></div>', '<button class="primary-btn" data-toast="个人资料已保存">编辑个人资料</button>'); else if (action === "switch-edition") { closeUserMenu(); $("#edition-gate").hidden = false; return; } else if (action === "download-app") { closeUserMenu(); setAppQrOpen(true); return; } else if (action === "checkin") { item.textContent = "已签到"; item.disabled = true; showToast("签到成功，获得 20 积分"); } else if (action === "logout") showToast("原型演示：退出登录需要二次确认"); else showToast({ upgrade: "正在查看升级方案", points: "正在打开积分明细", "earn-points": "正在打开积分任务", website: "正在打开百智官网", orders: "正在打开我的订单", "agent-workspace": "将按已有逻辑打开 Agent 工作台", intro: "正在打开产品介绍", changelog: "正在打开更新日志", guide: "正在打开新手指南" }[action] || "正在打开个人设置"); closeUserMenu(); });
     document.addEventListener("click", (event) => { if (!event.target.closest(".space-switcher-wrap")) closeSpaceMenu(); if (!event.target.closest(".user-footer")) closeUserMenu(); });
-    const mainViewTitles = { home: "企业AI工作台", knowledge: "知识库", "recycle-bin": "回收站", capabilities: "AI专家· 技能·连接器", recording: "语音录制", "note-detail": "语音内容" };
+    const mainViewTitles = { home: "企业AI工作台", knowledge: "知识库", "recycle-bin": "回收站", capabilities: "Ai 专家·技能·连接器·应用", recording: "语音录制", "note-detail": "语音内容" };
     const setActiveSidebar = (target) => {
       $$(".side-sub-item, .nav-item, .side-group-head").forEach((row) => { row.classList.remove("active"); row.removeAttribute("aria-current"); });
       [$("#recycle-bin-entry"), $("#recording-recycle-entry")].forEach((row) => { row.classList.remove("active"); row.removeAttribute("aria-current"); });
@@ -3077,6 +3076,7 @@
     $("#recording-assistant-transcript").addEventListener("click", () => showToast("小智已引用当前实时转写"));
     $("#recording-assistant-knowledge").addEventListener("click", () => showToast("小智已打开知识库选择"));
     const showCapabilityPanel = (target) => {
+      if (document.body.dataset.edition === "personal" && target === "experts") target = "skills";
       $$('[data-capability-tab]').forEach((button) => button.classList.toggle("active", button.dataset.capabilityTab === target));
       $$('[data-capability-panel]').forEach((panel) => { const active = panel.dataset.capabilityPanel === target; panel.hidden = !active; panel.setAttribute("aria-hidden", String(!active)); });
       $(".main").scrollTop = 0;
@@ -3906,6 +3906,10 @@
       Array.from($("#meeting-source-filter").options).forEach((option) => { if (option.value === "企业共享") { option.hidden = personal; option.disabled = personal; } });
       $("#edition-gate").hidden = true;
       mainViewTitles.home = personal ? "我的 AI 工作台" : "企业AI工作台";
+      mainViewTitles.capabilities = personal ? "技能·连接器·应用" : "Ai 专家·技能·连接器·应用";
+      $("#capability-entry .side-group-label").textContent = mainViewTitles.capabilities;
+      $('[data-main-view="capabilities"]').setAttribute("aria-label", mainViewTitles.capabilities);
+      showCapabilityPanel(personal ? "skills" : "experts");
       $("#user-edition-label").textContent = personal ? "个人版" : "企业版";
       $("#page-crumb").textContent = mainViewTitles.home;
       $("#history-tab-all").click();
