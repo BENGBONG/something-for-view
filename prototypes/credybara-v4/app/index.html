@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credybara — A clearer next step</title>
+<meta name="description" content="Understand your personal loan options with Bara. Explore at your own pace, compare estimated costs and choose your next step.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="site.css" rel="stylesheet">
+<script src="saved-products.js" defer></script><script src="account.js" defer></script><script src="home.js" defer></script>
+</head>
+<body class="visitor-home">
+<header class="site-header"><div class="site-header-in">
+<a class="site-brand" href="./" aria-label="Credybara home"><img src="bara.svg" alt="" width="36" height="36">Credybara</a>
+<nav aria-label="Main"><a href="#how-it-works">How it works</a><a href="#understand">Why Credybara</a><a href="#disclosures">Rates &amp; disclosures</a></nav>
+<div class="account-nav" data-account-nav></div>
+</div></header>
+<main>
+<section class="home-hero" aria-labelledby="home-title">
+<div class="hero-copy">
+<div class="hello-bara"><img src="bara.svg" alt="" width="28" height="28">A little guidance goes a long way.</div>
+<h1 id="home-title">Need a loan?<br><em>Start here.</em></h1>
+<p class="hero-lead">Big plans or little surprises. Find your way through personal loans with Bara, one clear step at a time.</p>
+<p class="hero-detail">Describe what you need in your own words. Bara picks up the details and asks only what’s missing before helping you compare.</p>
+<div class="hero-actions"><a class="site-btn primary" href="flow.html">Find my options <span aria-hidden="true">↗</span></a><button class="site-text-btn" type="button" id="watchProcess">See how it works <span aria-hidden="true">↓</span></button></div>
+<p class="hero-reassurance"><span>✓ Free to explore</span><span>✓ No account needed to start</span></p>
+</div>
+<div class="process-preview" id="processPreview" role="img" aria-label="A conversation with Bara: describe a need in your own words, see the details it understands, confirm an approximate amount, answer a missing detail and compare options.">
+<div class="preview-top"><div class="preview-guide"><img src="bara.svg" alt="" width="38" height="38"><span><b>Bara</b><small>Your AI loan guide</small></span></div><span class="walkthrough-step" id="walkthroughStep">Tell Bara</span></div>
+<div class="walkthrough-frame" inert><iframe id="walkthroughFrame" src="walkthrough.html" title="Loan matching walkthrough" tabindex="-1" aria-hidden="true" loading="eager"></iframe></div>
+<div class="preview-bottom"><span id="sceneCount">01 / 04</span><div class="walkthrough-progress" aria-hidden="true"><span data-scene-step="0" class="active"><i></i></span><span data-scene-step="1"><i></i></span><span data-scene-step="2"><i></i></span><span data-scene-step="3"><i></i></span></div><span id="sceneCaption">Describe it in your own words</span></div>
+</div>
+</section>
+<section class="how-section" id="how-it-works" aria-labelledby="how-title"><div class="section-intro"><span>At your pace, with a little guidance</span><h2 id="how-title">One conversation.<br>A clearer way forward.</h2></div><div class="how-steps"><article><span class="step-number">1</span><h3>Tell us your story</h3><p>Describe your need naturally. Bara picks up the purpose, amount and preferences in your message.</p></article><article><span class="step-number">2</span><h3>Understand your options</h3><p>Confirm any uncertain details, then compare estimated payments, fees and total costs.</p></article><article><span class="step-number">3</span><h3>Choose your next step</h3><p>Continue with a lender when you're ready. They'll review your application and confirm the final terms.</p></article></div></section>
+<section class="account-invite" id="understand"><div><img src="bara.svg" alt="" width="58" height="58"><div><h2>A familiar place. A fresh step.</h2><p>Create your space to keep your loan preferences and pick up where you left off. Explore first, sign up when you're ready.</p></div></div><button class="site-btn secondary" type="button" data-account="register">Create my account</button></section>
+</main>
+<footer class="site-footer" id="disclosures"><div class="footer-main"><div><a href="./" class="site-brand"><img src="bara.svg" alt="" width="28" height="28">Credybara</a><p>A little clarity for your next step.</p></div><div><h3>About Credybara</h3><p>Credybara is not a lender and does not make credit decisions. Each participating lender determines approval, rates, fees and funding times. Exploring options does not guarantee approval.</p></div><div><h3>Rates &amp; advertiser disclosure</h3><p>Rates and terms depend on your state, eligibility and lender. We may receive compensation from lenders, which can affect which options appear and their order. We don't show every loan available.</p><a href="flow.html#disclosures">View rate ranges and a representative example</a></div></div><div class="footer-links"><span>© 2026 Credybara</span><button type="button" data-policy="privacy">Privacy Notice</button><button type="button" data-policy="terms">Terms of Use</button><a href="flow.html#disclosures">Do Not Sell or Share My Personal Information</a></div></footer>
+</body></html>
