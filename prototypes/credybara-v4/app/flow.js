@@ -142,16 +142,16 @@ function prosCons(l, set, credit = null){
   const min = k => Math.min(...set.map(x => x[k])), max = k => Math.max(...set.map(x => x[k]));
   const many = set.length > 1;
   const pros = [], cons = [];
-  if (many && l.totalCost === min('totalCost')) pros.push(['cost', `Lowest total cost — ${money(max('totalCost') - l.totalCost)} less than the priciest here`]);
+  if (many && l.totalCost === min('totalCost')) pros.push(['cost', `Lowest total cost, ${money(max('totalCost') - l.totalCost)} less than the priciest here`]);
   if (many && l.monthly === min('monthly')) pros.push(['monthly', `Lowest monthly payment (${money(l.monthly)}/mo)`]);
-  if (many && l.term === min('term')) pros.push(['fast', `Paid off fastest — ${l.term} months`]);
+  if (many && l.term === min('term')) pros.push(['fast', `Paid off fastest: ${l.term} months`]);
   if (l.fee === 0) pros.push(['fee', 'No origination fee']);
   if (l.minCredit <= 1) pros.push(['flex', `Considers ${CREDIT_NAME[l.minCredit]} credit`]);
   if (many && l.apr === min('apr')) pros.push(['apr', `Lowest APR here (${l.apr.toFixed(2)}%)`]);
   else if (l.apr < 20) pros.push(['apr', `Low APR (${l.apr.toFixed(2)}%)`]);
   if (!pros.length) pros.push(['bal', 'Balanced payment and total cost']);
 
-  if (credit !== null && credit < l.minCredit) cons.push(`May not qualify — usually needs ${CREDIT_NAME[l.minCredit]} credit`);
+  if (credit !== null && credit < l.minCredit) cons.push(`May not qualify. Usually needs ${CREDIT_NAME[l.minCredit]} credit`);
   if (many && l.totalCost === max('totalCost')) cons.push(`Costs ${money(l.totalCost - min('totalCost'))} more overall than the cheapest here`);
   if (many && l.monthly === max('monthly')) cons.push(`Highest monthly payment (${money(l.monthly)}/mo)`);
   if (l.term >= 36) cons.push(`Longer term (${l.term} mo) adds interest`);
@@ -199,7 +199,7 @@ function compareHTML(list, mode, sel = new Set()){
       tip:cmpT('Everything you repay. Green is what you borrowed, orange is interest, yellow is fees. Fees come out of the cash you receive.','Todo lo que pagas. Verde es lo prestado, naranja el interés y amarillo los cargos. Los cargos se descuentan del dinero que recibes.'),
       val:l => money(l.total), num:l => l.total, f:'money', sub:l => `<span class="extra">+${money(l.totalCost)}</span>`, viz:stack},
     {k:'apr', ic:CMP_IC.pct, lbl:'APR',
-      tip:cmpT('The yearly cost of the loan, including interest and most fees — the best single number for comparing. Green = lower, orange = higher.','El costo anual del préstamo, con intereses y la mayoría de cargos: el mejor número para comparar. Verde = más bajo, naranja = más alto.'),
+      tip:cmpT('The yearly cost of the loan, including interest and most fees. The best single number for comparing. Green = lower, orange = higher.','El costo anual del préstamo, con intereses y la mayoría de cargos: el mejor número para comparar. Verde = más bajo, naranja = más alto.'),
       val:l => `${l.apr.toFixed(1)}%`, num:l => l.apr, f:'pct', viz:apr},
     {k:'minCredit', ic:ICON.flex, lbl:cmpT('Credit needed','Crédito'),
       tip:cmpT('The credit level this lender usually looks for. Fewer bars = easier to qualify. Not a guarantee either way.','El nivel de crédito que suele pedir. Menos barras = más fácil calificar. No es una garantía.'),
@@ -507,7 +507,7 @@ function pickTemplate(key, amount, fromAd){
   $('#tplBlock').classList.add('done');
   track('template_selected', {template:key, amount:amt});
   startPlan(label, key, amt, `${label} · <b class="num">${money(amt)}</b>`,
-    fromAd ? t(`Looks like you're here about <b>${tp.about}</b>, so I started with <b>${money(amt)}</b> — change it below if you need to.`,
+    fromAd ? t(`Looks like you're here about <b>${tp.about}</b>, so I started with <b>${money(amt)}</b>. You can change it below.`,
                `Parece que vienes por <b>${tp.aboutEs}</b>, así que empecé con <b>${money(amt)}</b>; cámbialo abajo si quieres.`) : null);
 }
 let composerBusy = false;
@@ -532,7 +532,7 @@ async function replyToMessage(text){
     const p = parseFree(text);
     $('#tplBlock').classList.add('done');
     await startPlan(p.label, p.key, p.amount, esc(text),
-      `Sounds like <b>${p.label.toLowerCase()}</b>${p.guessed ? ' — I started with <b>'+money(p.amount)+'</b>, change it below if needed' : ', about <b>'+money(p.amount)+'</b>'}.`);
+      `Sounds like <b>${p.label.toLowerCase()}</b>${p.guessed ? '. I started with <b>'+money(p.amount)+'</b>; change it below if needed' : ', about <b>'+money(p.amount)+'</b>'}.`);
     return;
   }
   const question = /\?|\b(why|what|how|explain)\b|为什么|什么|怎么/i.test(text);
@@ -604,7 +604,7 @@ async function startPlan(label, key, amount, userHtml, ack){
   userMsg(userHtml, key);
   setStep(2);
   await typing();
-  baraMsg(`${ack || t(`Got it — <b>${money(amount)}</b> for ${label.toLowerCase()}.`, `Entendido: <b>${money(amount)}</b> para ${label.toLowerCase()}.`)} <b>${t('What matters most to you this time?','¿Qué es lo más importante para ti esta vez?')}</b>`);
+  baraMsg(`${ack || t(`Got it: <b>${money(amount)}</b> for ${label.toLowerCase()}.`, `Entendido: <b>${money(amount)}</b> para ${label.toLowerCase()}.`)} <b>${t('What matters most to you this time?','¿Qué es lo más importante para ti esta vez?')}</b>`);
   const blk = add(`
     <div class="plan" role="group" aria-label="Your priority">
       <div class="plan-q"><span>${t('Pick one · you can switch later','Elige una · puedes cambiarla después')}</span><span class="num">1–4</span></div>
@@ -652,7 +652,7 @@ const CREDIT_Q = [
   ['0', t('Needs work','Por mejorar'), t('Below 580','Menos de 580')], ['', t('Not sure','No sé'), t('That\'s okay','No pasa nada')]
 ];
 function askCredit(){
-  baraMsg(t(`Last question before I show options: <b>how would you describe your credit?</b> A rough guess is fine — this doesn't check your credit.`,
+  baraMsg(t(`Last question before I show options: <b>how would you describe your credit?</b> A rough guess is fine. This doesn't check your credit.`,
             `Una última pregunta antes de mostrarte opciones: <b>¿cómo describirías tu crédito?</b> Un cálculo aproximado basta; esto no revisa tu crédito.`));
   const blk = add(`<div class="plan credit-q" role="group" aria-label="${t('Your credit','Tu crédito')}">
       <div class="plan-q"><span>${t('Pick the closest','Elige la más cercana')}</span><span>${t('Score range','Rango')}</span></div>
@@ -685,7 +685,7 @@ function renderResults(){
   const p = PREFS.find(x => x.key === S.pref);
   const stTxt = S.st ? ` in <b>${S.st}</b>` : '';
   $('#resIntro .bubble').innerHTML = top.length
-    ? t(`Here ${top.length===1?'is':'are'} your <b>${top.length} best overall option${top.length>1?'s':''}</b> for <b>${money(S.amount)}</b>${stTxt} — balanced across cost, payment, payoff speed and credit fit, with extra weight on <b>${p.label.toLowerCase()}</b>${S.credit !== '' ? ` and lenders that fit <b>${CREDIT_Q.find(x => x[0] === S.credit)[1].toLowerCase()}</b> credit` : ''}. Tick the ones you like, then continue. Estimated terms, subject to lender review.`,
+    ? t(`Here ${top.length===1?'is':'are'} your <b>${top.length} best overall option${top.length>1?'s':''}</b> for <b>${money(S.amount)}</b>${stTxt}, balanced across cost, payment, payoff speed and credit fit, with extra weight on <b>${p.label.toLowerCase()}</b>${S.credit !== '' ? ` and lenders that fit <b>${CREDIT_Q.find(x => x[0] === S.credit)[1].toLowerCase()}</b> credit` : ''}. Tick the ones you like, then continue. Estimated terms, subject to lender review.`,
         `Estas son tus <b>${top.length} mejores opciones</b> para <b>${money(S.amount)}</b>${stTxt}, equilibrando costo, pago, plazo y crédito, con más peso en <b>${p.label.toLowerCase()}</b>. Marca las que te gusten y continúa. Términos estimados, sujetos a la revisión del prestamista.`)
     : `No lenders in our network cover <b>${money(S.amount)}</b>${stTxt}. Try a different amount or state.`;
 
@@ -741,7 +741,7 @@ const PART = {valid: () => true};   // stand-in for the two sections rendered in
 const APP = [
   {id:'details', q:t('One short form and you\'ll see your offers.','Un formulario corto y verás tus ofertas.'),
     sub:t('Just what lenders need to estimate your offers with a soft credit check. No SSN needed here.','Solo lo que necesitan los prestamistas para estimar tus ofertas con una consulta suave. Aquí no se pide el SSN.'),
-    why:t('A soft check finds your credit file with your name, date of birth and address. Income shows what you can afford. Anything else — like your phone or full SSN — is asked by the lender you choose, on its own site.',
+    why:t('A soft check finds your credit file with your name, date of birth and address. Income shows what you can afford. Anything else, like your phone or full SSN, is asked by the lender you choose on its own site.',
           'La consulta suave encuentra tu historial con tu nombre, fecha de nacimiento y dirección. El ingreso muestra lo que puedes pagar. Lo demás, como teléfono o SSN completo, lo pide el prestamista que elijas en su sitio.'),
     ui:uiDetails, valid:(show, blk) => validBasics(show, blk) & validContact(show, blk),
     answer:() => `${A.first} ${A.last} · ${A.zip} ${A.st} · ${money(A.income)}/mo · ${A.email}`, final:true, cta:t('See my offers','Ver mis ofertas')}
@@ -759,7 +759,7 @@ async function startApply(ids){
   track('check_options_click', {lenders:ids.join(',')});
   renderProgress();
   await typing();
-  baraMsg(t(`Great. <b>One quick form</b> and I'll check pre-qualified offers for you — a soft check that doesn't affect your credit score.`,
+  baraMsg(t(`<b>One quick form</b> and I'll check pre-qualified offers for you. It's a soft check and doesn't affect your credit score.`,
             `Perfecto. <b>Un formulario rápido</b> y reviso tus ofertas precalificadas, con una consulta suave que no afecta tu puntaje.`));
   armNudge();
   nextQ();
@@ -842,7 +842,7 @@ function uiBasics(blk, done, editing){
     const pay = pays.length ? Math.min(...pays) : null;
     blk.querySelector('[data-inc]').innerHTML = !v ? '' : v < 1000
       ? `<div class="soft">${ICON.alert}<span>Many lenders look for at least $1,000 a month. You can still continue.</span></div>`
-      : pay ? `<div class="note">${ICON.info}<span>For ${money(S.amount)}, example payments start around <b>${money(pay)}/mo</b> — about ${Math.max(1, Math.round(pay/v*100))}% of your take-home pay.</span></div>` : '';
+      : pay ? `<div class="note">${ICON.info}<span>For ${money(S.amount)}, example payments start around <b>${money(pay)}/mo</b> (about ${Math.max(1, Math.round(pay/v*100))}% of your take-home pay).</span></div>` : '';
   };
   blk.querySelectorAll('.chip[data-v]').forEach(c => c.addEventListener('click', () => { inc.value = money(+c.dataset.v); set(+c.dataset.v); }));
   inc.addEventListener('input', () => set(parseInt(inc.value.replace(/\D/g,''),10) || null));
@@ -898,11 +898,11 @@ function validContact(show, blk){
 // Honest stop: explain, offer alternatives, let them change the answer in place.
 function stop(blk, reason){
   const t = {
-    state:[`We can't match you in ${esc(A.st)} yet`, `None of our partner lenders serve ${esc(A.st)} right now, so we stopped here — you don't need to share anything else.`]
+    state:[`We can't match you in ${esc(A.st)} yet`, `None of our partner lenders serve ${esc(A.st)} right now, so we stopped here. You don't need to share anything else.`]
   }[reason];
   blk.querySelector('[data-stop]').innerHTML = `<div class="stop"><h4>${t[0]}</h4><p>${t[1]}</p>
     <ul><li><b>Local credit unions</b> often offer small personal loans to members.</li>
-    <li><b>Nonprofit credit counseling</b> can help with budgets and debt, often free — <a href="https://www.nfcc.org" target="_blank" rel="noopener">nfcc.org</a>.</li></ul></div>`;
+    <li><b>Nonprofit credit counseling</b> can help with budgets and debt, often for free: <a href="https://www.nfcc.org" target="_blank" rel="noopener">nfcc.org</a>.</li></ul></div>`;
 }
 
 /* =====================================================================
@@ -927,8 +927,8 @@ async function submit(){
   await typing();
   buildLead();
   track('lead_submitted', {state:A.st, amount:S.amount, credit:S.credit || 'unsure'});
-  baraMsg(t('On it — checking which lenders can pre-qualify you.','Listo: estoy revisando qué prestamistas pueden precalificarte.'));
-  const steps = [t(`Checking lender rules for ${esc(A.st)}`,`Revisando las reglas de ${esc(A.st)}`), t('Soft credit check — doesn\'t affect your score','Consulta suave: no afecta tu puntaje')];
+  baraMsg(t('Checking which lenders can pre-qualify you.','Listo: estoy revisando qué prestamistas pueden precalificarte.'));
+  const steps = [t(`Checking lender rules for ${esc(A.st)}`,`Revisando las reglas de ${esc(A.st)}`), t('Soft credit check (doesn\'t affect your score)','Consulta suave: no afecta tu puntaje')];
   const list = add(`<ul class="checks">${steps.map(x => `<li><span class="c">${ICON.check}</span>${x}</li>`).join('')}</ul>`, 'block');
   scrollToEl(list);
   for (const li of list.querySelectorAll('li')){ await sleep(reduceMotion ? 50 : 650); li.classList.add('done'); }
@@ -963,7 +963,7 @@ async function showOffers(top, credit){
   R.innerHTML = `<div class="res-mini" style="display:flex">${ICON.check.replace('<svg','<svg width="16" height="16" style="color:var(--green-2)"')}<span>${cmpT('Your comparison has been updated with your pre-qualified offers below.','Tu comparación se actualizó con tus ofertas precalificadas abajo.')}</span></div>`;
   F.sel = new Set((A.picks || []).filter(id => top.some(l => l.id === id)));
   if (!F.sel.size) F.sel.add(top[0].id);
-  const ready = cmpT(`${esc(A.first)}, you pre-qualified with <b>${top.length} lender${top.length>1?'s':''}</b>. These are <b>estimates</b>. Your picks are ticked — change them if you like, then apply.`,
+  const ready = cmpT(`${esc(A.first)}, you pre-qualified with <b>${top.length} lender${top.length>1?'s':''}</b>. These are <b>estimates</b>. Your picks are ticked. Change them if you like, then apply.`,
                      `${esc(A.first)}, precalificaste con <b>${top.length} prestamista${top.length>1?'s':''}</b>. Son <b>estimados</b>. Tus elecciones están marcadas; cámbialas si quieres y aplica.`);
   const m = baraMsg(IS_V2 ? cmpT('Checking lenders in our network… <b data-found>0</b> offers so far.', 'Revisando prestamistas de nuestra red… <b data-found>0</b> ofertas hasta ahora.') : ready);
   const blk = add(`<div data-match>${advHTML()}<div data-cmp></div></div>`, 'block');
@@ -1010,7 +1010,7 @@ async function applyTo(ids, blk){
     <div class="srow" data-r="${l.id}"><span class="mono" style="background:${l.color}">${l.name[0]}</span>
       <div class="nm">${l.name}<small data-sub>${t('Sending your application…','Enviando tu solicitud…')}</small></div>
       <span class="badge"><span class="spin"></span>${t('Sending','Enviando')}</span></div>`).join('')}</div>
-    <p class="fine" style="margin-top:8px">${t('“Accepted” means the lender wants to review your application — it isn\'t an approval yet.','“Aceptada” significa que el prestamista quiere revisar tu solicitud; todavía no es una aprobación.')}</p>`, 'block');
+    <p class="fine" style="margin-top:8px">${t('“Accepted” means the lender wants to review your application. It isn\'t an approval yet.','“Aceptada” significa que el prestamista quiere revisar tu solicitud; todavía no es una aprobación.')}</p>`, 'block');
   scrollToEl(st);
   F.resp = chosen.map((l, i) => ({l, ok: i < 2 || chosen.length < 3}));
   for (const r of F.resp){
@@ -1095,7 +1095,7 @@ function restoreProducts(snapshot, owner){
   F.resp = saved.products.map(p => ({ok:true,l:{...calc(LENDERS.find(l=>l.id===p.lenderId),saved.amount),...p,id:p.lenderId}}));
   F.offers = F.resp.map(r=>r.l); renderProgress(); syncComposer();
   const expired = saved.expiresAt <= Date.now();
-  baraMsg(expired ? t('Your saved products have expired. Start a new search to see what is available now.','Tus productos guardados caducaron. Inicia una nueva búsqueda.') : t('Welcome back. Your saved products are ready — pick up where you left off.','Bienvenido de nuevo. Tus productos guardados están listos.'));
+  baraMsg(expired ? t('Your saved products have expired. Start a new search to see what is available now.','Tus productos guardados caducaron. Inicia una nueva búsqueda.') : t('Welcome back. Your saved products are still here.','Bienvenido de nuevo. Tus productos guardados están listos.'));
   const block = add(`<div class="saved-products-heading"><h3>${t('Your available products','Tus productos disponibles')}</h3><p>${money(saved.amount)} · ${t('Available until','Disponibles hasta')} ${fmtDay(new Date(saved.expiresAt))}</p></div>
     <div class="status">${F.resp.map(({l})=>`<div class="srow" data-r="${l.id}"><span class="mono" style="background:${l.color}">${l.name[0]}</span><div class="nm">${esc(l.name)}<small>${money2(l.monthly)}/mo · ${l.term} months · ${l.apr.toFixed(1)}% APR</small></div><span class="badge ${expired?'no':'ok'}">${expired?t('Expired','Caducado'):t('Available','Disponible')}</span><button type="button" class="btn primary go" data-product-continue="${l.id}" ${expired?'disabled':''}>${t('Continue','Continuar')}</button></div>`).join('')}</div>
     <p class="fine">${t('These results are not final approvals. Each lender reviews your application and confirms the final terms.','Estos resultados no son aprobaciones finales. Cada prestamista confirma los términos finales.')}</p><div class="retain-results" data-retain-results aria-live="polite"></div>`, 'block');
@@ -1232,7 +1232,7 @@ async function fund(l, financed, first){
         <dt>Payments</dt><dd>${l.term}</dd>
         <dt>Autopay</dt><dd>${F.autopay ? 'On' : 'Off'}</dd>
       </dl>
-      <p class="fine" style="margin-top:14px">Your loan is with ${esc(l.name)}; questions about it go to them.${F.resp.filter(r => r.ok && r.l.id !== l.id).length ? ' Your other applications stay unfinished — nothing happens unless you complete them.' : ''}</p>
+      <p class="fine" style="margin-top:14px">Your loan is with ${esc(l.name)}; questions about it go to them.${F.resp.filter(r => r.ok && r.l.id !== l.id).length ? ' Your other applications stay unfinished. Nothing happens unless you complete them.' : ''}</p>
       <div style="margin-top:14px"><button class="btn primary" type="button" data-again>Start a new request</button></div>
     </div>`, 'block');
   done.querySelector('[data-again]').addEventListener('click', () => $('#restart').click());
@@ -1251,12 +1251,12 @@ const TOUR = [
   {target:'#tplGrid', title:'Start here', text:'Tap what the loan is for. You can change the amount later.', done:() => S.step >= 2},
   {target:'.plan:not(.credit-q)', title:'Pick what matters most', text:'Bara picks your 3 best overall options, giving extra weight to this.', done:() => S.step >= 3},
   {target:'.credit-q', title:'Your credit, roughly', text:'A rough guess helps Bara skip lenders that are unlikely to work for you. It doesn\'t check your credit.', done:() => S.step >= 4},
-  {target:'#results .cmp', title:'Compare at a glance', text:'One column per option, one row per thing to compare. ✓ marks the best in each row — tap a row name to learn what it means. Tick the columns you like.', next:true},
-  {target:'#composerActions [data-cta], #results [data-cta]', title:'Check real options', text:'Continue with the ones you ticked — one short form, right here in the chat.', done:() => S.phase === 'apply'},
-  {target:'.qa[data-s="details"] .block', title:'One quick form', text:'Just what lenders need to estimate your offers — the lender asks for anything else on its own site. Check the box and tap “See my offers”.', done:() => A.submitted},
-  {target:'[data-match]', title:'Pick and apply', text:'Same table, now with your pre-qualified estimates. Your picks are ticked — change them if you like, then tap Apply', done:() => F.applied,
+  {target:'#results .cmp', title:'Compare at a glance', text:'One column per option, one row per thing to compare. ✓ marks the best in each row. Tap a row name to learn what it means. Tick the columns you like.', next:true},
+  {target:'#composerActions [data-cta], #results [data-cta]', title:'Check real options', text:'Continue with the ones you ticked. It\'s one short form, right here in the chat.', done:() => S.phase === 'apply'},
+  {target:'.qa[data-s="details"] .block', title:'One quick form', text:'Just what lenders need to estimate your offers. The lender asks for anything else on its own site. Check the box and tap “See my offers”.', done:() => A.submitted},
+  {target:'[data-match]', title:'Pick and apply', text:'Same table, now with your pre-qualified estimates. Your picks are ticked. Change them if you like, then tap Apply', done:() => F.applied,
     wait:'Bara is checking pre-qualified offers…'},
-  {target:'[data-resp]', title:'Lenders respond', text:'“Accepted” means a lender wants to review your application — not an approval. Tap Continue: you\'ll go to that lender\'s own website to finish.', next:true,
+  {target:'[data-resp]', title:'Lenders respond', text:'“Accepted” means a lender wants to review your application. It\'s not an approval. Tap Continue: you\'ll go to that lender\'s own website to finish.', next:true,
     wait:'Lenders are responding…'},
 ];
 const Tour = {
@@ -1416,7 +1416,7 @@ function buildLead(){
   $('#dnsBtn').addEventListener('click', () => $('#dns').classList.toggle('open'));
   if (navigator.globalPrivacyControl){
     $('#dnsToggle').checked = true;
-    $('#gpcNote').textContent = 'Global Privacy Control signal detected — you\'re opted out of the sale or sharing of your personal information.';
+    $('#gpcNote').textContent = 'Global Privacy Control signal detected. You\'re opted out of the sale or sharing of your personal information.';
   }
 })();
 
@@ -1432,7 +1432,7 @@ function fireNudge(){
   if (nudged || A.submitted || S.phase !== 'apply') return;
   nudged = true;
   const q = chat.querySelector('.qa:last-child');
-  const m = baraMsg(t('Still there? You\'re almost done — it takes under a minute, and checking offers won\'t affect your credit score.',
+  const m = baraMsg(t('Still there? You\'re almost done. It takes under a minute, and checking offers won\'t affect your credit score.',
                       '¿Sigues ahí? Ya casi terminas: toma menos de un minuto y ver ofertas no afecta tu puntaje.'));
   if (q) q.parentNode.insertBefore(m, q.nextSibling);
 }

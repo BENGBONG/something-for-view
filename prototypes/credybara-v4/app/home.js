@@ -1,13 +1,13 @@
 (() => {
   const frame = document.getElementById('walkthroughFrame');
   const progress = [...document.querySelectorAll('[data-scene-step]')];
-  const names = ['Tell Bara', 'AI understands', 'One quick question', 'Your options'];
+  let previewVisible = true;
   const captions = ['Describe it in your own words', 'Bara picks up the details', 'Confirm only what’s needed', 'Compare your options'];
   window.addEventListener('message', event => {
     if (event.origin !== location.origin || event.source !== frame.contentWindow) return;
     const {type, step, duration, elapsed} = event.data || {};
     if (type !== 'credybara-walkthrough-step' || !Number.isInteger(step) || step < 0 || step > 3) return;
-    document.getElementById('walkthroughStep').textContent = names[step];
+    if (!previewVisible) frame.contentWindow.postMessage({type:'credybara-walkthrough-visibility', visible:false}, location.origin);
     document.getElementById('sceneCount').textContent = `0${step + 1} / 04`;
     document.getElementById('sceneCaption').textContent = captions[step];
     progress.forEach((segment, index) => {
@@ -23,6 +23,14 @@
       }
     });
   });
+  const preview = document.getElementById('processPreview');
+  const progressBar = preview.querySelector('.walkthrough-progress');
+  // Pause the film and its progress bar while the preview is off screen.
+  new IntersectionObserver(([entry]) => {
+    previewVisible = entry.isIntersecting;
+    progressBar.classList.toggle('paused', !entry.isIntersecting);
+    frame.contentWindow?.postMessage({type:'credybara-walkthrough-visibility', visible:entry.isIntersecting}, location.origin);
+  }).observe(preview);
   document.getElementById('watchProcess').addEventListener('click', () => {
     document.getElementById('processPreview').scrollIntoView({
       behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block:'center'

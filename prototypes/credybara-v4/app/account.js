@@ -24,7 +24,7 @@
         el.innerHTML = '<div><b>These products have expired</b><p>Check again to find the products currently available to you.</p></div><button class="btn primary" type="button" data-new-search>Find new options</button>';
       } else if (!account){
         el.className = 'retain-results';
-        el.innerHTML = `<div><b>Keep your results, at your pace</b><p>Create an account or log in to save these ${result.products.length} products automatically. Return anytime before <b>${resultDate(result.expiresAt)}</b>.</p></div><div class="retain-actions"><button class="btn primary" type="button" data-keep-results="register">Create account &amp; keep results</button><button class="btn ghost" type="button" data-keep-results="login">Log in</button></div>`;
+        el.innerHTML = `<div><b>Keep these results</b><p>Create an account or log in to save these ${result.products.length} products automatically. Return anytime before <b>${resultDate(result.expiresAt)}</b>.</p></div><div class="retain-actions"><button class="btn primary" type="button" data-keep-results="register">Create account &amp; keep results</button><button class="btn ghost" type="button" data-keep-results="login">Log in</button></div>`;
       } else {
         const stored = saved && saved.id === result.id && !saved.expired;
         el.className = 'retain-results '+(stored?'saved':'save-failed');
@@ -87,8 +87,8 @@
     if (!['register','verify'].includes(mode)) { registration = null; resendAt = 0; }
     accountMode = mode;
     const isRegister = mode === 'register', isLogin = mode === 'login';
-    const title = ({login:'Welcome back',register:'Create your space',verify:'Verify your email',forgot:'Forgot your password?',sent:'Check your inbox',profile:'Your space'})[mode] || 'Welcome back';
-    const headline = (isRegister || mode === 'verify') ? 'Make room<br>for <span>progress.</span>' : 'A familiar place.<br>A <span>fresh step.</span>';
+    const title = ({login:'Welcome back',register:'Create an account',verify:'Verify your email',forgot:'Forgot your password?',sent:'Check your inbox',profile:'Your account'})[mode] || 'Welcome back';
+    const headline = (isRegister || mode === 'verify') ? 'Save your results<br>and <span>come back later.</span>' : 'Welcome back.<br>Your results <span>are here.</span>';
     let content = '';
     if (isLogin || isRegister) {
       const rules = '<ul class="password-rules"><li>Use at least 12 characters.</li><li>Avoid your username or email and commonly used passwords.</li><li>Don\'t use only numbers.</li></ul>';
@@ -98,8 +98,8 @@
       ${field('password','Password','password', isRegister ? rules : '', `autocomplete="${isRegister ? 'new-password' : 'current-password'}"`)}
       ${isRegister ? field('confirm','Confirm password','password','Enter the same password again.','autocomplete="new-password"') : ''}
       ${isRegister ? '<label class="terms-check"><input name="terms" type="checkbox" aria-describedby="error-terms"><span>I agree to the <button type="button" data-policy="terms">Terms of Use</button> and acknowledge the <button type="button" data-policy="privacy">Privacy Notice</button>.</span></label><span id="error-terms" class="error" hidden></span>' : ''}
-      <button type="submit" class="site-btn primary">${isRegister ? 'Send verification code' : 'Log in'} <span aria-hidden="true">↗</span></button>
-      <div class="auth-links">${isRegister ? '<span>Already have a space? <button type="button" data-switch="login">Log in</button></span>' : '<button type="button" data-switch="forgot">Forgot your password?</button><span>New here? <button type="button" data-switch="register">Create an account</button></span>'}</div>
+      <button type="submit" class="site-btn primary">${isRegister ? 'Send verification code' : 'Log in'}</button>
+      <div class="auth-links">${isRegister ? '<span>Already have an account? <button type="button" data-switch="login">Log in</button></span>' : '<button type="button" data-switch="forgot">Forgot your password?</button><span>New here? <button type="button" data-switch="register">Create an account</button></span>'}</div>
       </form>`;
     } else if (mode === 'verify') {
       content = `${registrationSteps(2)}
@@ -107,13 +107,13 @@
       <button class="verification-change" type="button" data-change-email>Change email address</button>
       <form id="verificationForm" novalidate>
         ${field('code','Verification code','text','Enter the code from your email.','class="verification-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" minlength="6" pattern="[0-9]{6}" spellcheck="false"')}
-        <button class="site-btn primary verification-submit" type="submit" disabled>Verify &amp; create account <span aria-hidden="true">↗</span></button>
+        <button class="site-btn primary verification-submit" type="submit" disabled>Verify &amp; create account</button>
       </form>
       <div class="verification-delivery"><span>Didn't get the email?</span><button type="button" data-resend-code disabled>Resend code</button></div>
       <p class="hint verification-help">Check your spam folder or make sure your email address is correct.</p>
       <p class="verification-status" role="status" aria-live="polite"></p>`;
     } else if (mode === 'forgot') {
-      content = `<p class="policy-copy">Enter the email address associated with your account. We'll help you get back to your space.</p><form id="forgotForm" novalidate>${field('email','Email','email','','autocomplete="email" maxlength="254"')}<button class="site-btn primary" type="submit">Send reset link</button></form><div class="auth-links"><button type="button" data-switch="login">Back to log in</button></div>`;
+      content = `<p class="policy-copy">Enter the email address associated with your account. We'll send you a link to reset your password.</p><form id="forgotForm" novalidate>${field('email','Email','email','','autocomplete="email" maxlength="254"')}<button class="site-btn primary" type="submit">Send reset link</button></form><div class="auth-links"><button type="button" data-switch="login">Back to log in</button></div>`;
     } else if (mode === 'sent') {
       content = '<div class="account-status">If an account uses this email address, you\'ll receive a password reset link.</div><p class="policy-copy">Check your spam folder too. For your privacy, we don\'t confirm whether an email address has an account.</p><button type="button" class="site-btn secondary" data-switch="login">Back to log in</button><div class="auth-links"><button type="button" data-switch="forgot">Try another email</button></div>';
     } else if (mode === 'profile') {
@@ -122,9 +122,9 @@
       const resultContent = result ? result.expired
         ? '<div class="account-status">Your saved products have expired. Start a new search to see what is available now.</div><a class="site-btn primary" href="flow.html?fresh=1">Find new options</a>'
         : `<div class="account-status"><b>${result.products.length} products automatically saved</b><br>Available until ${resultDate(result.expiresAt)}. Your results will be here when you return.</div><a class="site-btn primary" href="flow.html?results=1">View my products</a>` : '';
-      content = `<p class="policy-copy">Hi, <b>${encode(account?.username)}</b>. Keep exploring at your own pace.</p>${account?.emailVerified ? '<span class="verified-badge">✓ Email verified</span>' : ''}${resultContent || (hasDraft ? '<div class="account-status">Your loan preferences are saved for this visit.</div><a class="site-btn primary" href="flow.html?restore=1">Continue exploring</a>' : '<p class="policy-copy">Your saved products will appear here when they are ready.</p><a class="site-btn primary" href="flow.html">Find my options</a>')}<div class="auth-links"><button type="button" data-signout>Log out</button></div>`;
+      content = `<p class="policy-copy">Hi, <b>${encode(account?.username)}</b>. Here’s what you’ve saved.</p>${account?.emailVerified ? '<span class="verified-badge">✓ Email verified</span>' : ''}${resultContent || (hasDraft ? '<div class="account-status">Your loan preferences are saved for this visit.</div><a class="site-btn primary" href="flow.html?restore=1">Continue exploring</a>' : '<p class="policy-copy">Your saved products will appear here when they are ready.</p><a class="site-btn primary" href="flow.html">Find my options</a>')}<div class="auth-links"><button type="button" data-signout>Log out</button></div>`;
     }
-    dialog.innerHTML = `<div class="account-shell"><div class="account-top"><a class="site-brand" href="./"><img src="bara.svg" alt="" width="36" height="36">Credybara</a><button class="account-close" type="button" data-close aria-label="Close account page">×</button></div><div class="account-layout"><section class="account-copy"><p class="eyebrow">Your own little corner</p><h1>${headline}</h1><p class="account-lead">Create your space to find the right loan, understand your money and build stronger financial habits.</p><p>Explore loan options freely. Create an account when you're ready for a more personal next step.</p><button class="account-browse" type="button" data-close>${account ? 'Back to exploring' : 'Keep exploring without an account'} <span aria-hidden="true">↗</span></button></section><section class="account-card"><h2 id="accountTitle">${title}</h2>${pendingSave ? '<p class="account-context">Log in or create an account to save your loan preferences. Your current page will stay right here.</p>' : ''}${content}</section></div><p class="account-disclaimer">Creating an account does not apply for a loan or authorize a credit check.</p></div>`;
+    dialog.innerHTML = `<div class="account-shell"><div class="account-top"><a class="site-brand" href="./"><img src="bara.svg" alt="" width="36" height="36">Credybara</a><button class="account-close" type="button" data-close aria-label="Close account page">×</button></div><div class="account-layout"><section class="account-copy"><p class="eyebrow">Credybara account</p><h1>${headline}</h1><p class="account-lead">An account saves your loan preferences and matched products on this device, so you don’t have to start over.</p><p>You can compare options without one. Creating an account doesn’t apply for a loan or check your credit.</p><button class="account-browse" type="button" data-close>${account ? 'Back to exploring' : 'Keep exploring without an account'}</button></section><section class="account-card"><h2 id="accountTitle">${title}</h2>${pendingSave ? '<p class="account-context">Log in or create an account to save your loan preferences. Your current page will stay right here.</p>' : ''}${content}</section></div><p class="account-disclaimer">Creating an account does not apply for a loan or authorize a credit check.</p></div>`;
     if (pendingResults){
       const context = document.createElement('p'); context.className = 'account-context';
       context.textContent = 'Your products will be saved automatically after you log in or create an account. Your current results will stay right here.';

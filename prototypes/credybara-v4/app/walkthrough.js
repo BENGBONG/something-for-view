@@ -3,29 +3,37 @@
 (async () => {
   const TOTAL=24000, EASE='cubic-bezier(.22,1,.36,1)', SOFT='cubic-bezier(.65,0,.35,1)';
   const root=document.body, quiet=matchMedia('(prefers-reduced-motion: reduce)'), animations=[];
-  let origin=0,monitor,lastPhase=-1,geometry=null;
+  let origin=0,monitor,lastPhase=-1,geometry=null,offscreen=false,resume=()=>{};
   track=()=>{};typing=async()=>{};scrollToEl=()=>{};
   const requestText="My car needs a repair, about $2,000. I'd like to keep my monthly payment low.";
   // The film has a known input and a reviewed interpretation. No production AI claim is made here.
   const understood={purpose:'Car repair',purposeKey:'other',amount:2000,pref:'monthly'};
   const clone=node=>node.cloneNode(true);
+  // Typing rhythm: about 32ms a character, with a short pause after each clause.
+  const typedAt=[];[...requestText].reduce((at,char,i,list)=>{typedAt.push(at);return at+32+(/[,.]/.test(char)&&list[i+1]===' '?160:0);},550);
   const greeting=clone(document.getElementById('hello'));
   greeting.innerHTML="Hi, I'm Bara. <b>Tell me what you need, in your own words.</b> I'll help you work out the next step.";
   await startPlan(understood.purpose,understood.purposeKey,understood.amount,understood.purpose);
   await choosePref(understood.pref,document.querySelector('.plan:not(.credit-q)').closest('.block'));
   const credit=clone(document.querySelector('.credit-q'));
   const creditQuestion=document.createElement('div');creditQuestion.className='bubble';
-  creditQuestion.innerHTML="One detail I couldn't get from your message: <b>how would you describe your credit?</b> A rough idea is enough — this doesn't check your credit.";
+  creditQuestion.innerHTML="One detail I couldn't get from your message: <b>how would you describe your credit?</b> A rough idea is enough. This doesn't check your credit.";
   const products=rank(understood.pref,understood.amount,'',2).top;
   const best=products.reduce((a,b)=>a.monthly<b.monthly?a:b);
   const shell=document.createElement('div');shell.innerHTML=compareHTML(products,'examples',new Set([best.id]));
   const comparison=shell.firstElementChild;comparison.classList.add('go');comparison.dataset.w='1';
-  const creditRow=comparison.querySelector('.ri-minCredit').closest('.cmp-l');
-  let next=creditRow.nextElementSibling;
-  while(next&&next.classList.contains('cmp-c')){const current=next;next=next.nextElementSibling;current.remove();}
-  creditRow.remove();comparison.querySelectorAll('.cmp-f').forEach(n=>n.remove());
+  // The film keeps three rows (monthly, total cost, APR) so the numbers stay readable at preview size.
+  ['.ri-minCredit','.ri-term'].forEach(icon=>{
+    const row=comparison.querySelector(icon).closest('.cmp-l');
+    let next=row.nextElementSibling;
+    while(next&&next.classList.contains('cmp-c')){const current=next;next=next.nextElementSibling;current.remove();}
+    row.remove();
+  });comparison.querySelectorAll('.cmp-f').forEach(n=>n.remove());
   comparison.querySelectorAll('.sel').forEach(n=>n.classList.remove('sel'));
   comparison.querySelectorAll(`[data-col="${best.id}"]`).forEach(n=>n.classList.add('motion-best'));
+  // The request asks for a low monthly payment, so the badge sits on the column the film selects.
+  const badge=comparison.querySelector('.toppick'),bestHead=comparison.querySelector(`.cmp-h[data-col="${best.id}"]`);
+  if(badge&&bestHead){badge.textContent='Lowest monthly';bestHead.querySelector('small').before(badge);}
 
   const stage=document.createElement('div');stage.className='motion-stage ai-story';stage.inert=true;
   stage.innerHTML=`<div class="motion-context"><div class="context-pill purpose-pill">${ICON.other}<span>Car repair <b>$2,000</b></span></div><div class="context-pill preference-pill">${ICON.monthly}<span>Lower monthly payments</span></div></div>
@@ -35,7 +43,7 @@
   <section class="motion-scene understanding-scene"><div class="ai-thinking"><span>Bara is reading your message</span><i></i><i></i><i></i></div><div class="motion-question"><div class="bubble ai-response"></div></div><section class="form ai-confirm-card"><h3>Confirm the amount</h3><div class="ai-amount-row"><span>Start with</span>${stepperHTML()}</div><p>You said “about $2,000”. Adjust it if you need to.</p><div class="ai-confirm-actions"><button class="btn primary ai-confirm" type="button">Use $2,000</button><button class="edit" type="button">Edit details</button></div></section></section>
   <section class="motion-scene credit-scene"><div class="motion-question"></div><div class="motion-content"></div></section>
   <section class="motion-scene comparison-scene"><div class="motion-content"></div><p class="motion-note">Estimated terms. Not an approval or a guarantee.</p></section>
-  <div class="motion-bridge send-bridge"></div><div class="motion-bridge amount-bridge"></div><div class="ai-caret"></div>
+  <div class="ai-caret"></div>
   <div class="motion-tap"></div><svg class="motion-cursor" viewBox="0 0 28 34" aria-hidden="true"><path d="M3 2v26l6-6 5 10 5-2-5-10 10-1z" fill="white" stroke="#1F4D3A" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
   stage.querySelector('.conversation-scene .motion-question').append(greeting);
   stage.querySelector('.ai-user-message .bubble').textContent=requestText;
@@ -70,19 +78,6 @@
     const r = node.getBoundingClientRect(), s = stage.getBoundingClientRect();
     return {x:r.left-s.left,y:r.top-s.top,w:r.width,h:r.height};
   }
-  function bridge(node, source, target, start, land) {
-    const a = localRect(source), b = localRect(target);
-    const transform = r => `translate3d(${r.x}px,${r.y}px,0) scale(${r.w/a.w},${r.h/a.h})`;
-    node.style.width = `${a.w}px`; node.style.height = `${a.h}px`;
-    add(node,[
-      {at:0,opacity:0,transform:transform(a),borderRadius:'16px'},
-      {at:start,opacity:0,transform:transform(a),borderRadius:'16px'},
-      {at:start+40,opacity:1,transform:transform(a),borderRadius:'16px',easing:EASE},
-      {at:land-100,opacity:1,transform:transform(b),borderRadius:'28px'},
-      {at:land,opacity:0,transform:transform(b),borderRadius:'28px'},
-      {at:TOTAL,opacity:0,transform:transform(b),borderRadius:'28px'}
-    ]);
-  }
   function press(node, time) {
     const primary=node.matches('.btn.primary');
     const resting=primary?'#1F4D3A':'#FFFFFF', active=primary?'#2F6B52':'#DDF1E5';
@@ -111,60 +106,64 @@
     const confirm=q('.ai-confirm'),good=q('[data-cr="2"]'),column=q(`.cmp-h[data-col="${best.id}"]`);
     const xform=(x,y,s=1)=>`translate3d(${x}px,${y}px,0) scale(${s})`;
     const intro=q('.conversation-scene');
-    add(intro,[{at:0,opacity:1,transform:xform(0,0)},{at:3450,opacity:1,transform:xform(0,0),easing:SOFT},{at:4250,opacity:0,transform:reduced?xform(0,0):xform(-18,-14,.975)},{at:22700,opacity:0,transform:reduced?xform(0,0):xform(20,24,.98),easing:EASE},{at:23800,opacity:1,transform:xform(0,0)},{at:TOTAL,opacity:1,transform:xform(0,0)}]);
+    add(intro,[{at:0,opacity:1,transform:xform(0,0)},{at:4450,opacity:1,transform:xform(0,0),easing:SOFT},{at:5250,opacity:0,transform:reduced?xform(0,0):xform(-18,-14,.975)},{at:23150,opacity:0,transform:reduced?xform(0,0):xform(20,24,.98),easing:EASE},{at:23850,opacity:1,transform:xform(0,0)},{at:TOTAL,opacity:1,transform:xform(0,0)}]);
     if(reduced){
-      pulseOpacity(q('.understanding-scene'),4000,4550,10000,10700);
-      pulseOpacity(q('.credit-scene'),10000,10800,14500,15300);
-      pulseOpacity(q('.comparison-scene'),14700,15600,22600,23700);
+      pulseOpacity(q('.understanding-scene'),5000,5550,10650,11150);
+      pulseOpacity(q('.credit-scene'),11500,12200,15500,16300);
+      pulseOpacity(q('.comparison-scene'),15700,16600,22300,22950);
     }else{
-      visible(q('.understanding-scene'),4000,4550,10000,10700,20);
-      visible(q('.credit-scene'),10000,10800,14500,15300,28);
-      visible(q('.comparison-scene'),14700,15600,22600,23700,24);
+      visible(q('.understanding-scene'),5000,5550,10650,11150,20);
+      visible(q('.credit-scene'),11500,12200,15500,16300,28);
+      visible(q('.comparison-scene'),15700,16600,22300,22950,24);
     }
-    add(q('.ai-composer'),[{at:0,opacity:1,transform:xform(0,0)},{at:3030,opacity:1,transform:xform(0,0),easing:EASE},{at:3320,opacity:0,transform:reduced?xform(0,0):xform(0,-8,.99)},{at:22700,opacity:0,transform:xform(0,0)},{at:23500,opacity:1,transform:xform(0,0)},{at:TOTAL,opacity:1,transform:xform(0,0)}]);
-    add(q('.ai-user-message'),[{at:0,opacity:0,transform:reduced?xform(0,-94):xform(0,0)},{at:3550,opacity:0,transform:reduced?xform(0,-94):xform(0,0),easing:EASE},{at:3930,opacity:1,transform:reduced?xform(0,-94):xform(0,0)},{at:3980,opacity:1,transform:reduced?xform(0,-94):xform(0,0),easing:EASE},{at:4550,opacity:1,transform:xform(0,-94)},{at:9950,opacity:1,transform:xform(0,-94),easing:SOFT},{at:10650,opacity:0,transform:reduced?xform(0,-94):xform(-12,-112)},{at:TOTAL,opacity:0,transform:reduced?xform(0,-94):xform(-12,-112)}]);
-    pulseOpacity(q('.ai-writing'),350,600,2650,2950);
+    add(q('.ai-composer'),[{at:0,opacity:1,transform:xform(0,0)},{at:4030,opacity:1,transform:xform(0,0),easing:EASE},{at:4320,opacity:0,transform:reduced?xform(0,0):xform(0,-8,.99)},{at:23150,opacity:0,transform:xform(0,0)},{at:23750,opacity:1,transform:xform(0,0)},{at:TOTAL,opacity:1,transform:xform(0,0)}]);
+    add(q('.ai-user-message'),[{at:0,opacity:0,transform:reduced?xform(0,-94):xform(0,16)},{at:4300,opacity:0,transform:reduced?xform(0,-94):xform(0,16),easing:EASE},{at:4750,opacity:1,transform:reduced?xform(0,-94):xform(0,0)},{at:4980,opacity:1,transform:reduced?xform(0,-94):xform(0,0),easing:EASE},{at:5550,opacity:1,transform:xform(0,-94)},{at:10650,opacity:1,transform:xform(0,-94),easing:SOFT},{at:11150,opacity:0,transform:reduced?xform(0,-94):xform(0,-104)},{at:TOTAL,opacity:0,transform:reduced?xform(0,-94):xform(0,-104)}]);
+    pulseOpacity(q('.ai-writing'),350,600,3650,3950);
     const chars=all('.typed-char');
-    chars.forEach((node,i)=>{const at=550+i*25;add(node,[{at:0,opacity:0},{at,opacity:0},{at:at+1,opacity:1},{at:22760,opacity:1},{at:22800,opacity:0},{at:TOTAL,opacity:0}]);});
+    chars.forEach((node,i)=>{const at=typedAt[i];add(node,[{at:0,opacity:0},{at,opacity:0},{at:at+1,opacity:1},{at:22760,opacity:1},{at:22800,opacity:0},{at:TOTAL,opacity:0}]);});
     if(!reduced){
       const charRects=chars.map(localRect),first=charRects[0];
       const caret=[{at:0,opacity:0,transform:xform(first.x,first.y)},{at:540,opacity:1,transform:xform(first.x,first.y)}];
-      charRects.forEach((r,i)=>caret.push({at:550+i*25,opacity:1,transform:xform(r.x+r.w,r.y),easing:'steps(1,end)'}));
-      const last=charRects.at(-1);caret.push({at:2730,opacity:1,transform:xform(last.x+last.w,last.y)},{at:2850,opacity:0,transform:xform(last.x+last.w,last.y)},{at:TOTAL,opacity:0,transform:xform(last.x+last.w,last.y)});
+      charRects.forEach((r,i)=>caret.push({at:typedAt[i],opacity:1,transform:xform(r.x+r.w,r.y),easing:'steps(1,end)'}));
+      const last=charRects.at(-1);caret.push({at:3730,opacity:1,transform:xform(last.x+last.w,last.y)},{at:3850,opacity:0,transform:xform(last.x+last.w,last.y)},{at:TOTAL,opacity:0,transform:xform(last.x+last.w,last.y)});
       add(q('.ai-caret'),caret);
-      bridge(q('.send-bridge'),q('.ai-composer'),q('.ai-user-message'),3050,3950);
-      bridge(q('.amount-bridge'),q('.ai-confirm-card'),q('.purpose-pill'),9600,10700);
     }
-    pulseOpacity(q('.ai-thinking'),4100,4300,4830,5030);
-    if(!reduced)all('.ai-thinking i').forEach((dot,i)=>add(dot,[{at:0,transform:'translateY(0)'},{at:4210+i*110,transform:'translateY(0)',easing:SOFT},{at:4430+i*110,transform:'translateY(-4px)',easing:SOFT},{at:4650+i*110,transform:'translateY(0)'},{at:TOTAL,transform:'translateY(0)'}]));
-    pulseOpacity(q('.ai-response'),4830,5100,10000,10600);
-    all('.ai-word').forEach((node,i)=>{const at=4870+i*61;add(node,[{at:0,opacity:0},{at,opacity:0,easing:EASE},{at:at+120,opacity:1},{at:10100,opacity:1},{at:10600,opacity:0},{at:TOTAL,opacity:0}]);});
-    if(reduced){pulseOpacity(q('.ai-confirm-card'),6500,7200,9600,10400);}
-    else{visible(q('.ai-confirm-card'),6500,7200,9600,10400,14);press(q('.ai-send'),3020);press(confirm,9300);press(good,13300);}
+    pulseOpacity(q('.ai-thinking'),5100,5300,5830,6030);
+    if(!reduced)all('.ai-thinking i').forEach((dot,i)=>add(dot,[{at:0,transform:'translateY(0)'},{at:5210+i*110,transform:'translateY(0)',easing:SOFT},{at:5430+i*110,transform:'translateY(-4px)',easing:SOFT},{at:5650+i*110,transform:'translateY(0)'},{at:TOTAL,transform:'translateY(0)'}]));
+    pulseOpacity(q('.ai-response'),5830,6100,10650,11150);
+    all('.ai-word').forEach((node,i)=>{const at=5870+i*61;add(node,[{at:0,opacity:0},{at,opacity:0,easing:EASE},{at:at+120,opacity:1},{at:10650,opacity:1},{at:11150,opacity:0},{at:TOTAL,opacity:0}]);});
+    if(reduced){pulseOpacity(q('.ai-confirm-card'),7500,8200,10550,11050);}
+    else{visible(q('.ai-confirm-card'),7500,8200,10550,11050,14);press(q('.ai-send'),4020);press(confirm,10300);press(good,14300);}
     if(reduced){
       ['.purpose-pill','.preference-pill'].forEach((selector,i)=>add(q(selector),[
-        {at:0,opacity:0,transform:xform(0,recognizedY)},{at:6150+i*120,opacity:0,transform:xform(0,recognizedY)},
-        {at:6750+i*120,opacity:1,transform:xform(0,recognizedY)},{at:9600,opacity:1,transform:xform(0,recognizedY)},
-        {at:10000,opacity:0,transform:xform(0,recognizedY)},{at:10001,opacity:0,transform:xform(0,0)},
-        {at:10700,opacity:1,transform:xform(0,0)},{at:22600,opacity:1,transform:xform(0,0)},
-        {at:23600,opacity:0,transform:xform(0,0)},{at:TOTAL,opacity:0,transform:xform(0,0)}
+        {at:0,opacity:0,transform:xform(0,recognizedY)},{at:7150+i*120,opacity:0,transform:xform(0,recognizedY)},
+        {at:7750+i*120,opacity:1,transform:xform(0,recognizedY)},{at:10600,opacity:1,transform:xform(0,recognizedY)},
+        {at:11000,opacity:0,transform:xform(0,recognizedY)},{at:11001,opacity:0,transform:xform(0,0)},
+        {at:11700,opacity:1,transform:xform(0,0)},{at:22300,opacity:1,transform:xform(0,0)},
+        {at:22950,opacity:0,transform:xform(0,0)},{at:TOTAL,opacity:0,transform:xform(0,0)}
       ]));
     }else{
     ['.purpose-pill','.preference-pill'].forEach((selector,i)=>{
-      add(q(selector),[{at:0,opacity:0,transform:xform(0,recognizedY,.96)},{at:6150+i*120,opacity:0,transform:xform(0,recognizedY+7,.96),easing:EASE},{at:6750+i*120,opacity:1,transform:xform(0,recognizedY)},{at:9700,opacity:1,transform:xform(0,recognizedY),easing:EASE},{at:10700,opacity:1,transform:xform(0,0)},{at:22600,opacity:1,transform:xform(0,0),easing:SOFT},{at:23600,opacity:0,transform:xform(0,-12,.96)},{at:TOTAL,opacity:0,transform:xform(0,-12,.96)}]);
+      add(q(selector),[{at:0,opacity:0,transform:xform(0,recognizedY,.96)},{at:7150+i*120,opacity:0,transform:xform(0,recognizedY+7,.96),easing:EASE},{at:7750+i*120,opacity:1,transform:xform(0,recognizedY)},{at:11050,opacity:1,transform:xform(0,recognizedY),easing:EASE},{at:11750,opacity:1,transform:xform(0,0)},{at:22300,opacity:1,transform:xform(0,0),easing:SOFT},{at:22950,opacity:0,transform:xform(0,-12,.96)},{at:TOTAL,opacity:0,transform:xform(0,-12,.96)}]);
     });
     }
     if(!reduced){
-      all('.credit-scene .opt').forEach((node,i)=>add(node,[{at:0,opacity:0},{at:10100+i*45,opacity:0,easing:EASE},{at:10800+i*45,opacity:1},{at:14600,opacity:1},{at:15300,opacity:0},{at:TOTAL,opacity:0}]));
-      all('.cmp-h').forEach((node,i)=>add(node,[{at:0,opacity:0,transform:'translateY(16px)'},{at:14900+i*65,opacity:0,transform:'translateY(16px)',easing:EASE},{at:15700+i*65,opacity:1,transform:'translateY(0)'},{at:22900,opacity:1,transform:'translateY(0)'},{at:23700,opacity:0,transform:'translateY(-8px)'},{at:TOTAL,opacity:0,transform:'translateY(-8px)'}]));
-      all('.cbar i,.ctl i,.cstack').forEach((node,i)=>add(node,[{at:0,transform:'scaleX(0)'},{at:15500+i*45,transform:'scaleX(0)',easing:EASE},{at:16700+i*45,transform:'scaleX(1)'},{at:22900,transform:'scaleX(1)'},{at:TOTAL,transform:'scaleX(1)'}]));
-      all('.motion-best').forEach(node=>add(node,[{at:0,backgroundColor:'#FFFFFF',boxShadow:'inset 0 0 0 #2F6B52'},{at:17750,backgroundColor:'#FFFFFF',boxShadow:'inset 0 0 0 #2F6B52',easing:EASE},{at:18200,backgroundColor:'#EEF8F2',boxShadow:'inset 2px 0 0 #2F6B52, inset -2px 0 0 #2F6B52'},{at:TOTAL,backgroundColor:'#EEF8F2',boxShadow:'inset 2px 0 0 #2F6B52, inset -2px 0 0 #2F6B52'}]));
+      all('.credit-scene .opt').forEach((node,i)=>add(node,[{at:0,opacity:0},{at:11550+i*45,opacity:0,easing:EASE},{at:12250+i*45,opacity:1},{at:15600,opacity:1},{at:16300,opacity:0},{at:TOTAL,opacity:0}]));
+      all('.cmp-h').forEach((node,i)=>add(node,[{at:0,opacity:0,transform:'translateY(16px)'},{at:15900+i*65,opacity:0,transform:'translateY(16px)',easing:EASE},{at:16700+i*65,opacity:1,transform:'translateY(0)'},{at:22300,opacity:1,transform:'translateY(0)'},{at:22950,opacity:0,transform:'translateY(-8px)'},{at:TOTAL,opacity:0,transform:'translateY(-8px)'}]));
+      all('.cbar i,.ctl i,.cstack').forEach((node,i)=>add(node,[{at:0,transform:'scaleX(0)'},{at:16500+i*45,transform:'scaleX(0)',easing:EASE},{at:17700+i*45,transform:'scaleX(1)'},{at:22900,transform:'scaleX(1)'},{at:TOTAL,transform:'scaleX(1)'}]));
+      const bestCells=all('.motion-best');
+      bestCells.forEach((node,i)=>{
+        // Close the highlighted column at its top and bottom cells.
+        const edge=i===0?', inset 0 2px 0 #2F6B52':i===bestCells.length-1?', inset 0 -2px 0 #2F6B52':', inset 0 0 0 #2F6B52';
+        const on=`inset 2px 0 0 #2F6B52, inset -2px 0 0 #2F6B52${edge}`,off='inset 0 0 0 #2F6B52, inset 0 0 0 #2F6B52, inset 0 0 0 #2F6B52';
+        add(node,[{at:0,backgroundColor:'#FFFFFF',boxShadow:off},{at:18750,backgroundColor:'#FFFFFF',boxShadow:off,easing:EASE},{at:19200,backgroundColor:'#EEF8F2',boxShadow:on},{at:TOTAL,backgroundColor:'#EEF8F2',boxShadow:on}]);
+      });
       const box=column.querySelector('.box');
-      add(box,[{at:0,backgroundColor:'#FFFFFF'},{at:17750,backgroundColor:'#FFFFFF',easing:EASE},{at:18100,backgroundColor:'#1F4D3A'},{at:TOTAL,backgroundColor:'#1F4D3A'}]);
-      add(box.querySelector('svg'),[{at:0,opacity:0,transform:'scale(.6)'},{at:17800,opacity:0,transform:'scale(.6)',easing:EASE},{at:18150,opacity:1,transform:'scale(1)'},{at:TOTAL,opacity:1,transform:'scale(1)'}]);
+      add(box,[{at:0,backgroundColor:'#FFFFFF'},{at:18750,backgroundColor:'#FFFFFF',easing:EASE},{at:19100,backgroundColor:'#1F4D3A'},{at:TOTAL,backgroundColor:'#1F4D3A'}]);
+      add(box.querySelector('svg'),[{at:0,opacity:0,transform:'scale(.6)'},{at:18800,opacity:0,transform:'scale(.6)',easing:EASE},{at:19150,opacity:1,transform:'scale(1)'},{at:TOTAL,opacity:1,transform:'scale(1)'}]);
       const targets=[q('.ai-send'),confirm,good,column].map(localRect);
       const points=targets.map((r,i)=>({x:r.x+r.w*(i===3?.8:.65),y:r.y+r.h*.55}));
-      const slots=[[2860,3020,3150,3300],[9140,9300,9430,9600],[13140,13300,13430,13600],[17590,17750,17880,18050]];
+      const slots=[[3860,4020,4150,4300],[10140,10300,10430,10600],[14140,14300,14430,14600],[18590,18750,18880,19050]];
       const off=xform(stage.clientWidth+32,stage.clientHeight-24),stops=[{at:0,opacity:0,transform:off},{at:1950,opacity:0,transform:off}];
       const ripple=[];
       points.forEach((p,i)=>{
@@ -180,21 +179,31 @@
     }
     const aiY=mobile?124:110;
     add(q('.motion-avatar'),reduced?[{at:0,opacity:0},{at:TOTAL,opacity:0}]:[
-      {at:0,transform:xform(0,0),opacity:1},{at:3900,transform:xform(0,0),opacity:1,easing:EASE},{at:4600,transform:`translateY(${aiY}px) rotate(-3deg)`,opacity:1,easing:EASE},{at:5000,transform:xform(0,aiY),opacity:1},{at:9950,transform:xform(0,aiY),opacity:1,easing:EASE},{at:10750,transform:'translateY(62px) rotate(3deg)',opacity:1,easing:EASE},{at:11100,transform:xform(0,62),opacity:1},{at:14500,transform:xform(0,62),opacity:1,easing:EASE},{at:15300,transform:xform(0,44),opacity:0},{at:22600,transform:xform(0,18),opacity:0,easing:EASE},{at:23800,transform:xform(0,0),opacity:1},{at:TOTAL,transform:xform(0,0),opacity:1}]);
+      {at:0,transform:xform(0,0),opacity:1},{at:4900,transform:xform(0,0),opacity:1,easing:EASE},{at:5600,transform:`translateY(${aiY}px) rotate(-3deg)`,opacity:1,easing:EASE},{at:6000,transform:xform(0,aiY),opacity:1},{at:10650,transform:xform(0,aiY),opacity:1,easing:SOFT},{at:11100,transform:xform(0,aiY),opacity:0},{at:11450,transform:xform(0,62),opacity:0,easing:EASE},{at:12000,transform:xform(0,62),opacity:1},{at:15500,transform:xform(0,62),opacity:1,easing:EASE},{at:16300,transform:xform(0,44),opacity:0},{at:23150,transform:xform(0,18),opacity:0,easing:EASE},{at:23850,transform:xform(0,0),opacity:1},{at:TOTAL,transform:xform(0,0),opacity:1}]);
     const reviewAt=new URLSearchParams(location.search).get('at');origin=document.timeline.currentTime+40;
     animations.forEach(a=>{if(reviewAt!==null&&Number.isFinite(+reviewAt)){a.pause();a.currentTime=Math.max(0,Math.min(TOTAL-1,+reviewAt));}else a.startTime=origin;});
     stage.classList.add('ready');
     function tick(){
-      const elapsed=reviewAt===null?Math.max(0,document.timeline.currentTime-origin):Math.max(0,+reviewAt),t=elapsed%TOTAL;
-      const phase=t<4200||t>=22900?0:t<10300?1:t<15100?2:3;
+      const elapsed=reviewAt===null?Math.max(0,animations[0]?.currentTime??0):Math.max(0,+reviewAt),t=elapsed%TOTAL;
+      const phase=t<5200||t>=22900?0:t<11300?1:t<16100?2:3;
       root.dataset.walkthroughStep=String(phase);root.dataset.walkthroughCycle=String(Math.floor(elapsed/TOTAL)+1);root.dataset.motionTime=String(Math.round(t));
-      if(phase!==lastPhase){const starts=[22900,4200,10300,15100],durations=[5300,6100,4800,7800],phaseElapsed=phase===0?(t+1100)%TOTAL:t-starts[phase];parent.postMessage({type:'credybara-walkthrough-step',step:phase,duration:durations[phase],elapsed:phaseElapsed},location.origin);lastPhase=phase;}
-      if(reviewAt===null)monitor=requestAnimationFrame(tick);
+      if(phase!==lastPhase){const starts=[22900,5200,11300,16100],durations=[6300,6100,4800,6800],phaseElapsed=phase===0?(t+1100)%TOTAL:t-starts[phase];parent.postMessage({type:'credybara-walkthrough-step',step:phase,duration:durations[phase],elapsed:phaseElapsed},location.origin);lastPhase=phase;}
+      if(reviewAt===null&&!offscreen)monitor=requestAnimationFrame(tick);
     }
+    resume=()=>{cancelAnimationFrame(monitor);tick();};
     lastPhase=-1;tick();
+    if(offscreen)animations.forEach(a=>a.pause());
   }
   build();
   let resizeTimer,lastWidth=stage.clientWidth,lastHeight=stage.clientHeight;
   new ResizeObserver(()=>{if(stage.clientWidth===lastWidth&&stage.clientHeight===lastHeight)return;lastWidth=stage.clientWidth;lastHeight=stage.clientHeight;clearTimeout(resizeTimer);resizeTimer=setTimeout(build,150);}).observe(stage);
   quiet.addEventListener('change',build);
+  // The home page reports when the preview leaves the viewport; nothing runs while it is out of sight.
+  window.addEventListener('message',event=>{
+    if(event.origin!==location.origin||event.source!==parent||event.data?.type!=='credybara-walkthrough-visibility')return;
+    if(new URLSearchParams(location.search).has('at'))return;
+    offscreen=!event.data.visible;
+    if(offscreen){cancelAnimationFrame(monitor);animations.forEach(a=>a.pause());}
+    else{animations.forEach(a=>a.play());resume();}
+  });
 })().catch(error=>{document.body.dataset.motionError=String(error.message);console.error('AI conversation motion setup failed.',error);});
